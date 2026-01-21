@@ -1,0 +1,335 @@
+.petit-home {
+  min-height: 100vh;
+}
+
+.ph-hero {
+  width: 100%;
+  height: 70vh;
+  overflow: hidden;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .ph-hero {
+    height: 85vh;
+  }
+}
+
+.ph-heroImage {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: scale(1);
+  transition: transform 3000ms ease;
+  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCjrlyJwi9uCl8ALI1Zo3C8TPnNMQqQXS0TdmQXYU8dShtaKbfCMVW4QaH_ckffPTafgrBbS5TnHbZMRkZ2OSq1pe-A5pSIN5TdETee7EmWoADhRQTJVInfLwUc5p7-cJJ8xpXZmnYTS-ifmbmtSpbKbGJf2BdvOuZm80EfFr42LtCR0FoVT9d0BK3T7F94BsgnAzV6Q8nXL8M-5c5oklQ0QJ6pWApAKmogqDBXcVcmMNa1Mbv8nRbf4TJlf9Ie-Mp7VDT-_4W8ZZ8');
+}
+
+@media (hover: hover) {
+  .ph-hero:hover .ph-heroImage {
+    transform: scale(1.05);
+  }
+}
+
+.ph-section {
+  padding: 96px 0;
+  background: var(--ph-background);
+}
+
+.ph-sectionTopBorder {
+  border-top: 1px solid #fafafa;
+}
+
+.ph-sectionTitle {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.ph-carousel {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 6px;
+  scrollbar-width: none; /* Firefox */
+}
+
+.ph-carousel::-webkit-scrollbar {
+  display: none; /* Chromium/Safari */
+}
+
+.ph-carouselWrap {
+  position: relative;
+}
+
+.ph-carouselArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--ph-border);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  color: var(--ph-text-main);
+  transition: transform 150ms ease, background 150ms ease, color 150ms ease;
+}
+
+.ph-carouselArrow:hover {
+  color: var(--ph-primary);
+  background: rgba(255, 255, 255, 0.98);
+  transform: translateY(-50%) scale(1.03);
+}
+
+.ph-carouselArrowLeft {
+  left: -10px;
+}
+
+.ph-carouselArrowRight {
+  right: -10px;
+}
+
+@media (max-width: 639px) {
+  .ph-carouselArrowLeft {
+    left: -6px;
+  }
+  .ph-carouselArrowRight {
+    right: -6px;
+  }
+}
+
+.ph-carouselTrack {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 78%;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .ph-carouselTrack {
+    grid-auto-columns: 42%;
+    gap: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ph-carouselTrack {
+    grid-auto-columns: 22%;
+    gap: 32px;
+  }
+}
+
+.ph-carouselItem {
+  scroll-snap-align: start;
+}
+
+.ph-h2 {
+  margin: 0 0 8px;
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: #000;
+}
+
+.ph-divider {
+  width: 48px;
+  height: 2px;
+  background: var(--ph-primary);
+  margin: 0 auto;
+}
+
+.ph-gridCollections {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 32px;
+  row-gap: 64px;
+}
+
+@media (min-width: 640px) {
+  .ph-gridCollections {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ph-gridCollections {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.ph-collectionCard {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.ph-collectionMedia {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #fafafa;
+  margin-bottom: 24px;
+}
+
+.ph-collectionImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 700ms ease, filter 700ms ease;
+  filter: grayscale(20%);
+}
+
+@media (hover: hover) {
+  .ph-collectionCard:hover .ph-collectionImg {
+    transform: scale(1.05);
+    filter: grayscale(0%);
+  }
+}
+
+.ph-collectionText {
+  text-align: center;
+  transform: translateY(0);
+  transition: transform 300ms ease;
+}
+
+@media (hover: hover) {
+  .ph-collectionCard:hover .ph-collectionText {
+    transform: translateY(-4px);
+  }
+}
+
+.ph-h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.ph-smallLink {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+  transition: color 200ms ease;
+}
+
+@media (hover: hover) {
+  .ph-collectionCard:hover .ph-smallLink {
+    color: var(--ph-primary);
+  }
+}
+
+.ph-gridProducts {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 32px;
+  row-gap: 48px;
+}
+
+@media (min-width: 640px) {
+  .ph-gridProducts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ph-gridProducts {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.ph-productCard {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.ph-productMedia {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #fafafa;
+  margin-bottom: 16px;
+}
+
+.ph-productImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 500ms ease;
+}
+
+@media (hover: hover) {
+  .ph-productCard:hover .ph-productImg {
+    transform: scale(1.05);
+  }
+}
+
+.ph-productCTA {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+.ph-productCTA .material-symbols-outlined {
+  font-size: 16px;
+  color: #000;
+}
+
+@media (hover: hover) {
+  .ph-productCard:hover .ph-productCTA {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ph-productText {
+  text-align: left;
+}
+
+.ph-productName {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #000;
+  transition: color 200ms ease;
+}
+
+@media (hover: hover) {
+  .ph-productCard:hover .ph-productName {
+    color: var(--ph-primary);
+  }
+}
+
+.ph-price {
+  margin: 6px 0 0;
+  color: var(--ph-primary);
+  font-weight: 600;
+  font-size: 14px;
+}
+

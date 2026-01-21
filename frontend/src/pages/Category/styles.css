@@ -1,0 +1,9 @@
+.ph-sectionTight {
+  padding: 64px 0;
+}
+
+.ph-empty {
+  margin: 0;
+  text-align: center;
+  color: var(--ph-text-subtle);
+}

@@ -1,0 +1,52 @@
+:root {
+  --ph-primary: #db2777;
+  --ph-primary-light: #fbcfe8;
+  --ph-background: #ffffff;
+  --ph-text-main: #09090b;
+  --ph-text-subtle: #52525b;
+  --ph-border: #f4f4f5;
+  --ph-muted: #fafafa;
+
+  font-family: "Manrope", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: var(--ph-text-main);
+  background-color: var(--ph-background);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Material Symbols tuning (used by the prototype) */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+.ph-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 1024px) {
+  .ph-container {
+    padding: 0 48px;
+  }
+}

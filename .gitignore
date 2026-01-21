@@ -1,0 +1,29 @@
+# Monorepo root
+
+# Node
+**/node_modules/
+
+# Builds
+**/dist/
+**/dist-ssr/
+**/*.tsbuildinfo
+
+# Logs
+**/*.log
+
+# Env files / secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Backend uploads (imágenes subidas)
+backend/public/uploads/
+
+# Optional: keep curated images tracked (remove if you don't want them)
+# backend/public/images/
