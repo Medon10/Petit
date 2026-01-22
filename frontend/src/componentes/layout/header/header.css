@@ -41,6 +41,12 @@
   transition: color 200ms ease;
 }
 
+button.ph-iconLink {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .ph-iconLink:hover {
   color: var(--ph-primary);
 }
@@ -59,6 +65,23 @@
 
 .ph-iconLink:hover .ph-cartDot {
   opacity: 1;
+}
+
+.ph-cartCount {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--ph-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 18px;
+  text-align: center;
+  letter-spacing: 0.02em;
 }
 
 .ph-actions {

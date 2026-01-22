@@ -10,11 +10,28 @@ export type VariantDto = {
   price: string;
 };
 
+export type ExtraDto = {
+  id: number;
+  name: string;
+  price: string;
+  categoryType?: 'general' | 'dije' | 'cadena' | 'servicio' | string;
+};
+
 export type ProductDto = {
   id: number;
   name: string;
   imageUrl?: string | null;
   variants?: VariantDto[];
+};
+
+export type CategoryRefDto = {
+  id: number;
+  name: string;
+};
+
+export type ProductDetailDto = ProductDto & {
+  description?: string | null;
+  category?: CategoryRefDto | null;
 };
 
 export function apiBase() {
@@ -49,6 +66,23 @@ async function apiGetJson<T>(path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+async function apiRequestJson<T>(path: string, options: { method: string; body?: unknown }): Promise<T> {
+  const base = apiBase().replace(/\/$/, '');
+  const res = await fetch(`${base}${path}`, {
+    method: options.method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: options.body != null ? JSON.stringify(options.body) : undefined,
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = (json as any)?.message || `API ${res.status} ${res.statusText}`;
+    throw new Error(String(msg));
+  }
+  return json as T;
+}
+
 export async function getCategories(options?: { includeRepresentative?: boolean }) {
   const qs = buildQuery({ include_representative: options?.includeRepresentative ? 1 : undefined });
   const data = await apiGetJson<{ data?: unknown }>(`/categories${qs}`);
@@ -62,4 +96,33 @@ export async function getProducts(options?: { limit?: number; categoryId?: numbe
   });
   const data = await apiGetJson<{ data?: unknown }>(`/products${qs}`);
   return Array.isArray((data as any)?.data) ? ((data as any).data as ProductDto[]) : [];
+}
+
+export async function getProduct(id: number) {
+  const data = await apiGetJson<{ data?: unknown }>(`/products/${id}`);
+  const item = (data as any)?.data;
+  return item && typeof item === 'object' ? (item as ProductDetailDto) : null;
+}
+
+export async function getExtras(options?: { categoryType?: string }) {
+  const qs = buildQuery({ category_type: options?.categoryType });
+  const data = await apiGetJson<{ data?: unknown }>(`/extras${qs}`);
+  return Array.isArray((data as any)?.data) ? ((data as any).data as ExtraDto[]) : [];
+}
+
+export type CreateOrderInput = {
+  customer_name: string;
+  customer_email?: string;
+  customer_phone?: string;
+  notes?: string;
+  items: Array<{
+    product_id: number;
+    variant_id: number;
+    quantity: number;
+    extras?: Array<{ extra_id: number; quantity: number }>;
+  }>;
+};
+
+export async function createOrder(input: CreateOrderInput) {
+  return await apiRequestJson<{ data?: unknown }>(`/orders`, { method: 'POST', body: input });
 }

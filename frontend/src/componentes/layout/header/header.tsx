@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { getCategories, type CategoryDto } from '../../../shared/api';
+import { useCart } from '../../../shared/cart';
 import './header.css';
 
 export default function Header() {
+  const cart = useCart();
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const navItemRef = useRef<HTMLDivElement | null>(null);
@@ -108,10 +110,13 @@ export default function Header() {
           <button className="ph-iconButton" type="button" aria-label="Buscar">
             <span className="material-symbols-outlined">search</span>
           </button>
-          <a className="ph-iconLink" href="#" aria-label="Carrito">
+          <button className="ph-iconLink ph-cartButton" type="button" aria-label="Carrito" onClick={() => cart.openCart()}>
             <span className="material-symbols-outlined">shopping_bag</span>
-            <span className="ph-cartDot" aria-hidden="true" />
-          </a>
+            {cart.totalItems > 0 ? <span className="ph-cartDot" aria-hidden="true" /> : null}
+            {cart.totalItems > 0 ? (
+              <span className="ph-cartCount" aria-label={`${cart.totalItems} productos en carrito`}>{cart.totalItems}</span>
+            ) : null}
+          </button>
         </div>
       </div>
     </header>

@@ -1,0 +1,242 @@
+.ph-cartDrawerRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.ph-cartDrawerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.ph-cartDrawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(420px, 92vw);
+  background: #fff;
+  border-left: 1px solid var(--ph-border);
+  box-shadow: -18px 0 60px rgba(0, 0, 0, 0.18);
+  transform: translateX(102%);
+  transition: transform 220ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.ph-cartDrawerRoot.isOpen {
+  pointer-events: auto;
+}
+
+.ph-cartDrawerRoot.isOpen .ph-cartDrawerOverlay {
+  opacity: 1;
+}
+
+.ph-cartDrawerRoot.isOpen .ph-cartDrawer {
+  transform: translateX(0);
+}
+
+.ph-cartDrawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px;
+  border-bottom: 1px solid var(--ph-border);
+}
+
+.ph-cartDrawerTitle {
+  margin: 0;
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  font-size: 22px;
+}
+
+.ph-cartDrawerClose {
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  line-height: 0;
+  cursor: pointer;
+  color: var(--ph-text-main);
+}
+
+.ph-cartDrawerClose:hover {
+  color: var(--ph-primary);
+}
+
+.ph-cartDrawerBody {
+  padding: 14px 18px 18px;
+  overflow: auto;
+  flex: 1;
+}
+
+.ph-cartDrawerEmpty {
+  padding: 18px 2px;
+}
+
+.ph-cartDrawerList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ph-cartDrawerItem {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ph-border);
+}
+
+.ph-cartDrawerMedia {
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--ph-border);
+  background: var(--ph-muted);
+  display: block;
+}
+
+.ph-cartDrawerImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ph-cartDrawerInfo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ph-cartDrawerTopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ph-cartDrawerName {
+  min-width: 0;
+  color: var(--ph-text-main);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.ph-cartDrawerName:hover {
+  color: var(--ph-primary);
+}
+
+.ph-cartDrawerVariant {
+  margin-left: 6px;
+  font-weight: 700;
+  color: var(--ph-text-subtle);
+}
+
+.ph-cartDrawerTrash {
+  border: 0;
+  background: transparent;
+  padding: 6px;
+  line-height: 0;
+  cursor: pointer;
+  color: var(--ph-text-subtle);
+}
+
+.ph-cartDrawerTrash:hover {
+  color: var(--ph-primary);
+}
+
+.ph-cartDrawerBottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ph-cartDrawerQty {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--ph-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ph-cartDrawerQtyBtn {
+  width: 38px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--ph-text-main);
+}
+
+.ph-cartDrawerQtyBtn:hover {
+  background: var(--ph-muted);
+  color: var(--ph-primary);
+}
+
+.ph-cartDrawerQtyValue {
+  width: 38px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.ph-cartDrawerLineTotal {
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.ph-cartDrawerSummary {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ph-border);
+}
+
+.ph-cartDrawerSummaryRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.ph-cartDrawerCtas {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.ph-secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--ph-border);
+  background: #fff;
+  color: var(--ph-text-main);
+  text-decoration: none;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.ph-secondaryButton:hover {
+  border-color: var(--ph-primary);
+  color: var(--ph-primary);
+}
