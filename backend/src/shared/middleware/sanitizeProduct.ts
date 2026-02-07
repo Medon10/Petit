@@ -11,6 +11,9 @@ export function sanitizeProductInput(req: Request, res: Response, next: NextFunc
       ? (b.is_featured === true || b.is_featured === 1 || String(b.is_featured).toLowerCase() === 'true' ? 1 : 0)
       : (b.isFeatured != null ? (b.isFeatured === true || b.isFeatured === 1 || String(b.isFeatured).toLowerCase() === 'true' ? 1 : 0) : undefined),
     featured_rank: b.featured_rank != null ? Number(b.featured_rank) : (b.featuredRank != null ? Number(b.featuredRank) : undefined),
+    is_active: b.is_active != null
+      ? (b.is_active === true || b.is_active === 1 || String(b.is_active).toLowerCase() === 'true' ? 1 : 0)
+      : (b.isActive != null ? (b.isActive === true || b.isActive === 1 || String(b.isActive).toLowerCase() === 'true' ? 1 : 0) : undefined),
   } as any;
   (req as any).body.sanitizedInput = input;
   next();

@@ -10,6 +10,9 @@ import HomePage from './pages/Home/Home'
 import OrderConfirmationPage from './pages/OrderConfirmation'
 import ProductPage from './pages/Product'
 import CartDrawer from './componentes/cart/CartDrawer'
+import AdminLoginPage from './pages/AdminLogin'
+import AdminCatalogPage from './pages/AdminCatalog'
+import AdminOrdersPage from './pages/AdminOrders'
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
         <Route path="/carrito" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/pedido/:id" element={<OrderConfirmationPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/catalogo" element={<AdminCatalogPage />} />
+        <Route path="/admin/pedidos" element={<AdminOrdersPage />} />
         <Route path="/acerca" element={<AboutPage />} />
         <Route path="/contacto" element={<ContactPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

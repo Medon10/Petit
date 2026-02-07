@@ -13,6 +13,7 @@ import { productRouter } from './product/product.routes.js';
 import { variantRouter } from './variant/variant.routes.js';
 import { extraRouter } from './extra/extra.routes.js';
 import adminAuthRouter from './admin/admin-auth.routes.js';
+import adminCatalogRouter from './admin/admin-catalog.routes.js';
 import { orderRouter } from './order/order.routes.js';
 import { orderItemRouter } from './order-item/order-item.routes.js';
 import { orderItemExtraRouter } from './order-item-extra/order-item-extra.routes.js';
@@ -84,6 +85,7 @@ app.use((req, res, next) => {
 
 
 app.use('/admin/auth', adminAuthRouter);
+app.use('/admin/catalog', adminCatalogRouter);
 app.use('/categories', categoryRouter);
 app.use('/products', productRouter);
 app.use('/variants', variantRouter);

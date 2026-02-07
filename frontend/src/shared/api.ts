@@ -34,6 +34,8 @@ export type ProductDetailDto = ProductDto & {
   category?: CategoryRefDto | null;
 };
 
+const ADMIN_TOKEN_KEY = 'petit_admin_token';
+
 export function apiBase() {
   return (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000';
 }
@@ -83,6 +85,55 @@ async function apiRequestJson<T>(path: string, options: { method: string; body?:
   return json as T;
 }
 
+function getAdminToken() {
+  return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+}
+
+export function setAdminToken(token: string) {
+  localStorage.setItem(ADMIN_TOKEN_KEY, token);
+}
+
+export function clearAdminToken() {
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
+async function adminRequestJson<T>(path: string, options: { method: string; body?: unknown }): Promise<T> {
+  const base = apiBase().replace(/\/$/, '');
+  const token = getAdminToken();
+  const res = await fetch(`${base}${path}`, {
+    method: options.method,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: token ? `Bearer ${token}` : '',
+    },
+    body: options.body != null ? JSON.stringify(options.body) : undefined,
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = (json as any)?.message || (json as any)?.error || `API ${res.status} ${res.statusText}`;
+    throw new Error(String(msg));
+  }
+  return json as T;
+}
+
+async function adminRequestForm<T>(path: string, form: FormData): Promise<T> {
+  const base = apiBase().replace(/\/$/, '');
+  const token = getAdminToken();
+  const res = await fetch(`${base}${path}`, {
+    method: 'POST',
+    headers: {
+      Authorization: token ? `Bearer ${token}` : '',
+    },
+    body: form,
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = (json as any)?.message || (json as any)?.error || `API ${res.status} ${res.statusText}`;
+    throw new Error(String(msg));
+  }
+  return json as T;
+}
+
 export async function getCategories(options?: { includeRepresentative?: boolean }) {
   const qs = buildQuery({ include_representative: options?.includeRepresentative ? 1 : undefined });
   const data = await apiGetJson<{ data?: unknown }>(`/categories${qs}`);
@@ -125,4 +176,43 @@ export type CreateOrderInput = {
 
 export async function createOrder(input: CreateOrderInput) {
   return await apiRequestJson<{ data?: unknown }>(`/orders`, { method: 'POST', body: input });
+}
+
+export async function adminLogin(input: { username: string; password: string }) {
+  return await apiRequestJson<{ token?: string }>(`/admin/auth/login`, { method: 'POST', body: input });
+}
+
+export async function adminUploadImage(file: File) {
+  const form = new FormData();
+  form.append('image', file);
+  return await adminRequestForm<{ data?: { url?: string } }>(`/admin/catalog/uploads`, form);
+}
+
+export async function adminCreateProduct(input: {
+  category_id: number;
+  name: string;
+  description?: string;
+  image_url?: string;
+  is_featured?: boolean;
+  featured_rank?: number;
+  is_active?: boolean;
+}) {
+  return await adminRequestJson<{ data?: unknown }>(`/products`, { method: 'POST', body: input });
+}
+
+export async function adminUpdateProduct(id: number, input: {
+  category_id?: number;
+  name?: string;
+  description?: string;
+  image_url?: string;
+  is_featured?: boolean;
+  featured_rank?: number;
+  is_active?: boolean;
+}) {
+  return await adminRequestJson<{ data?: unknown }>(`/products/${id}`, { method: 'PATCH', body: input });
+}
+
+export async function adminGetCategories() {
+  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/categories?include_inactive=1`, { method: 'GET' });
+  return Array.isArray((data as any)?.data) ? ((data as any).data as CategoryDto[]) : [];
 }

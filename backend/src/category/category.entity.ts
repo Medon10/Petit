@@ -7,6 +7,9 @@ export class Category extends BaseEntity {
   @Property()
   name!: string;
 
+  @Property({ fieldName: 'is_active', default: true })
+  isActive: boolean = true;
+
   @OneToMany(() => Product, (product) => product.category)
   products = new Collection<Product>(this);
 }

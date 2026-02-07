@@ -23,6 +23,9 @@ export class Product extends BaseEntity {
   @Property({ fieldName: 'featured_rank', default: 0 })
   featuredRank: number = 0;
 
+  @Property({ fieldName: 'is_active', default: true })
+  isActive: boolean = true;
+
   @OneToMany(() => Variant, (variant) => variant.product)
   variants = new Collection<Variant>(this);
 }

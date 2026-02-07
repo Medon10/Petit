@@ -12,4 +12,7 @@ export class Variant extends BaseEntity {
 
   @Property({ type: 'decimal', precision: 10, scale: 2 })
   price!: string;
+
+  @Property({ fieldName: 'is_active', default: true })
+  isActive: boolean = true;
 }

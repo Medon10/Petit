@@ -18,4 +18,7 @@ export class Extra extends BaseEntity {
 
   @Enum({ items: () => ExtraCategoryType, fieldName: 'category_type' })
   categoryType: ExtraCategoryType = ExtraCategoryType.GENERAL;
+
+  @Property({ fieldName: 'is_active', default: true })
+  isActive: boolean = true;
 }
