@@ -42,7 +42,7 @@ export async function findAllCategories(filters: CategoryFilters) {
     return { data };
   }
 
-  const data = await CategoryRepository.representativeRows(em);
+  const data = await CategoryRepository.representativeRows(em, { includeInactive });
   return { data };
 }
 

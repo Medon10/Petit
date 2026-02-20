@@ -15,12 +15,14 @@ export class CategoryRepository {
     return await em.findOne(Category as any, { id });
   }
 
-  static async representativeRows(em: EntityManager) {
+  static async representativeRows(em: EntityManager, options?: { includeInactive?: boolean }) {
+    const whereClause = options?.includeInactive ? '1 = 1' : 'c.is_active = 1';
     const rows = await em.getConnection().execute(
       `
       SELECT
         c.id,
         c.name,
+        c.is_active AS isActive,
         (
           SELECT p.image_url
           FROM products p
@@ -32,7 +34,7 @@ export class CategoryRepository {
           LIMIT 1
         ) AS representativeImageUrl
       FROM categories c
-      WHERE c.is_active = 1
+      WHERE ${whereClause}
       ORDER BY c.name ASC
       `
     );
@@ -40,6 +42,7 @@ export class CategoryRepository {
     return (rows as any[]).map((r) => ({
       id: Number(r.id),
       name: r.name,
+      isActive: Boolean(r.isActive),
       representativeImageUrl: r.representativeImageUrl ?? null,
     }));
   }

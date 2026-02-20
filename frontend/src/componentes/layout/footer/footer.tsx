@@ -66,6 +66,9 @@ export default function Footer() {
           <div className="ph-footerBottomLinks">
             <a href="#">Términos</a>
             <a href="#">Privacidad</a>
+            <a href="/admin/login" className="ph-adminLink" title="Administración">
+              <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle' }}>lock</span>
+            </a>
           </div>
         </div>
       </div>

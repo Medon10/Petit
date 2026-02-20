@@ -128,3 +128,17 @@ export async function getOrderById(id: number) {
   const em = orm.em.fork();
   return await OrderRepository.populateOrder(em, id);
 }
+
+const VALID_STATUSES = ['pending', 'paid', 'cancelled', 'completed'] as const;
+
+export async function updateOrderStatus(id: number, status: string) {
+  if (!VALID_STATUSES.includes(status as any)) {
+    throw new Error(`Estado inválido: ${status}. Valores válidos: ${VALID_STATUSES.join(', ')}`);
+  }
+  const em = orm.em.fork();
+  const order = await em.findOne(Order as any, { id });
+  if (!order) return null;
+  (order as any).status = status;
+  await em.flush();
+  return await OrderRepository.populateOrder(em, id);
+}

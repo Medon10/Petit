@@ -173,3 +173,12 @@
 .ph-footerBottomLinks a:hover {
   color: var(--ph-primary);
 }
+
+.ph-adminLink {
+  opacity: 0.35;
+  transition: opacity 200ms ease;
+}
+
+.ph-adminLink:hover {
+  opacity: 1;
+}

@@ -1,3 +1,6 @@
+/**
+ * @deprecated Legacy interface – not used. Repositories use static methods + EntityManager.
+ */
 export interface Repository<T> {
     findAll(): Promise<T[] | undefined>
     findOne(item: {id: string }): Promise<T | undefined>

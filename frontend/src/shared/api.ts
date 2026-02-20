@@ -1,6 +1,7 @@
 export type CategoryDto = {
   id: number;
   name: string;
+  isActive?: boolean;
   representativeImageUrl?: string | null;
 };
 
@@ -8,19 +9,27 @@ export type VariantDto = {
   id: number;
   name: string;
   price: string;
+  isActive?: boolean;
+  product?: { id: number; name: string } | null;
 };
 
 export type ExtraDto = {
   id: number;
   name: string;
   price: string;
+  isActive?: boolean;
   categoryType?: 'general' | 'dije' | 'cadena' | 'servicio' | string;
 };
 
 export type ProductDto = {
   id: number;
   name: string;
+  description?: string | null;
   imageUrl?: string | null;
+  isFeatured?: boolean;
+  featuredRank?: number;
+  isActive?: boolean;
+  category?: { id: number; name: string } | null;
   variants?: VariantDto[];
 };
 
@@ -188,6 +197,19 @@ export async function adminUploadImage(file: File) {
   return await adminRequestForm<{ data?: { url?: string } }>(`/admin/catalog/uploads`, form);
 }
 
+// ── Admin Products ──────────────────────────────────────────
+
+export async function adminGetProducts(opts?: { categoryId?: number }) {
+  const qs = buildQuery({ category_id: opts?.categoryId, include_inactive: 1 });
+  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/products${qs}`, { method: 'GET' });
+  return Array.isArray((data as any)?.data) ? ((data as any).data as ProductDto[]) : [];
+}
+
+export async function adminGetProduct(id: number) {
+  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/products/${id}`, { method: 'GET' });
+  return (data as any)?.data as ProductDto | null;
+}
+
 export async function adminCreateProduct(input: {
   category_id: number;
   name: string;
@@ -197,7 +219,7 @@ export async function adminCreateProduct(input: {
   featured_rank?: number;
   is_active?: boolean;
 }) {
-  return await adminRequestJson<{ data?: unknown }>(`/products`, { method: 'POST', body: input });
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/products`, { method: 'POST', body: input });
 }
 
 export async function adminUpdateProduct(id: number, input: {
@@ -209,10 +231,124 @@ export async function adminUpdateProduct(id: number, input: {
   featured_rank?: number;
   is_active?: boolean;
 }) {
-  return await adminRequestJson<{ data?: unknown }>(`/products/${id}`, { method: 'PATCH', body: input });
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/products/${id}`, { method: 'PATCH', body: input });
 }
+
+export async function adminDeleteProduct(id: number) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/products/${id}`, { method: 'DELETE' });
+}
+
+export async function adminSetProductActive(id: number, isActive: boolean) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/products/${id}/active`, { method: 'PATCH', body: { is_active: isActive } });
+}
+
+// ── Admin Categories ────────────────────────────────────────
 
 export async function adminGetCategories() {
   const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/categories?include_inactive=1`, { method: 'GET' });
   return Array.isArray((data as any)?.data) ? ((data as any).data as CategoryDto[]) : [];
+}
+
+export async function adminCreateCategory(input: { name: string; is_active?: boolean }) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/categories`, { method: 'POST', body: input });
+}
+
+export async function adminUpdateCategory(id: number, input: { name?: string; is_active?: boolean }) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/categories/${id}`, { method: 'PATCH', body: input });
+}
+
+export async function adminDeleteCategory(id: number) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/categories/${id}`, { method: 'DELETE' });
+}
+
+export async function adminSetCategoryActive(id: number, isActive: boolean) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/categories/${id}/active`, { method: 'PATCH', body: { is_active: isActive } });
+}
+
+// ── Admin Variants ──────────────────────────────────────────
+
+export async function adminGetVariants(opts?: { productId?: number }) {
+  const qs = buildQuery({ product_id: opts?.productId, include_inactive: 1 });
+  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/variants${qs}`, { method: 'GET' });
+  return Array.isArray((data as any)?.data) ? ((data as any).data as VariantDto[]) : [];
+}
+
+export async function adminCreateVariant(input: { product_id: number; name: string; price: string; is_active?: boolean }) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/variants`, { method: 'POST', body: input });
+}
+
+export async function adminUpdateVariant(id: number, input: { product_id?: number; name?: string; price?: string; is_active?: boolean }) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/variants/${id}`, { method: 'PATCH', body: input });
+}
+
+export async function adminDeleteVariant(id: number) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/variants/${id}`, { method: 'DELETE' });
+}
+
+export async function adminSetVariantActive(id: number, isActive: boolean) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/variants/${id}/active`, { method: 'PATCH', body: { is_active: isActive } });
+}
+
+// ── Admin Extras ────────────────────────────────────────────
+
+export async function adminGetExtras() {
+  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/extras?include_inactive=1`, { method: 'GET' });
+  return Array.isArray((data as any)?.data) ? ((data as any).data as ExtraDto[]) : [];
+}
+
+export async function adminCreateExtra(input: { name: string; price: string; category_type?: string; is_active?: boolean }) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/extras`, { method: 'POST', body: input });
+}
+
+export async function adminUpdateExtra(id: number, input: { name?: string; price?: string; category_type?: string; is_active?: boolean }) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/extras/${id}`, { method: 'PATCH', body: input });
+}
+
+export async function adminDeleteExtra(id: number) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/extras/${id}`, { method: 'DELETE' });
+}
+
+export async function adminSetExtraActive(id: number, isActive: boolean) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/extras/${id}/active`, { method: 'PATCH', body: { is_active: isActive } });
+}
+
+// ── Admin Orders ────────────────────────────────────────────
+
+export type OrderDto = {
+  id: number;
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  notes?: string;
+  status: string;
+  total: string;
+  createdAt?: string;
+  items?: Array<{
+    id: number;
+    productName: string;
+    variantName?: string;
+    quantity: number;
+    unitPrice: string;
+    extras?: Array<{
+      id: number;
+      extraName: string;
+      quantity: number;
+      unitPrice: string;
+      categoryType?: string;
+    }>;
+  }>;
+};
+
+export async function adminGetOrders() {
+  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/orders`, { method: 'GET' });
+  return Array.isArray((data as any)?.data) ? ((data as any).data as OrderDto[]) : [];
+}
+
+export async function adminGetOrder(id: number) {
+  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/orders/${id}`, { method: 'GET' });
+  return (data as any)?.data as OrderDto | null;
+}
+
+export async function adminUpdateOrderStatus(id: number, status: string) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/orders/${id}/status`, { method: 'PATCH', body: { status } });
 }

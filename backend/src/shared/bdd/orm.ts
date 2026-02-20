@@ -63,4 +63,41 @@ export const syncSchema = async () => {
         }
     }
     console.log('Esquema actualizado');
+
+    // Auto-seed: create default admin user if none exists
+    await seedDefaultAdmin();
+}
+
+async function seedDefaultAdmin() {
+    const { default: bcrypt } = await import('bcryptjs');
+    const em = orm.em.fork();
+    try {
+        const username = process.env.ADMIN_USER || 'admin';
+        const rawPassword = process.env.ADMIN_PASS || 'admin123';
+        const hash = await bcrypt.hash(rawPassword, 10);
+
+        const existing = await em.findOne(AdminUser as any, { id: 1 } as any);
+        if (existing) {
+            // In development, keep credentials in sync with env vars
+            if (process.env.NODE_ENV !== 'production') {
+                (existing as any).username = username;
+                (existing as any).passwordHash = hash;
+                (existing as any).isActive = true;
+                await em.persistAndFlush(existing);
+                console.log(`[seed] Admin actualizado → usuario: ${username} / contraseña: ${rawPassword}`);
+            }
+            return;
+        }
+
+        const admin = em.create(AdminUser, {
+            id: 1,
+            username,
+            passwordHash: hash,
+            isActive: true,
+        } as any);
+        await em.persistAndFlush(admin);
+        console.log(`[seed] Admin creado → usuario: ${username} / contraseña: ${rawPassword}`);
+    } catch (e: any) {
+        console.error('[seed] No se pudo crear admin por defecto:', e?.message || e);
+    }
 }
