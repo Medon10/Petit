@@ -64,6 +64,10 @@ export default function HomePage() {
     });
   }, [categories]);
 
+  const featured = useMemo(() => {
+    return products.filter((p) => p.isFeatured);
+  }, [products]);
+
   return (
     <div className="petit-home">
       <Header />
@@ -151,6 +155,71 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Featured products */}
+      {featured.length > 0 && (
+        <section className="ph-section ph-sectionTopBorder" aria-label="Los Más Elegidos">
+          <div className="ph-container">
+            <div className="ph-sectionTitle">
+              <h2 className="ph-h2">Los Más Elegidos 💖</h2>
+              <div className="ph-divider" />
+            </div>
+            <div className="ph-gridProducts">
+              {featured.map((p) => {
+                const img = toAbsoluteUrl(p.imageUrl) ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
+                const prices = (p.variants || [])
+                  .map((v) => Number.parseFloat(String(v.price)))
+                  .filter((n) => Number.isFinite(n));
+                const min = prices.length ? Math.min(...prices) : undefined;
+                const priceLabel = min != null ? formatMoney(min) : undefined;
+                return (
+                  <Link key={p.id} className="ph-productCard" to={`/productos/${p.id}`}>
+                    <div className="ph-productMedia">
+                      <img className="ph-productImg" src={img} alt={p.name} loading="lazy" />
+                      <div className="ph-productCTA" aria-hidden="true">
+                        <span className="material-symbols-outlined">shopping_bag</span>
+                      </div>
+                    </div>
+                    <div className="ph-productText">
+                      <h3 className="ph-productName">{p.name}</h3>
+                      {priceLabel ? <p className="ph-price">{priceLabel}</p> : null}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Trust badges */}
+      <section className="ph-trustSection" aria-label="Beneficios">
+        <div className="ph-container">
+          <div className="ph-trustGrid">
+            <div className="ph-trustItem">
+              <span className="material-symbols-outlined ph-trustIcon">local_shipping</span>
+              <h4 className="ph-trustTitle">Envíos a todo el país</h4>
+              <p className="ph-trustDesc">Recibí tu pedido en casa o retiralo en sucursal.</p>
+            </div>
+            <div className="ph-trustItem">
+              <span className="material-symbols-outlined ph-trustIcon">credit_card</span>
+              <h4 className="ph-trustTitle">Pagá como quieras</h4>
+              <p className="ph-trustDesc">3 cuotas sin interés o 10% OFF por transferencia.</p>
+            </div>
+            <div className="ph-trustItem">
+              <span className="material-symbols-outlined ph-trustIcon">verified</span>
+              <h4 className="ph-trustTitle">Calidad garantizada</h4>
+              <p className="ph-trustDesc">Acero quirúrgico hipoalergénico que no se oscurece.</p>
+            </div>
+            <div className="ph-trustItem">
+              <span className="material-symbols-outlined ph-trustIcon">chat</span>
+              <h4 className="ph-trustTitle">Atención personalizada</h4>
+              <p className="ph-trustDesc">Escribinos por WhatsApp y te asesoramos.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );

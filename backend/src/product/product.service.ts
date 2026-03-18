@@ -59,7 +59,7 @@ export async function findAllProducts(filters: ProductFilters) {
   const limit = limitRaw != null && String(limitRaw).trim() !== '' ? Number(limitRaw) : undefined;
 
   const data = await ProductRepository.listProducts(em, where, {
-    populate: ['category', 'variants'] as any,
+    populate: ['category'] as any,
     orderBy: featured === true
       ? ({ featuredRank: 'ASC', name: 'ASC' } as any)
       : ({ name: 'ASC' } as any),
@@ -149,7 +149,7 @@ export async function bestSellers(limitRaw?: unknown) {
   if (ids.length === 0) return { data: [] };
 
   const products = await ProductRepository.listProducts(em, { id: { $in: ids } as any, isActive: true } as any, {
-    populate: ['category', 'variants'] as any,
+    populate: ['category'] as any,
   });
 
   const byId = new Map<number, any>(products.map((p: any) => [Number(p.id), p]));

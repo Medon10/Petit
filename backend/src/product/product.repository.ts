@@ -24,7 +24,7 @@ export class ProductRepository {
 
   static async bestSellerIds(em: EntityManager, limit: number) {
     const rows = await em.getConnection().execute(
-      'SELECT product_id, SUM(quantity) AS qty FROM order_items GROUP BY product_id ORDER BY qty DESC LIMIT ?',
+      'SELECT product_id, SUM(quantity) AS qty FROM order_items GROUP BY product_id ORDER BY qty DESC LIMIT $1',
       [limit]
     );
 

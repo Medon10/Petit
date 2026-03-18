@@ -7,19 +7,17 @@ export default function Footer() {
         <div className="ph-footerGrid">
           <div className="ph-footerBrand">
             <div className="ph-footerBrandHeader">
-              <div className="ph-footerLogo" aria-hidden="true">
-                <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12,24 L24,6 L36,24 L24,42 Z" fill="currentColor"></path>
-                </svg>
+              <div className="ph-footerBrandWrap">
+                <span className="ph-footerBrandName">Petit</span>
+                <span className="ph-footerBrandSub">accesorios</span>
               </div>
-              <span className="ph-footerBrandName">Petit</span>
             </div>
             <p className="ph-footerText">
-              Joyería minimalista en acero quirúrgico. Diseñamos piezas que cuentan tu historia con
+              Accesorios personalizados en acero quirúrgico. Diseñamos piezas que cuentan tu historia con
               elegancia y durabilidad.
             </p>
             <div className="ph-social">
-              <a className="ph-socialLink" href="#" aria-label="Instagram">
+              <a className="ph-socialLink" href="https://www.instagram.com/petit.laser/" aria-label="Instagram">
                 <svg className="ph-socialIcon" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     fillRule="evenodd"
@@ -62,7 +60,7 @@ export default function Footer() {
         </div>
 
         <div className="ph-footerBottom">
-          <p>© 2026 Petit Joyas. Todos los derechos reservados.</p>
+          <p>© 2026 Petit Accesorios. Todos los derechos reservados.</p>
           <div className="ph-footerBottomLinks">
             <a href="#">Términos</a>
             <a href="#">Privacidad</a>

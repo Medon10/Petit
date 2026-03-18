@@ -1,6 +1,6 @@
 import { MikroORM } from '@mikro-orm/core';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
-import { MySqlDriver } from '@mikro-orm/mysql';
+import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 
 import '../../env.js';
 
@@ -17,14 +17,14 @@ function buildClientUrlFromEnv() {
     if (process.env.DB_URL && process.env.DB_URL.trim()) return process.env.DB_URL;
 
     const host = process.env.DB_HOST || 'localhost';
-    const port = process.env.DB_PORT || '3306';
-    const user = process.env.DB_USER || 'root';
+    const port = process.env.DB_PORT || '5432';
+    const user = process.env.DB_USER || 'postgres';
     const password = process.env.DB_PASSWORD || '';
     const database = process.env.DB_NAME || 'petit';
 
     const encodedPassword = encodeURIComponent(password);
     const authPart = password ? `${encodeURIComponent(user)}:${encodedPassword}` : encodeURIComponent(user);
-    return `mysql://${authPart}@${host}:${port}/${database}`;
+    return `postgresql://${authPart}@${host}:${port}/${database}`;
 }
 
 const dbSslEnabled = String(process.env.DB_SSL || '').toLowerCase() === 'true';
@@ -33,7 +33,7 @@ const dbSslRejectUnauthorized = String(process.env.DB_SSL_REJECT_UNAUTHORIZED ||
 export const orm = await MikroORM.init({
     entities: [Category, Product, Variant, Extra, AdminUser, Order, OrderItem, OrderItemExtra],
     entitiesTs: [Category, Product, Variant, Extra, AdminUser, Order, OrderItem, OrderItemExtra],
-    driver: MySqlDriver,
+    driver: PostgreSqlDriver,
     clientUrl: buildClientUrlFromEnv(),
         driverOptions: dbSslEnabled
             ? ({

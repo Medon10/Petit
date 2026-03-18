@@ -14,11 +14,13 @@ import AdminLoginPage from './pages/AdminLogin'
 import AdminCatalogPage from './pages/AdminCatalog'
 import AdminOrdersPage from './pages/AdminOrders'
 import ProtectedAdminRoute from './shared/ProtectedAdminRoute'
+import WhatsAppButton from './componentes/WhatsAppButton/WhatsAppButton'
 
 function App() {
   return (
     <BrowserRouter>
       <CartDrawer />
+      <WhatsAppButton />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/categorias" element={<CategoriesPage />} />

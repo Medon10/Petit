@@ -26,7 +26,7 @@ export type CreateOrderInput = {
 };
 
 function toDecimalString(n: number) {
-  // Keep 2 decimals for MySQL DECIMAL(10,2)
+  // Keep 2 decimals for NUMERIC(10,2)
   return n.toFixed(2);
 }
 

@@ -16,7 +16,7 @@ export class CategoryRepository {
   }
 
   static async representativeRows(em: EntityManager, options?: { includeInactive?: boolean }) {
-    const whereClause = options?.includeInactive ? '1 = 1' : 'c.is_active = 1';
+    const whereClause = options?.includeInactive ? 'true' : 'c.is_active = true';
     const rows = await em.getConnection().execute(
       `
       SELECT
@@ -27,7 +27,7 @@ export class CategoryRepository {
           SELECT p.image_url
           FROM products p
           WHERE p.category_id = c.id
-            AND p.is_active = 1
+            AND p.is_active = true
             AND p.image_url IS NOT NULL
             AND p.image_url <> ''
           ORDER BY p.is_featured DESC, p.featured_rank ASC, p.id ASC

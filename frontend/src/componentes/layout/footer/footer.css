@@ -24,19 +24,28 @@
   gap: 10px;
 }
 
-.ph-footerLogo {
-  width: 20px;
-  height: 20px;
-  color: #000;
+.ph-footerBrandWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
 }
 
 .ph-footerBrandName {
-  font-family: "Playfair Display", ui-serif, Georgia, serif;
-  font-weight: 900;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-size: 20px;
+  font-family: "Alkalami", serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  font-size: 24px;
+  line-height: 1;
   color: #000;
+}
+
+.ph-footerBrandSub {
+  font-family: "Alkalami", serif;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: #000;
+  margin-top: -1px;
 }
 
 .ph-footerText {
