@@ -194,8 +194,6 @@ export default function ProductPage() {
         <div className="ph-container">
           <div className="ph-breadcrumbs">
             <Link className="ph-crumb" to="/">Inicio</Link>
-            <span className="ph-crumbSep">/</span>
-            <Link className="ph-crumb" to="/categorias">Categorías</Link>
             {categoryId ? (
               <>
                 <span className="ph-crumbSep">/</span>

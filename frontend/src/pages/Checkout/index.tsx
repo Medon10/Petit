@@ -7,6 +7,19 @@ import { useCart } from '../../shared/cart';
 import '../Home/Home.css';
 import './styles.css';
 
+type OrderConfirmationItem = {
+  key: string;
+  name: string;
+  quantity: number;
+  total: number;
+};
+
+type OrderConfirmationState = {
+  orderNumber: string;
+  total: number;
+  items: OrderConfirmationItem[];
+};
+
 function parsePrice(p: unknown) {
   const n = Number.parseFloat(String(p ?? ''));
   return Number.isFinite(n) ? n : 0;
@@ -129,6 +142,22 @@ export default function CheckoutPage() {
 
     setSubmitting(true);
     try {
+      const orderItemsSummary: OrderConfirmationItem[] = cart.items.map((it) => {
+        const product = productsById[it.productId];
+        const variant = product?.variants?.find((v) => v.id === it.variantId) ?? product?.variants?.[0];
+        const lineVariantPrice = parsePrice(variant?.price);
+        const lineExtrasPrice = it.extraIds.reduce((sum, id) => sum + parsePrice(extrasById[id]?.price), 0);
+        const lineTotal = (lineVariantPrice + lineExtrasPrice) * it.quantity;
+        const variantName = variant?.name ? ` (${variant.name})` : '';
+
+        return {
+          key: it.key,
+          name: `${product?.name ?? `Producto #${it.productId}`}${variantName}`,
+          quantity: it.quantity,
+          total: lineTotal,
+        };
+      });
+
       const payload = {
         customer_name: name,
         customer_email: customerEmail.trim() || undefined,
@@ -143,13 +172,18 @@ export default function CheckoutPage() {
       };
 
       const res = await createOrder(payload);
-      const id = Number((res as any)?.data?.id);
+      const idRaw = (res as any)?.data?.id;
+      const idNum = Number(idRaw);
+      const orderNumber = Number.isFinite(idNum) ? String(idNum) : String(idRaw ?? 'ok');
+
+      const orderState: OrderConfirmationState = {
+        orderNumber,
+        total: summary.subtotal,
+        items: orderItemsSummary,
+      };
+
       cart.clear();
-      if (Number.isFinite(id)) {
-        nav(`/pedido/${id}`);
-      } else {
-        nav(`/pedido/ok`);
-      }
+      nav(`/pedido/${orderNumber}`, { state: orderState });
     } catch (e: any) {
       setError(e?.message || 'No se pudo crear el pedido.');
     } finally {

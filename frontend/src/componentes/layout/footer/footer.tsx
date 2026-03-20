@@ -1,6 +1,31 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getCategories, type CategoryDto } from '../../../shared/api';
 import './footer.css';
 
 export default function Footer() {
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const cats = await getCategories();
+        if (cancelled) return;
+        setCategories(cats);
+      } catch {
+        if (cancelled) return;
+        setCategories([]);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <footer className="ph-footer">
       <div className="ph-container">
@@ -30,42 +55,37 @@ export default function Footer() {
           </div>
 
           <div>
-            <h5 className="ph-footerTitle">Colecciones</h5>
-            <ul className="ph-footerLinks">
-              <li><a href="#">Novedades</a></li>
-              <li><a href="#">Pulseras</a></li>
-              <li><a href="#">Medallas</a></li>
-              <li><a href="#">Anillos</a></li>
+            <h5 className="ph-footerTitle">Categorías</h5>
+            <ul className="ph-footerLinks ph-footerCategories">
+              {categories.length ? (
+                categories.map((c) => (
+                  <li key={c.id}>
+                    <Link to={`/categorias/${c.id}`}>{c.name}</Link>
+                  </li>
+                ))
+              ) : (
+                <li><span className="ph-footerMuted">Sin categorías disponibles</span></li>
+              )}
             </ul>
           </div>
 
           <div>
-            <h5 className="ph-footerTitle">Atención al Cliente</h5>
+            <h5 className="ph-footerTitle">Contacto</h5>
             <ul className="ph-footerLinks">
-              <li><a href="#">Envíos y Entregas</a></li>
-              <li><a href="#">Cambios y Devoluciones</a></li>
-              <li><a href="#">Guía de Talles</a></li>
-              <li><a href="#">Preguntas Frecuentes</a></li>
+              <li><a href="https://wa.me/5491100000000" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+              <li><a href="https://www.instagram.com/petit.laser/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+              <li><span className="ph-footerMuted">Lun a Sáb · 10:00 a 20:00</span></li>
             </ul>
-          </div>
-
-          <div>
-            <h5 className="ph-footerTitle">Newsletter</h5>
-            <p className="ph-footerSmall">Suscríbete y recibe un 10% en tu primera compra.</p>
-            <form className="ph-newsletter" onSubmit={(e) => e.preventDefault()}>
-              <input className="ph-input" type="email" placeholder="Tu correo electrónico" />
-              <button className="ph-button" type="submit">Suscribirse</button>
-            </form>
           </div>
         </div>
 
         <div className="ph-footerBottom">
           <p>© 2026 Petit Accesorios. Todos los derechos reservados.</p>
           <div className="ph-footerBottomLinks">
-            <a href="#">Términos</a>
-            <a href="#">Privacidad</a>
             <a href="/admin/login" className="ph-adminLink" title="Administración">
-              <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle' }}>lock</span>
+              <svg viewBox="0 0 24 24" className="ph-adminLock" aria-hidden="true">
+                <path d="M17 8h-1V6a4 4 0 10-8 0v2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V10a2 2 0 00-2-2zm-7-2a2 2 0 114 0v2h-4V6zm7 14H7V10h10v10z" fill="currentColor"/>
+              </svg>
             </a>
           </div>
         </div>
