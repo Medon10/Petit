@@ -156,3 +156,24 @@ export async function bestSellers(limitRaw?: unknown) {
   const ordered = ids.map((id) => byId.get(id)).filter(Boolean);
   return { data: ordered };
 }
+
+export async function searchProducts(queryRaw?: unknown) {
+  const em = orm.em.fork();
+  const query = String(queryRaw ?? '').trim();
+  if (!query) return { data: [] };
+
+  const pattern = `%${query}%`;
+  const data = await ProductRepository.listProducts(em, {
+    isActive: true,
+    $or: [
+      { name: { $ilike: pattern } as any },
+      { description: { $ilike: pattern } as any },
+    ],
+  } as any, {
+    populate: ['category', 'variants'] as any,
+    orderBy: { name: 'ASC' } as any,
+    limit: 20,
+  });
+
+  return { data };
+}

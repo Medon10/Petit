@@ -5,7 +5,7 @@ import Footer from '../../componentes/layout/footer/footer';
 import { createOrder, getExtras, getProduct, type ExtraDto, type ProductDetailDto } from '../../shared/api';
 import { useCart } from '../../shared/cart';
 import '../Home/Home.css';
-import './styles.css';
+import './Checkout.css';
 
 type OrderConfirmationItem = {
   key: string;
@@ -294,3 +294,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+

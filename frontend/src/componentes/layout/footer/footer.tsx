@@ -82,7 +82,7 @@ export default function Footer() {
         <div className="ph-footerBottom">
           <p>© 2026 Petit Accesorios. Todos los derechos reservados.</p>
           <div className="ph-footerBottomLinks">
-            <a href="/admin/login" className="ph-adminLink" title="Administración">
+            <a href="/login" className="ph-adminLink" title="Administración">
               <svg viewBox="0 0 24 24" className="ph-adminLock" aria-hidden="true">
                 <path d="M17 8h-1V6a4 4 0 10-8 0v2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V10a2 2 0 00-2-2zm-7-2a2 2 0 114 0v2h-4V6zm7 14H7V10h10v10z" fill="currentColor"/>
               </svg>

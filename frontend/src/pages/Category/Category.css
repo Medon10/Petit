@@ -1,0 +1,33 @@
+.ph-sectionTight {
+  padding: 64px 0;
+}
+
+.ph-empty {
+  margin: 0;
+  text-align: center;
+  color: var(--ph-text-subtle);
+}
+
+.ph-categoryToolbar {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.ph-categorySortLabel {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ph-categorySort {
+  border: 1px solid var(--ph-border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #fff;
+  color: var(--ph-text-main);
+  font-size: 12px;
+}

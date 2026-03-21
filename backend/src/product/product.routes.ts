@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { findAll, findOne, add, update, remove, bestSellers } from './product.controller.js';
+import { findAll, findOne, add, update, remove, bestSellers, search } from './product.controller.js';
 import { sanitizeProductInput } from '../shared/middleware/sanitizeProduct.js';
 import { verifyToken } from '../shared/middleware/verifytoken.js';
 import { verifyAdmin } from '../shared/middleware/verifyAdmin.js';
@@ -7,6 +7,7 @@ import { verifyAdmin } from '../shared/middleware/verifyAdmin.js';
 export const productRouter = Router();
 
 productRouter.get('/', findAll);
+productRouter.get('/search', search);
 productRouter.get('/best-sellers', bestSellers);
 productRouter.get('/:id', findOne);
 

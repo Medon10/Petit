@@ -1,18 +1,41 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { getCategories, type CategoryDto } from '../../../shared/api';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { getCategories, searchProducts, type CategoryDto, type ProductDto } from '../../../shared/api';
 import { useCart } from '../../../shared/cart';
 // import AnnouncementBar from '../announcement-bar/AnnouncementBar';
 import './header.css';
 
+const RECENT_SEARCHES_KEY = 'petit_recent_searches';
+
+function fromPrice(product: ProductDto) {
+  const prices = (product.variants || [])
+    .map((v) => Number.parseFloat(String(v.price)))
+    .filter((n) => Number.isFinite(n));
+  if (!prices.length) return null;
+  return Math.min(...prices);
+}
+
+function moneyAr(amount: number) {
+  if (!Number.isFinite(amount)) return '$0';
+  return `$${Math.round(amount).toLocaleString('es-AR')}`;
+}
+
 export default function Header() {
   const cart = useCart();
+  const navigate = useNavigate();
   const location = useLocation();
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<ProductDto[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [activeSearchIndex, setActiveSearchIndex] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const navItemRef = useRef<HTMLDivElement | null>(null);
+  const searchRef = useRef<HTMLDivElement | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function openDropdown() {
@@ -42,6 +65,18 @@ export default function Header() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) {
+        setRecentSearches(parsed.filter((x) => typeof x === 'string').slice(0, 5));
+      }
+    } catch {
+      setRecentSearches([]);
+    }
   }, []);
 
   useEffect(() => {
@@ -78,6 +113,9 @@ export default function Header() {
   useEffect(() => {
     setMobileMenuOpen(false);
     setMobileCategoriesOpen(false);
+    setSearchOpen(false);
+    setSearchQuery('');
+    setSearchResults([]);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -91,6 +129,85 @@ export default function Header() {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (!query) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      setActiveSearchIndex(-1);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const results = await searchProducts(query);
+        if (cancelled) return;
+        setSearchResults(results);
+        setActiveSearchIndex(results.length ? 0 : -1);
+      } catch {
+        if (cancelled) return;
+        setSearchResults([]);
+        setActiveSearchIndex(-1);
+      } finally {
+        if (!cancelled) setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    function onPointerDown(e: PointerEvent) {
+      if (!searchRef.current) return;
+      if (searchRef.current.contains(e.target as Node)) return;
+      setSearchOpen(false);
+    }
+    window.addEventListener('pointerdown', onPointerDown);
+    return () => window.removeEventListener('pointerdown', onPointerDown);
+  }, [searchOpen]);
+
+  function registerRecentSearch(term: string) {
+    const q = term.trim();
+    if (!q) return;
+    const next = [q, ...recentSearches.filter((x) => x.toLowerCase() !== q.toLowerCase())].slice(0, 5);
+    setRecentSearches(next);
+    try {
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+    } catch {
+      // ignore storage errors
+    }
+  }
+
+  function onSearchInputKeyDown(e: ReactKeyboardEvent<HTMLInputElement>) {
+    if (!searchResults.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSearchIndex((prev) => (prev + 1) % searchResults.length);
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSearchIndex((prev) => (prev <= 0 ? searchResults.length - 1 : prev - 1));
+      return;
+    }
+    if (e.key === 'Enter' && activeSearchIndex >= 0) {
+      e.preventDefault();
+      const item = searchResults[activeSearchIndex];
+      if (!item) return;
+      registerRecentSearch(searchQuery);
+      navigate(`/productos/${item.id}`);
+    }
+    if (e.key === 'Escape') {
+      setSearchOpen(false);
+    }
+  }
 
   return (
     <>
@@ -159,7 +276,13 @@ export default function Header() {
         </Link>
 
         <div className="ph-actions">
-          <button className="ph-iconButton" type="button" aria-label="Buscar">
+          <button
+            className="ph-iconButton"
+            type="button"
+            aria-label="Buscar"
+            aria-expanded={searchOpen}
+            onClick={() => setSearchOpen((v) => !v)}
+          >
             <span className="material-symbols-outlined">search</span>
           </button>
           <button className="ph-iconLink ph-cartButton" type="button" aria-label="Carrito" onClick={() => cart.openCart()}>
@@ -169,6 +292,62 @@ export default function Header() {
               <span className="ph-cartCount" aria-label={`${cart.totalItems} productos en carrito`}>{cart.totalItems}</span>
             ) : null}
           </button>
+        </div>
+
+        <div ref={searchRef} className={searchOpen ? 'ph-searchOverlay isOpen' : 'ph-searchOverlay'}>
+          <input
+            className="ph-searchInput"
+            placeholder="Buscar productos..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={onSearchInputKeyDown}
+          />
+          {searchOpen ? (
+            <div className="ph-searchResults" role="listbox" aria-label="Resultados de búsqueda">
+              {searchLoading ? <div className="ph-searchEmpty">Buscando...</div> : null}
+              {!searchLoading && !searchResults.length && searchQuery.trim() ? (
+                <div className="ph-searchEmpty">Sin resultados</div>
+              ) : null}
+              {!searchLoading && !searchQuery.trim() ? (
+                recentSearches.length ? (
+                  <div className="ph-searchRecent">
+                    <div className="ph-searchRecentTitle">Búsquedas recientes</div>
+                    {recentSearches.map((term) => (
+                      <button
+                        key={term}
+                        type="button"
+                        className="ph-searchRecentBtn"
+                        onClick={() => setSearchQuery(term)}
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                ) : <div className="ph-searchEmpty">Escribí para buscar</div>
+              ) : null}
+              {searchResults.map((p, idx) => {
+                const price = fromPrice(p);
+                return (
+                  <Link
+                    key={p.id}
+                    className={activeSearchIndex === idx ? 'ph-searchItem isActive' : 'ph-searchItem'}
+                    to={`/productos/${p.id}`}
+                    onClick={() => {
+                      registerRecentSearch(searchQuery);
+                      setSearchOpen(false);
+                      setSearchQuery('');
+                    }}
+                  >
+                    <span className="ph-searchItemTitle">{p.name}</span>
+                    <span className="ph-searchItemMeta">
+                      {p.category?.name || 'Sin categoría'}
+                      {price != null ? ` · desde ${moneyAr(price)}` : ''}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
       </div>
     </header>
@@ -196,6 +375,38 @@ export default function Header() {
           </header>
 
           <nav className="ph-mobileNav" aria-label="Navegación móvil">
+            <div className="ph-mobileSearchBox">
+              <label className="ph-mobileSearchLabel" htmlFor="mobile-search">Buscar</label>
+              <input
+                id="mobile-search"
+                className="ph-mobileSearchInput"
+                placeholder="Buscar productos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={onSearchInputKeyDown}
+              />
+              {searchQuery.trim() ? (
+                <div className="ph-mobileSearchResults">
+                  {searchLoading ? <div className="ph-searchEmpty">Buscando...</div> : null}
+                  {!searchLoading && !searchResults.length ? <div className="ph-searchEmpty">Sin resultados</div> : null}
+                  {searchResults.slice(0, 8).map((p) => (
+                    <Link
+                      key={`m-${p.id}`}
+                      className="ph-mobileSearchItem"
+                      to={`/productos/${p.id}`}
+                      onClick={() => {
+                        registerRecentSearch(searchQuery);
+                        setMobileMenuOpen(false);
+                        setSearchQuery('');
+                      }}
+                    >
+                      {p.name}
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
             <NavLink className="ph-mobileNavLink" to="/" onClick={() => setMobileMenuOpen(false)}>
               Inicio
             </NavLink>

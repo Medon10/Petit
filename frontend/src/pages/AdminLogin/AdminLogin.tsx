@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminLogin, setAdminToken } from '../../shared/api';
-import './styles.css';
+import './AdminLogin.css';
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -46,3 +46,4 @@ export default function AdminLoginPage() {
     </main>
   );
 }
+

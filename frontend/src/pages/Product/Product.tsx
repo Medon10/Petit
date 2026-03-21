@@ -5,7 +5,7 @@ import Footer from '../../componentes/layout/footer/footer';
 import { getExtras, getProduct, toAbsoluteUrl, type ExtraDto, type ProductDetailDto, type VariantDto } from '../../shared/api';
 import { useCart } from '../../shared/cart';
 import '../Home/Home.css';
-import './styles.css';
+import './Product.css';
 
 function formatMoney(price: number) {
   if (!Number.isFinite(price)) return undefined;
@@ -375,3 +375,4 @@ export default function ProductPage() {
     </div>
   );
 }
+

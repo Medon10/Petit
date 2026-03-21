@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import '../Home/Home.css';
-import './styles.css';
+import './OrderConfirmation.css';
 
 export default function OrderConfirmationPage() {
   const params = useParams();
@@ -31,3 +31,4 @@ export default function OrderConfirmationPage() {
     </div>
   );
 }
+

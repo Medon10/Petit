@@ -6,6 +6,7 @@ import {
   updateProduct,
   removeProduct,
   bestSellers as bestSellersService,
+  searchProducts,
 } from './product.service.js';
 
 async function findAll(req: Request, res: Response) {
@@ -75,4 +76,13 @@ async function bestSellers(req: Request, res: Response) {
   }
 }
 
-export { findAll, findOne, add, update, remove, bestSellers };
+async function search(req: Request, res: Response) {
+  try {
+    const result = await searchProducts(req.query.q);
+    return res.json(result);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al buscar productos', error });
+  }
+}
+
+export { findAll, findOne, add, update, remove, bestSellers, search };

@@ -1,4 +1,4 @@
-import './styles.css';
+import './About.css';
 
 export default function AboutPage() {
   return (
@@ -7,3 +7,4 @@ export default function AboutPage() {
     </main>
   );
 }
+

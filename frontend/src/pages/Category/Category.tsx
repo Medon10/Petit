@@ -4,7 +4,7 @@ import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import { getCategories, getProducts, toAbsoluteUrl, type CategoryDto, type ProductDto } from '../../shared/api';
 import '../Home/Home.css';
-import './styles.css';
+import './Category.css';
 
 function formatMoney(price: number) {
   if (!Number.isFinite(price)) return undefined;
@@ -17,6 +17,7 @@ export default function CategoryPage() {
 
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<ProductDto[]>([]);
+  const [sortBy, setSortBy] = useState<'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'>('name_asc');
 
   useEffect(() => {
     let cancelled = false;
@@ -49,6 +50,25 @@ export default function CategoryPage() {
     return found?.name ?? (Number.isFinite(categoryId) ? `Categoría #${categoryId}` : 'Categoría');
   }, [categories, categoryId]);
 
+  const sortedProducts = useMemo(() => {
+    const minPrice = (p: ProductDto) => {
+      const values = (p.variants || [])
+        .map((v) => Number.parseFloat(String(v.price)))
+        .filter((n) => Number.isFinite(n));
+      return values.length ? Math.min(...values) : Number.POSITIVE_INFINITY;
+    };
+
+    const list = [...products];
+    list.sort((a, b) => {
+      if (sortBy === 'name_asc') return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+      if (sortBy === 'name_desc') return b.name.localeCompare(a.name, 'es', { sensitivity: 'base' });
+      if (sortBy === 'price_asc') return minPrice(a) - minPrice(b);
+      return minPrice(b) - minPrice(a);
+    });
+
+    return list;
+  }, [products, sortBy]);
+
   return (
     <div className="petit-category">
       <Header />
@@ -65,8 +85,24 @@ export default function CategoryPage() {
           ) : products.length === 0 ? (
             <p className="ph-empty">No hay productos en esta categoría.</p>
           ) : (
-            <div className="ph-gridProducts">
-              {products.map((p) => {
+            <>
+              <div className="ph-categoryToolbar">
+                <label className="ph-categorySortLabel" htmlFor="category-sort">Ordenar por</label>
+                <select
+                  id="category-sort"
+                  className="ph-categorySort"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                >
+                  <option value="price_asc">Menor precio</option>
+                  <option value="price_desc">Mayor precio</option>
+                  <option value="name_asc">Nombre A-Z</option>
+                  <option value="name_desc">Nombre Z-A</option>
+                </select>
+              </div>
+
+              <div className="ph-gridProducts">
+                {sortedProducts.map((p) => {
                 const img = toAbsoluteUrl(p.imageUrl) ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
                 const prices = (p.variants || [])
                   .map((v) => Number.parseFloat(String(v.price)))
@@ -88,8 +124,9 @@ export default function CategoryPage() {
                     </div>
                   </Link>
                 );
-              })}
-            </div>
+                })}
+              </div>
+            </>
           )}
         </div>
       </section>
@@ -98,3 +135,4 @@ export default function CategoryPage() {
     </div>
   );
 }
+

@@ -5,7 +5,7 @@ import Footer from '../../componentes/layout/footer/footer';
 import { getExtras, getProduct, toAbsoluteUrl, type ExtraDto, type ProductDetailDto } from '../../shared/api';
 import { useCart } from '../../shared/cart';
 import '../Home/Home.css';
-import './styles.css';
+import './Cart.css';
 
 function moneyAr(amount: number) {
   if (!Number.isFinite(amount)) return '$0';
@@ -186,3 +186,4 @@ export default function CartPage() {
     </div>
   );
 }
+

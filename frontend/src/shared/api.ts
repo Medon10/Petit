@@ -164,6 +164,13 @@ export async function getProduct(id: number) {
   return item && typeof item === 'object' ? (item as ProductDetailDto) : null;
 }
 
+export async function searchProducts(term: string) {
+  const q = String(term || '').trim();
+  if (!q) return [] as ProductDto[];
+  const data = await apiGetJson<{ data?: unknown }>(`/products/search${buildQuery({ q })}`);
+  return Array.isArray((data as any)?.data) ? ((data as any).data as ProductDto[]) : [];
+}
+
 export async function getExtras(options?: { categoryType?: string }) {
   const qs = buildQuery({ category_type: options?.categoryType });
   const data = await apiGetJson<{ data?: unknown }>(`/extras${qs}`);

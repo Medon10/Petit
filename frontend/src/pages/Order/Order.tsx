@@ -2,7 +2,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import '../Home/Home.css';
-import './styles.css';
+import './Order.css';
 
 type OrderConfirmationItem = {
   key: string;
@@ -101,3 +101,4 @@ export default function OrderPage() {
     </div>
   );
 }
+
