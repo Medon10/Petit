@@ -43,6 +43,13 @@ export type ProductDetailDto = ProductDto & {
   category?: CategoryRefDto | null;
 };
 
+export type ProductsPageDto = {
+  data: ProductDto[];
+  total: number;
+  page: number;
+  totalPages: number;
+};
+
 const ADMIN_TOKEN_KEY = 'petit_admin_token';
 
 export function apiBase() {
@@ -150,12 +157,26 @@ export async function getCategories(options?: { includeRepresentative?: boolean 
 }
 
 export async function getProducts(options?: { limit?: number; categoryId?: number }) {
+  const result = await getProductsPage({
+    limit: options?.limit,
+    categoryId: options?.categoryId,
+    page: 1,
+  });
+  return result.data;
+}
+
+export async function getProductsPage(options?: { limit?: number; categoryId?: number; page?: number }) {
   const qs = buildQuery({
     limit: options?.limit,
     category_id: options?.categoryId,
+    page: options?.page,
   });
-  const data = await apiGetJson<{ data?: unknown }>(`/products${qs}`);
-  return Array.isArray((data as any)?.data) ? ((data as any).data as ProductDto[]) : [];
+  const data = await apiGetJson<Partial<ProductsPageDto> & { data?: unknown }>(`/products${qs}`);
+  const rows = Array.isArray((data as any)?.data) ? ((data as any).data as ProductDto[]) : [];
+  const total = Number((data as any)?.total ?? rows.length);
+  const page = Number((data as any)?.page ?? (options?.page ?? 1));
+  const totalPages = Number((data as any)?.totalPages ?? 1);
+  return { data: rows, total, page, totalPages } as ProductsPageDto;
 }
 
 export async function getProduct(id: number) {
@@ -164,11 +185,22 @@ export async function getProduct(id: number) {
   return item && typeof item === 'object' ? (item as ProductDetailDto) : null;
 }
 
-export async function searchProducts(term: string) {
+export async function searchProductsPage(term: string, options?: { page?: number; limit?: number }) {
   const q = String(term || '').trim();
-  if (!q) return [] as ProductDto[];
-  const data = await apiGetJson<{ data?: unknown }>(`/products/search${buildQuery({ q })}`);
-  return Array.isArray((data as any)?.data) ? ((data as any).data as ProductDto[]) : [];
+  if (!q) return { data: [], total: 0, page: 1, totalPages: 1 } as ProductsPageDto;
+  const data = await apiGetJson<Partial<ProductsPageDto> & { data?: unknown }>(
+    `/products/search${buildQuery({ q, page: options?.page, limit: options?.limit })}`
+  );
+  const rows = Array.isArray((data as any)?.data) ? ((data as any).data as ProductDto[]) : [];
+  const total = Number((data as any)?.total ?? rows.length);
+  const page = Number((data as any)?.page ?? (options?.page ?? 1));
+  const totalPages = Number((data as any)?.totalPages ?? 1);
+  return { data: rows, total, page, totalPages } as ProductsPageDto;
+}
+
+export async function searchProducts(term: string) {
+  const result = await searchProductsPage(term, { page: 1, limit: 20 });
+  return result.data;
 }
 
 export async function getExtras(options?: { categoryType?: string }) {
@@ -346,9 +378,26 @@ export type OrderDto = {
   }>;
 };
 
-export async function adminGetOrders() {
-  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/orders`, { method: 'GET' });
-  return Array.isArray((data as any)?.data) ? ((data as any).data as OrderDto[]) : [];
+export type OrdersPageDto = {
+  data: OrderDto[];
+  total: number;
+  page: number;
+  totalPages: number;
+};
+
+export async function adminGetOrders(options?: { status?: string; q?: string; page?: number; limit?: number }) {
+  const qs = buildQuery({
+    status: options?.status,
+    q: options?.q,
+    page: options?.page,
+    limit: options?.limit,
+  });
+  const data = await adminRequestJson<any>(`/admin/catalog/orders${qs}`, { method: 'GET' });
+  const rows = Array.isArray((data as any)?.data) ? ((data as any).data as OrderDto[]) : [];
+  const total = Number((data as any)?.total ?? rows.length);
+  const page = Number((data as any)?.page ?? (options?.page ?? 1));
+  const totalPages = Number((data as any)?.totalPages ?? 1);
+  return { data: rows, total, page, totalPages } as OrdersPageDto;
 }
 
 export async function adminGetOrder(id: number) {

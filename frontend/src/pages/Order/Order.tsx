@@ -1,4 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import '../Home/Home.css';
@@ -42,6 +43,10 @@ export default function OrderPage() {
 
   return (
     <div className="petit-orderOk">
+      <Helmet>
+        <title>Pedido confirmado | Petit Accesorios</title>
+        <meta name="description" content="Tu pedido fue registrado correctamente. Compartí el comprobante por WhatsApp para validarlo." />
+      </Helmet>
       <Header />
 
       <section className="ph-section ph-sectionTight" aria-label="Pedido confirmado">

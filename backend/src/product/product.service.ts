@@ -6,6 +6,7 @@ export type ProductFilters = {
   categoryId?: unknown;
   featured?: unknown;
   limit?: unknown;
+  page?: unknown;
   includeInactive?: unknown;
   isActive?: unknown;
 };
@@ -56,17 +57,26 @@ export async function findAllProducts(filters: ProductFilters) {
   }
 
   const limitRaw = filters.limit as any;
-  const limit = limitRaw != null && String(limitRaw).trim() !== '' ? Number(limitRaw) : undefined;
+  const limitParsed = limitRaw != null && String(limitRaw).trim() !== '' ? Number(limitRaw) : 12;
+  const limit = Number.isFinite(limitParsed) ? Math.min(Math.max(1, limitParsed), 50) : 12;
 
-  const data = await ProductRepository.listProducts(em, where, {
+  const pageRaw = filters.page as any;
+  const pageParsed = pageRaw != null && String(pageRaw).trim() !== '' ? Number(pageRaw) : 1;
+  const page = Number.isFinite(pageParsed) ? Math.max(1, pageParsed) : 1;
+
+  const offset = (page - 1) * limit;
+
+  const [data, total] = await ProductRepository.listProductsAndCount(em, where, {
     populate: ['category'] as any,
     orderBy: featured === true
       ? ({ featuredRank: 'ASC', name: 'ASC' } as any)
       : ({ name: 'ASC' } as any),
-    ...(limit != null && !Number.isNaN(limit) ? { limit } : {}),
+    limit,
+    offset,
   });
 
-  return { data };
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  return { data, total, page, totalPages };
 }
 
 export async function findOneProduct(id: number, options?: { includeInactive?: boolean }) {
@@ -157,13 +167,21 @@ export async function bestSellers(limitRaw?: unknown) {
   return { data: ordered };
 }
 
-export async function searchProducts(queryRaw?: unknown) {
+export async function searchProducts(queryRaw?: unknown, pageRaw?: unknown, limitRaw?: unknown) {
   const em = orm.em.fork();
   const query = String(queryRaw ?? '').trim();
-  if (!query) return { data: [] };
+  if (!query) return { data: [], total: 0, page: 1, totalPages: 1 };
+
+  const limitParsed = limitRaw != null && String(limitRaw).trim() !== '' ? Number(limitRaw) : 20;
+  const limit = Number.isFinite(limitParsed) ? Math.min(Math.max(1, limitParsed), 50) : 20;
+
+  const pageParsed = pageRaw != null && String(pageRaw).trim() !== '' ? Number(pageRaw) : 1;
+  const page = Number.isFinite(pageParsed) ? Math.max(1, pageParsed) : 1;
+
+  const offset = (page - 1) * limit;
 
   const pattern = `%${query}%`;
-  const data = await ProductRepository.listProducts(em, {
+  const [data, total] = await ProductRepository.listProductsAndCount(em, {
     isActive: true,
     $or: [
       { name: { $ilike: pattern } as any },
@@ -172,8 +190,10 @@ export async function searchProducts(queryRaw?: unknown) {
   } as any, {
     populate: ['category', 'variants'] as any,
     orderBy: { name: 'ASC' } as any,
-    limit: 20,
+    limit,
+    offset,
   });
 
-  return { data };
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  return { data, total, page, totalPages };
 }

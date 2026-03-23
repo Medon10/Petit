@@ -5,3 +5,28 @@
 .title {
   margin: 0;
 }
+
+.adm-ordersToolbar {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.adm-ordersCount {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #71717a;
+  padding-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .adm-ordersCount {
+    margin-left: 0;
+    width: 100%;
+    padding-bottom: 0;
+  }
+}

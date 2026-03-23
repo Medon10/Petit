@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import './Home.css';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
@@ -70,6 +71,10 @@ export default function HomePage() {
 
   return (
     <div className="petit-home">
+      <Helmet>
+        <title>Petit Accesorios | Joyas de Acero Quirúrgico</title>
+        <meta name="description" content="Descubrí colecciones de accesorios personalizados en acero quirúrgico. Envíos a todo el país y atención por WhatsApp." />
+      </Helmet>
       <Header />
 
       <section className="ph-hero" aria-label="Banner principal">

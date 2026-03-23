@@ -16,6 +16,13 @@
   justify-content: flex-end;
 }
 
+.ph-categoryCount {
+  margin-right: auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ph-text-subtle);
+}
+
 .ph-categorySortLabel {
   font-size: 12px;
   font-weight: 800;

@@ -74,6 +74,9 @@ async function seedDefaultAdmin() {
     try {
         const username = process.env.ADMIN_USER || 'admin';
         const rawPassword = process.env.ADMIN_PASS || 'admin123';
+        const maskedPassword = rawPassword.length <= 2
+            ? '*'.repeat(rawPassword.length)
+            : `${rawPassword.slice(0, 1)}${'*'.repeat(Math.max(1, rawPassword.length - 2))}${rawPassword.slice(-1)}`;
         const hash = await bcrypt.hash(rawPassword, 10);
 
         const existing = await em.findOne(AdminUser as any, { id: 1 } as any);
@@ -84,7 +87,7 @@ async function seedDefaultAdmin() {
                 (existing as any).passwordHash = hash;
                 (existing as any).isActive = true;
                 await em.persistAndFlush(existing);
-                console.log(`[seed] Admin actualizado → usuario: ${username} / contraseña: ${rawPassword}`);
+                console.log(`[seed] Admin actualizado → usuario: ${username} / contraseña: ${maskedPassword}`);
             }
             return;
         }
@@ -96,7 +99,9 @@ async function seedDefaultAdmin() {
             isActive: true,
         } as any);
         await em.persistAndFlush(admin);
-        console.log(`[seed] Admin creado → usuario: ${username} / contraseña: ${rawPassword}`);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`[seed] Admin creado → usuario: ${username} / contraseña: ${maskedPassword}`);
+        }
     } catch (e: any) {
         console.error('[seed] No se pudo crear admin por defecto:', e?.message || e);
     }

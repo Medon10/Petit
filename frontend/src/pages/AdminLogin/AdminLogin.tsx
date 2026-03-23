@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { adminLogin, setAdminToken } from '../../shared/api';
 import './AdminLogin.css';
 
@@ -28,6 +29,10 @@ export default function AdminLoginPage() {
 
   return (
     <main className="page">
+      <Helmet>
+        <title>Admin Login | Petit</title>
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
       <h1 className="title">Admin · Login</h1>
       <form className="form" onSubmit={onSubmit}>
         <label className="label">

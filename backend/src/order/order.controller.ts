@@ -14,7 +14,10 @@ async function createOrder(req: Request, res: Response) {
 async function listOrders(req: Request, res: Response) {
   try {
     const limit = (req.query.limit ?? req.query.take) as any;
-    const result = await listOrdersService({ limit });
+    const page = req.query.page as any;
+    const status = req.query.status as any;
+    const q = req.query.q as any;
+    const result = await listOrdersService({ limit, page, status, q });
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener pedidos', error });

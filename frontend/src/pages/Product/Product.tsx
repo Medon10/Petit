@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
+import Skeleton from '../../componentes/shared/Skeleton';
 import { getExtras, getProduct, toAbsoluteUrl, type ExtraDto, type ProductDetailDto, type VariantDto } from '../../shared/api';
 import { useCart } from '../../shared/cart';
 import '../Home/Home.css';
@@ -188,6 +190,10 @@ export default function ProductPage() {
 
   return (
     <div className="petit-product">
+      <Helmet>
+        <title>{product?.name ? `${product.name} | Petit Accesorios` : 'Producto | Petit Accesorios'}</title>
+        <meta name="description" content={product?.description || 'Detalle de producto en Petit Accesorios.'} />
+      </Helmet>
       <Header />
 
       <section className="ph-section ph-sectionTight" aria-label="Detalle del producto">
@@ -203,7 +209,18 @@ export default function ProductPage() {
           </div>
 
           {loading ? (
-            <p className="ph-empty">Cargando producto...</p>
+            <div className="ph-productLayout" aria-label="Cargando producto">
+              <div className="ph-productLeft">
+                <Skeleton variant="image" height={380} />
+              </div>
+              <div className="ph-productRight" style={{ display: 'grid', gap: 12 }}>
+                <Skeleton variant="text" width="72%" />
+                <Skeleton variant="text" width="36%" />
+                <Skeleton variant="text" width="100%" />
+                <Skeleton variant="text" width="95%" />
+                <Skeleton variant="text" width="90%" />
+              </div>
+            </div>
           ) : !Number.isFinite(productId) ? (
             <p className="ph-empty">Producto inválido.</p>
           ) : !product ? (

@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import AdminLayout from '../../componentes/admin/AdminLayout';
+import Pagination from '../../componentes/shared/Pagination';
+import Skeleton from '../../componentes/shared/Skeleton';
 import {
   adminGetOrders,
   adminGetOrder,
@@ -9,6 +12,7 @@ import {
   type OrderDto,
 } from '../../shared/api';
 import '../../componentes/admin/AdminLayout.css';
+import './AdminOrders.css';
 
 const STATUS_OPTIONS = ['pending', 'paid', 'completed', 'cancelled'] as const;
 
@@ -36,6 +40,12 @@ export default function AdminOrdersPage() {
   const nav = useNavigate();
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'paid' | 'completed' | 'cancelled'>('all');
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [detail, setDetail] = useState<OrderDto | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
@@ -48,15 +58,33 @@ export default function AdminOrdersPage() {
     }
   }
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 250);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, debouncedSearch]);
+
   const load = useCallback(async () => {
+    setLoading(true);
     try {
-      setOrders(await adminGetOrders());
+      const result = await adminGetOrders({
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        q: debouncedSearch || undefined,
+        page,
+        limit: 20,
+      });
+      setOrders(result.data);
+      setTotal(result.total);
+      setTotalPages(result.totalPages || 1);
     } catch (e: any) {
       onAuthErr(e);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [statusFilter, debouncedSearch, page]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -90,12 +118,54 @@ export default function AdminOrdersPage() {
 
   return (
     <AdminLayout>
+      <Helmet>
+        <title>Admin Pedidos | Petit</title>
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
+
       <div className="adm-header">
         <h1 className="adm-h1">Pedidos</h1>
       </div>
 
+      <div className="adm-card adm-ordersToolbar">
+        <div className="adm-field" style={{ minWidth: 220 }}>
+          <label className="adm-label" htmlFor="orders-status">Estado</label>
+          <select
+            id="orders-status"
+            className="adm-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+          >
+            <option value="all">Todos</option>
+            <option value="pending">Pendiente</option>
+            <option value="paid">Pagado</option>
+            <option value="completed">Completado</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+        </div>
+
+        <div className="adm-field" style={{ minWidth: 300, flex: 1 }}>
+          <label className="adm-label" htmlFor="orders-search">Buscar</label>
+          <input
+            id="orders-search"
+            className="adm-input"
+            placeholder="Cliente, email, teléfono o #pedido"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="adm-ordersCount" aria-live="polite">
+          {total} resultado(s)
+        </div>
+      </div>
+
       {loading ? (
-        <div className="adm-empty">Cargando...</div>
+        <div className="adm-card" style={{ display: 'grid', gap: 10 }} aria-label="Cargando pedidos">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <Skeleton key={idx} variant="text" height={14} />
+          ))}
+        </div>
       ) : orders.length === 0 ? (
         <div className="adm-empty">No hay pedidos.</div>
       ) : (
@@ -141,12 +211,21 @@ export default function AdminOrdersPage() {
           <div className="adm-modal" style={{ maxWidth: 600 }} onClick={(e) => e.stopPropagation()}>
             <div className="adm-modalHeader">
               <h2 className="adm-modalTitle">
-                {detailLoading ? 'Cargando...' : `Pedido #${detail?.id}`}
+                {detailLoading ? 'Detalle de pedido' : `Pedido #${detail?.id}`}
               </h2>
               <button className="adm-modalClose" onClick={() => { setDetail(null); setDetailLoading(false); }}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
+
+            {detailLoading ? (
+              <div className="adm-modalBody" style={{ display: 'grid', gap: 10 }} aria-label="Cargando detalle">
+                <Skeleton variant="text" width="80%" />
+                <Skeleton variant="text" width="70%" />
+                <Skeleton variant="text" width="75%" />
+                <Skeleton variant="text" width="60%" />
+              </div>
+            ) : null}
 
             {detail && (
               <div className="adm-modalBody">
@@ -208,7 +287,7 @@ export default function AdminOrdersPage() {
                         </thead>
                         <tbody>
                           {detail.items.map((item) => (
-                            <>
+                            <Fragment key={`row-${item.id}`}>
                               <tr key={`item-${item.id}`}>
                                 <td>{item.productName}</td>
                                 <td>{item.variantName ?? '—'}</td>
@@ -223,7 +302,7 @@ export default function AdminOrdersPage() {
                                   <td style={{ fontSize: 12, color: '#888' }}>${ex.unitPrice}</td>
                                 </tr>
                               ))}
-                            </>
+                            </Fragment>
                           ))}
                         </tbody>
                       </table>
@@ -243,6 +322,8 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </AdminLayout>
   );
 }

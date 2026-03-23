@@ -186,23 +186,37 @@ export default function Header() {
   }
 
   function onSearchInputKeyDown(e: ReactKeyboardEvent<HTMLInputElement>) {
-    if (!searchResults.length) return;
     if (e.key === 'ArrowDown') {
+      if (!searchResults.length) return;
       e.preventDefault();
       setActiveSearchIndex((prev) => (prev + 1) % searchResults.length);
       return;
     }
     if (e.key === 'ArrowUp') {
+      if (!searchResults.length) return;
       e.preventDefault();
       setActiveSearchIndex((prev) => (prev <= 0 ? searchResults.length - 1 : prev - 1));
       return;
     }
-    if (e.key === 'Enter' && activeSearchIndex >= 0) {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      const item = searchResults[activeSearchIndex];
-      if (!item) return;
+      if (!searchResults.length) return;
+      if (activeSearchIndex >= 0) {
+        const item = searchResults[activeSearchIndex];
+        if (!item) return;
+        registerRecentSearch(searchQuery);
+        setSearchOpen(false);
+        setMobileMenuOpen(false);
+        navigate(`/productos/${item.id}`);
+        return;
+      }
+      const first = searchResults[0];
+      if (!first) return;
       registerRecentSearch(searchQuery);
-      navigate(`/productos/${item.id}`);
+      setSearchOpen(false);
+      setMobileMenuOpen(false);
+      navigate(`/productos/${first.id}`);
+      return;
     }
     if (e.key === 'Escape') {
       setSearchOpen(false);

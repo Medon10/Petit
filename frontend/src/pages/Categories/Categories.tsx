@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
+import Skeleton from '../../componentes/shared/Skeleton';
 import { getCategories, toAbsoluteUrl, type CategoryDto } from '../../shared/api';
 import '../Home/Home.css';
 import './Categories.css';
@@ -9,14 +11,6 @@ import './Categories.css';
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const prevTitle = document.title;
-    document.title = 'Petit Accesorios | Categorías';
-    return () => {
-      document.title = prevTitle;
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +37,10 @@ export default function CategoriesPage() {
 
   return (
     <div className="petit-categories">
+      <Helmet>
+        <title>Categorías | Petit Accesorios</title>
+        <meta name="description" content="Explorá todas las categorías de Petit Accesorios y encontrá tu próximo diseño personalizado." />
+      </Helmet>
       <Header />
 
       <section className="ph-section ph-sectionTight" aria-label="Categorías">
@@ -53,7 +51,16 @@ export default function CategoriesPage() {
           </div>
 
           {loading ? (
-            <p className="ph-empty">Cargando categorías...</p>
+            <div className="ph-categoriesGrid" aria-label="Cargando categorías">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div key={`sk-cat-${idx}`} className="ph-categoryCard">
+                  <Skeleton variant="card" />
+                  <div className="ph-categoryBody">
+                    <Skeleton variant="text" width="65%" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : categories.length === 0 ? (
             <p className="ph-empty">No hay categorías disponibles.</p>
           ) : (

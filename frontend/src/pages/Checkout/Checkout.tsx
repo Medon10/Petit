@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
+import Skeleton from '../../componentes/shared/Skeleton';
 import { createOrder, getExtras, getProduct, type ExtraDto, type ProductDetailDto } from '../../shared/api';
 import { useCart } from '../../shared/cart';
 import '../Home/Home.css';
@@ -193,6 +195,10 @@ export default function CheckoutPage() {
 
   return (
     <div className="petit-checkout">
+      <Helmet>
+        <title>Checkout | Petit Accesorios</title>
+        <meta name="description" content="Confirmá tus datos y finalizá tu pedido en Petit Accesorios." />
+      </Helmet>
       <Header />
 
       <section className="ph-section ph-sectionTight" aria-label="Checkout">
@@ -281,7 +287,12 @@ export default function CheckoutPage() {
                   {invalidItems.length ? (
                     <p className="ph-error">Hay {invalidItems.length} ítem(s) sin variante.</p>
                   ) : null}
-                  {loadingSummary ? <p className="ph-cartNote">Cargando resumen…</p> : null}
+                  {loadingSummary ? (
+                    <div style={{ display: 'grid', gap: 8, marginTop: 10 }} aria-label="Cargando resumen">
+                      <Skeleton variant="text" width="80%" />
+                      <Skeleton variant="text" width="70%" />
+                    </div>
+                  ) : null}
                   <p className="ph-cartNote">Este checkout crea el pedido en el backend (estado: pending).</p>
                 </div>
               </aside>

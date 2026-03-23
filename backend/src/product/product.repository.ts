@@ -22,6 +22,10 @@ export class ProductRepository {
     return await em.find(Product as any, where, options as any);
   }
 
+  static async listProductsAndCount(em: EntityManager, where: any, options: any) {
+    return await em.findAndCount(Product as any, where, options as any);
+  }
+
   static async bestSellerIds(em: EntityManager, limit: number) {
     const rows = await em.getConnection().execute(
       'SELECT product_id, SUM(quantity) AS qty FROM order_items GROUP BY product_id ORDER BY qty DESC LIMIT $1',

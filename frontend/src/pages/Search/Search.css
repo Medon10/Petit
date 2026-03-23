@@ -1,0 +1,10 @@
+.ph-sectionTight {
+  padding: 64px 0;
+}
+
+.ph-searchSummary {
+  margin: 0 0 16px;
+  color: var(--ph-text-subtle);
+  font-size: 13px;
+  font-weight: 700;
+}

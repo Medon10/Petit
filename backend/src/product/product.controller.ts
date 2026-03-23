@@ -15,6 +15,7 @@ async function findAll(req: Request, res: Response) {
       categoryId: req.query.category_id ?? req.query.categoryId,
       featured: req.query.featured ?? req.query.is_featured ?? req.query.isFeatured,
       limit: req.query.limit ?? req.query.take,
+      page: req.query.page,
     });
     res.json(result);
   } catch (error) {
@@ -78,7 +79,7 @@ async function bestSellers(req: Request, res: Response) {
 
 async function search(req: Request, res: Response) {
   try {
-    const result = await searchProducts(req.query.q);
+    const result = await searchProducts(req.query.q, req.query.page, req.query.limit ?? req.query.take);
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ message: 'Error al buscar productos', error });

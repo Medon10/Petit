@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
-import { getCategories, getProducts, toAbsoluteUrl, type CategoryDto, type ProductDto } from '../../shared/api';
+import Pagination from '../../componentes/shared/Pagination';
+import Skeleton from '../../componentes/shared/Skeleton';
+import { getCategories, getProductsPage, toAbsoluteUrl, type CategoryDto, type ProductDto } from '../../shared/api';
 import '../Home/Home.css';
 import './Category.css';
 
@@ -17,6 +20,10 @@ export default function CategoryPage() {
 
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<ProductDto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [sortBy, setSortBy] = useState<'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'>('name_asc');
 
   useEffect(() => {
@@ -24,18 +31,25 @@ export default function CategoryPage() {
 
     async function load() {
       if (!Number.isFinite(categoryId)) return;
+      setLoading(true);
       try {
         const [cats, prods] = await Promise.all([
           getCategories(),
-          getProducts({ categoryId }),
+          getProductsPage({ categoryId, page, limit: 12 }),
         ]);
         if (cancelled) return;
         setCategories(cats);
-        setProducts(prods);
+        setProducts(prods.data);
+        setTotalPages(prods.totalPages || 1);
+        setTotal(prods.total || 0);
       } catch {
         if (cancelled) return;
         setCategories([]);
         setProducts([]);
+        setTotalPages(1);
+        setTotal(0);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
 
@@ -43,6 +57,10 @@ export default function CategoryPage() {
     return () => {
       cancelled = true;
     };
+  }, [categoryId, page]);
+
+  useEffect(() => {
+    setPage(1);
   }, [categoryId]);
 
   const categoryName = useMemo(() => {
@@ -71,6 +89,10 @@ export default function CategoryPage() {
 
   return (
     <div className="petit-category">
+      <Helmet>
+        <title>{`${categoryName} | Petit Accesorios`}</title>
+        <meta name="description" content={`Explorá ${categoryName} en Petit Accesorios. Diseños personalizados en acero quirúrgico.`} />
+      </Helmet>
       <Header />
 
       <section className="ph-section ph-sectionTight" aria-label="Productos de la categoría">
@@ -82,11 +104,24 @@ export default function CategoryPage() {
 
           {!Number.isFinite(categoryId) ? (
             <p className="ph-empty">Categoría inválida.</p>
+          ) : loading ? (
+            <div className="ph-gridProducts" aria-label="Cargando productos">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div key={`sk-${idx}`} className="ph-productCard">
+                  <Skeleton variant="card" />
+                  <div className="ph-productText">
+                    <Skeleton variant="text" width="70%" />
+                    <Skeleton variant="text" width="40%" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : products.length === 0 ? (
             <p className="ph-empty">No hay productos en esta categoría.</p>
           ) : (
             <>
               <div className="ph-categoryToolbar">
+                <span className="ph-categoryCount">{total} resultado(s)</span>
                 <label className="ph-categorySortLabel" htmlFor="category-sort">Ordenar por</label>
                 <select
                   id="category-sort"
@@ -126,6 +161,8 @@ export default function CategoryPage() {
                 );
                 })}
               </div>
+
+              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </>
           )}
         </div>

@@ -110,18 +110,46 @@ export async function createOrder(input: CreateOrderInput) {
   return populated;
 }
 
-export async function listOrders(params: { limit?: unknown }) {
+export async function listOrders(params: { limit?: unknown; page?: unknown; status?: unknown; q?: unknown }) {
   const em = orm.em.fork();
 
   const limitRaw = params.limit as any;
   const limit = limitRaw != null && String(limitRaw).trim() !== '' ? Number(limitRaw) : 50;
+  const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(1, limit), 200) : 50;
 
-  const data = await em.find(Order as any, {}, {
+  const pageRaw = params.page as any;
+  const page = pageRaw != null && String(pageRaw).trim() !== '' ? Number(pageRaw) : 1;
+  const safePage = Number.isFinite(page) ? Math.max(1, page) : 1;
+
+  const where: any = {};
+
+  const status = String(params.status ?? '').trim();
+  if (status) where.status = status;
+
+  const q = String(params.q ?? '').trim();
+  if (q) {
+    const conditions: any[] = [
+      { customerName: { $ilike: `%${q}%` } as any },
+      { customerEmail: { $ilike: `%${q}%` } as any },
+      { customerPhone: { $ilike: `%${q}%` } as any },
+    ];
+    const numeric = Number(q);
+    if (Number.isFinite(numeric)) {
+      conditions.push({ id: numeric });
+    }
+    where.$and = [{ $or: conditions } as any];
+  }
+
+  const offset = (safePage - 1) * safeLimit;
+
+  const [data, total] = await em.findAndCount(Order as any, where, {
     orderBy: { id: 'DESC' } as any,
-    limit: Number.isFinite(limit) ? Math.min(Math.max(1, limit), 200) : 50,
+    limit: safeLimit,
+    offset,
   } as any);
 
-  return { data };
+  const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+  return { data, total, page: safePage, totalPages };
 }
 
 export async function getOrderById(id: number) {

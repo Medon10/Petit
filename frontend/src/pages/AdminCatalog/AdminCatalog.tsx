@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import AdminLayout from '../../componentes/admin/AdminLayout';
+import Skeleton from '../../componentes/shared/Skeleton';
 import {
   adminGetProducts,
   adminCreateProduct,
@@ -165,7 +167,7 @@ function ProductsTab() {
 
   const catName = (id?: number) => categories.find((c) => c.id === id)?.name ?? '—';
 
-  if (loading) return <div className="adm-empty">Cargando...</div>;
+  if (loading) return <div className="adm-card" style={{ display: 'grid', gap: 10 }}><Skeleton variant="text" /><Skeleton variant="text" /><Skeleton variant="text" /></div>;
 
   return (
     <>
@@ -345,7 +347,7 @@ function CategoriesTab() {
     try { await adminDeleteCategory(c.id); await load(); } catch (e: any) { onAuthErr(e); }
   }
 
-  if (loading) return <div className="adm-empty">Cargando...</div>;
+  if (loading) return <div className="adm-card" style={{ display: 'grid', gap: 10 }}><Skeleton variant="text" /><Skeleton variant="text" /><Skeleton variant="text" /></div>;
 
   return (
     <>
@@ -494,7 +496,7 @@ function VariantsTab() {
       </div>
 
       {loading ? (
-        <div className="adm-empty">Cargando...</div>
+        <div className="adm-card" style={{ display: 'grid', gap: 10 }}><Skeleton variant="text" /><Skeleton variant="text" /><Skeleton variant="text" /></div>
       ) : items.length === 0 ? (
         <div className="adm-empty">No hay variantes{selectedProduct ? ' para este producto' : ''}.</div>
       ) : (
@@ -611,7 +613,7 @@ function ExtrasTab() {
     try { await adminDeleteExtra(x.id); await load(); } catch (e: any) { onAuthErr(e); }
   }
 
-  if (loading) return <div className="adm-empty">Cargando...</div>;
+  if (loading) return <div className="adm-card" style={{ display: 'grid', gap: 10 }}><Skeleton variant="text" /><Skeleton variant="text" /><Skeleton variant="text" /></div>;
 
   return (
     <>
@@ -694,6 +696,10 @@ export default function AdminCatalogPage() {
 
   return (
     <AdminLayout>
+      <Helmet>
+        <title>Admin Catálogo | Petit</title>
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
       <div className="adm-tabs">
         <button className={`adm-tab${tab === 'products' ? ' active' : ''}`} onClick={() => setTab('products')}>Productos</button>
         <button className={`adm-tab${tab === 'categories' ? ' active' : ''}`} onClick={() => setTab('categories')}>Categorías</button>

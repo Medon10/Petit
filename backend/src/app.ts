@@ -3,6 +3,7 @@ import './env.js';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { orm, syncSchema } from './shared/bdd/orm.js';
@@ -24,6 +25,7 @@ const PORT = Number(process.env.PORT || 3000);
 app.disable('x-powered-by');
 
 app.use(cookieParser());
+app.use(helmet());
 
 // CORS configuration.
 // - In prod: set FRONTEND_ORIGINS (comma separated) to the exact allowed origins.
@@ -78,6 +80,10 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: Date.now() });
+});
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
