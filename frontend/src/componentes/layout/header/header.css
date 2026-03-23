@@ -238,7 +238,8 @@ button.ph-iconLink {
   margin-left: 10px;
 }
 
-.ph-navLink {
+.ph-navLink,
+.ph-navButton {
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -249,18 +250,22 @@ button.ph-iconLink {
 }
 
 .ph-navButton {
-  border: 1px solid var(--ph-border);
-  border-radius: 999px;
-  background: #fff;
-  padding: 7px 12px;
+  border: 0;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none;
 }
 
+.ph-navLink:hover,
 .ph-navButton:hover {
-  border-color: var(--ph-primary);
+  color: var(--ph-primary);
 }
 
 .ph-navChevron {

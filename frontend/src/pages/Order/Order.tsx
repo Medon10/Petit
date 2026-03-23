@@ -37,70 +37,105 @@ export default function OrderPage() {
   const whatsappNumber = String((import.meta as any).env?.VITE_WHATSAPP_NUMBER || '5491100000000').replace(/\D/g, '');
 
   const whatsappText = encodeURIComponent(
-    `Hola! Acabo de realizar el pedido #${orderNumber} por ${moneyAr(total)}. Adjunto comprobante de transferencia.`
+    `Hola! Acabo de realizar el pedido #${orderNumber} por ${moneyAr(total)}. Adjunto comprobante de transferencia y coordinamos por acá los detalles finales de grabado/diseño.`
   );
   const whatsappHref = `https://wa.me/${whatsappNumber}?text=${whatsappText}`;
 
   return (
-    <div className="petit-orderOk">
+    <div className="order-page">
       <Helmet>
         <title>Pedido confirmado | Petit Accesorios</title>
-        <meta name="description" content="Tu pedido fue registrado correctamente. Compartí el comprobante por WhatsApp para validarlo." />
+        <meta name="description" content="Tu pedido fue registrado correctamente. Comparti el comprobante por WhatsApp para validarlo." />
       </Helmet>
       <Header />
 
-      <section className="ph-section ph-sectionTight" aria-label="Pedido confirmado">
-        <div className="ph-container">
-          <div className="ph-sectionTitle">
-            <h2 className="ph-h2">Pedido confirmado</h2>
-            <div className="ph-divider" />
-          </div>
+      <main className="order-main" aria-label="Pedido confirmado">
+        <section className="order-hero">
+          <div className="order-check" aria-hidden="true">OK</div>
+          <h1>Gracias por tu compra</h1>
+          <p>
+            Tu pedido <strong>#{orderNumber || 'N/A'}</strong> fue recibido correctamente.
+          </p>
+          <div className="order-heroDivider" />
+        </section>
 
-          <div className="ph-orderCard">
-            <p className="ph-orderBadge">Gracias por tu compra</p>
-            <h3 className="ph-orderNumber">Pedido #{orderNumber || 'N/A'}</h3>
-
-            {items.length > 0 ? (
-              <div className="ph-orderSection">
-                <h4 className="ph-orderSectionTitle">Resumen del pedido</h4>
-                <div className="ph-orderItems">
-                  {items.map((item) => (
-                    <div key={item.key} className="ph-orderItem">
-                      <div className="ph-orderItemName">{item.name}</div>
-                      <div className="ph-orderItemRow">
-                        <span>x{item.quantity}</span>
-                        <strong>{moneyAr(item.total)}</strong>
-                      </div>
-                    </div>
-                  ))}
+        <div className="order-grid">
+          <section className="order-detailsPanel">
+            <div className="order-transferCard">
+              <h2>Paga mediante transferencia</h2>
+              <div className="order-transferData">
+                <div>
+                  <span>Alias</span>
+                  <strong>{bankAlias}</strong>
                 </div>
-                <div className="ph-orderTotal">
-                  <span>Total</span>
-                  <strong>{moneyAr(total)}</strong>
+                <div>
+                  <span>Titular</span>
+                  <strong>{bankHolder}</strong>
                 </div>
               </div>
-            ) : null}
-
-            <div className="ph-orderSection">
-              <h4 className="ph-orderSectionTitle">Datos para transferencia</h4>
-              <div className="ph-bankBox">
-                <p><span>Alias:</span> {bankAlias}</p>
-                <p><span>Titular:</span> {bankHolder}</p>
-              </div>
-              <p className="ph-orderInstructions">
-                Realizá la transferencia y enviá el comprobante por WhatsApp.
-              </p>
             </div>
 
-            <div className="ph-orderActions">
-              <a className="ph-primaryButton ph-primaryLink" href={whatsappHref} target="_blank" rel="noopener noreferrer">
+            <div className="order-actionPanel">
+              <p>
+                Envia el comprobante y coordinamos por WhatsApp los detalles finales de grabado, personalizacion y entrega.
+              </p>
+              <a className="order-whatsappBtn" href={whatsappHref} target="_blank" rel="noopener noreferrer">
                 Enviar comprobante por WhatsApp
               </a>
-              <Link className="ph-secondaryLink" to="/">Volver al inicio</Link>
+              <Link className="order-backLink" to="/">
+                Volver al inicio
+              </Link>
             </div>
-          </div>
+          </section>
+
+          <aside className="order-summaryPanel" aria-label="Resumen del pedido">
+            <h3>Resumen del pedido</h3>
+            {items.length > 0 ? (
+              <>
+                <div className="order-items">
+                  {items.map((item) => (
+                    <article key={item.key} className="order-item">
+                      <div className="order-thumb" aria-hidden="true">
+                        {item.name.slice(0, 1).toUpperCase()}
+                      </div>
+                      <div className="order-itemContent">
+                        <p>{item.name}</p>
+                        <div className="order-itemRow">
+                          <span>x{item.quantity}</span>
+                          <strong>{moneyAr(item.total)}</strong>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="order-totals">
+                  <div>
+                    <span>Subtotal</span>
+                    <span>{moneyAr(total)}</span>
+                  </div>
+                  <div>
+                    <span>Envio</span>
+                    <span>Gratis</span>
+                  </div>
+                  <div className="is-total">
+                    <span>Total</span>
+                    <strong>{moneyAr(total)}</strong>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="order-empty">No se encontro el detalle de items en esta sesion, pero tu pedido ya fue registrado.</p>
+            )}
+          </aside>
         </div>
-      </section>
+
+        <div className="order-footNote" aria-hidden="true">
+          <span>Autenticidad</span>
+          <span>Retiro coordinado</span>
+          <span>Compra segura</span>
+        </div>
+      </main>
 
       <Footer />
     </div>

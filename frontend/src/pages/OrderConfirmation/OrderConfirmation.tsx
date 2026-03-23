@@ -9,24 +9,23 @@ export default function OrderConfirmationPage() {
   const id = String(params.id ?? '');
 
   return (
-    <div className="petit-orderOk">
+    <div className="orderConfirmation-wrap">
       <Header />
-
-      <section className="ph-section ph-sectionTight" aria-label="Pedido confirmado">
-        <div className="ph-container">
-          <div className="ph-sectionTitle">
-            <h2 className="ph-h2">Pedido confirmado</h2>
-            <div className="ph-divider" />
-          </div>
-
-          <div className="ph-okCard">
-            <p className="ph-okText">Gracias por tu compra.</p>
-            {id && id !== 'ok' ? <p className="ph-okMeta">Tu número de pedido es: <strong>#{id}</strong></p> : null}
-            <Link className="ph-primaryButton ph-primaryLink" to="/">Volver al inicio</Link>
-          </div>
-        </div>
-      </section>
-
+      <main className="orderConfirmation-page" aria-label="Pedido confirmado">
+        <section className="orderConfirmation-card">
+          <span className="orderConfirmation-pill">Confirmado</span>
+          <h1>Pedido recibido</h1>
+          <p>Gracias por elegir Petit Accesorios.</p>
+          {id && id !== 'ok' ? (
+            <p className="orderConfirmation-id">
+              Numero de pedido: <strong>#{id}</strong>
+            </p>
+          ) : null}
+          <Link className="orderConfirmation-button" to="/">
+            Volver al inicio
+          </Link>
+        </section>
+      </main>
       <Footer />
     </div>
   );

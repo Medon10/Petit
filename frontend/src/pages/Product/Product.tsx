@@ -306,6 +306,10 @@ export default function ProductPage() {
 
                 <p className="ph-productLongDesc">{longDescription}</p>
 
+                <p className="ph-whatsappCoordination">
+                  Algunas elecciones de grabado o diseño final las podés coordinar por WhatsApp al enviar el comprobante.
+                </p>
+
                 <div className="ph-extras" aria-label="Extras">
                   <h3 className="ph-extrasTitle">Extras</h3>
                   <div className="ph-extrasDropdown" ref={extrasRef}>

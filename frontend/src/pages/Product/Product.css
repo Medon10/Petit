@@ -188,6 +188,17 @@
   line-height: 1.85;
 }
 
+.ph-whatsappCoordination {
+  margin: 14px 0 0;
+  border: 1px dashed rgba(219, 39, 119, 0.35);
+  border-radius: 12px;
+  background: rgba(219, 39, 119, 0.05);
+  padding: 10px 12px;
+  color: var(--ph-text-main);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .ph-extras {
   margin-top: 22px;
   padding-top: 18px;

@@ -121,7 +121,7 @@ export default function CheckoutPage() {
     return { subtotal };
   }, [cart.items, productsById, extrasById]);
 
-  const canSubmit = cart.items.length > 0 && invalidItems.length === 0 && customerName.trim().length > 1 && !submitting;
+  const canSubmit = cart.items.length > 0 && invalidItems.length === 0 && !submitting;
 
   async function onSubmit() {
     setError(null);
@@ -137,10 +137,6 @@ export default function CheckoutPage() {
     }
 
     const name = customerName.trim();
-    if (!name) {
-      setError('Nombre y apellido es requerido.');
-      return;
-    }
 
     setSubmitting(true);
     try {
@@ -194,112 +190,162 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="petit-checkout">
+    <div className="checkout-page">
       <Helmet>
         <title>Checkout | Petit Accesorios</title>
         <meta name="description" content="Confirmá tus datos y finalizá tu pedido en Petit Accesorios." />
       </Helmet>
       <Header />
 
-      <section className="ph-section ph-sectionTight" aria-label="Checkout">
-        <div className="ph-container">
-          <div className="ph-sectionTitle">
-            <h2 className="ph-h2">Checkout</h2>
-            <div className="ph-divider" />
-          </div>
+      <main className="checkout-main" aria-label="Checkout">
+        <div className="checkout-shell">
+          <header className="checkout-hero">
+            <h1>Finaliza tu compra</h1>
+            <nav aria-label="Breadcrumb">
+              <span>Carrito</span>
+              <span className="checkout-separator">/</span>
+              <span className="is-current">Checkout</span>
+            </nav>
+          </header>
 
           {cart.items.length === 0 ? (
-            <div className="ph-checkoutEmpty">
-              <p className="ph-empty">Tu carrito está vacío.</p>
-              <Link className="ph-secondaryLink" to="/">Volver al catálogo</Link>
-            </div>
+            <section className="checkout-empty" aria-live="polite">
+              <p>Tu carrito esta vacio.</p>
+              <Link className="checkout-link" to="/">Volver al catalogo</Link>
+            </section>
           ) : (
-            <div className="ph-checkoutLayout">
-              <div className="ph-checkoutForm">
-                <h3 className="ph-checkoutTitle">Datos del comprador</h3>
+            <div className="checkout-grid">
+              <section className="checkout-formPanel">
+                <div className="checkout-sectionTitle">
+                  <span className="checkout-line" />
+                  <h2>Datos del comprador</h2>
+                </div>
 
-                <label className="ph-label">
-                  Nombre y apellido
-                  <input className="ph-input" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-                </label>
+                <div className="checkout-formGrid">
+                  <label className="checkout-field">
+                    Nombre completo
+                    <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Ej: Elena Rossi" />
+                  </label>
 
-                <label className="ph-label">
-                  Email (opcional)
-                  <input className="ph-input" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
-                </label>
+                  <label className="checkout-field">
+                    Correo electronico
+                    <input
+                      type="email"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      placeholder="nombre@email.com"
+                    />
+                  </label>
 
-                <label className="ph-label">
-                  Teléfono (opcional)
-                  <input className="ph-input" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
-                </label>
+                  <label className="checkout-field checkout-fieldFull">
+                    Telefono
+                    <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+54 9..." />
+                  </label>
 
-                <label className="ph-label">
-                  Notas (opcional)
-                  <textarea className="ph-textarea" value={notes} onChange={(e) => setNotes(e.target.value)} />
-                </label>
+                  <label className="checkout-field checkout-fieldFull">
+                    Notas adicionales
+                    <textarea
+                      rows={3}
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Cualquier detalle que debamos tener en cuenta..."
+                    />
+                  </label>
+                </div>
 
-                {error ? <p className="ph-error">{error}</p> : null}
+                <section className="checkout-pickupBox" aria-label="Informacion de retiro">
+                  <div className="checkout-pickupIcon" aria-hidden="true">
+                    RETIRO
+                  </div>
+                  <div>
+                    <h3>Retiro por coordinacion</h3>
+                    <p>
+                      Te contactamos por WhatsApp luego de confirmar la compra para definir direccion exacta, horario y detalles de
+                      entrega.
+                    </p>
+                  </div>
+                </section>
 
-                <button type="button" className="ph-primaryButton" disabled={!canSubmit} onClick={onSubmit}>
-                  {submitting ? 'Enviando…' : 'Confirmar pedido'}
-                </button>
+                <section className="checkout-noteBox" aria-label="Nota de personalizacion">
+                  <h4>Personalizacion</h4>
+                  <p>
+                    Los detalles de grabado, tipografia y ubicacion se coordinan por WhatsApp al enviar el comprobante.
+                  </p>
+                </section>
 
-                <Link className="ph-secondaryLink" to="/carrito">
-                  Volver al carrito
-                </Link>
-              </div>
+                {error ? <p className="checkout-error">{error}</p> : null}
+                {invalidItems.length ? (
+                  <p className="checkout-error">Hay {invalidItems.length} item(s) sin variante. Volve al carrito para corregirlos.</p>
+                ) : null}
 
-              <aside className="ph-checkoutSummary" aria-label="Resumen">
-                <div className="ph-cartSummaryBox">
-                  <div className="ph-cartSummaryRow">
+                <div className="checkout-actions">
+                  <button type="button" className="checkout-submit" disabled={!canSubmit} onClick={onSubmit}>
+                    {submitting ? 'Enviando...' : 'Confirmar compra'}
+                  </button>
+
+                  <Link className="checkout-link" to="/carrito">
+                    Volver al carrito
+                  </Link>
+                </div>
+              </section>
+
+              <aside className="checkout-summaryPanel" aria-label="Resumen del pedido">
+                <h3>Resumen del pedido</h3>
+
+                <div className="checkout-summaryRows">
+                  <div className="checkout-summaryRow">
                     <span>Productos</span>
                     <strong>{cart.totalItems}</strong>
                   </div>
-                  <div className="ph-cartSummaryRow">
+                  <div className="checkout-summaryRow">
                     <span>Subtotal</span>
                     <strong>{moneyAr(summary.subtotal)}</strong>
                   </div>
-                  <div className="ph-checkoutItems">
-                    {cart.items.map((it) => {
-                      const product = productsById[it.productId];
-                      const variant = product?.variants?.find((v) => v.id === it.variantId) ?? product?.variants?.[0];
-                      const lineVariantPrice = parsePrice(variant?.price);
-                      const lineExtrasPrice = it.extraIds.reduce((sum, id) => sum + parsePrice(extrasById[id]?.price), 0);
-                      const lineTotal = (lineVariantPrice + lineExtrasPrice) * it.quantity;
-                      const extrasNames = it.extraIds
-                        .map((id) => extrasById[id]?.name)
-                        .filter(Boolean)
-                        .join(' · ');
-                      return (
-                        <div key={it.key} className="ph-checkoutItem">
-                          <div className="ph-checkoutItemName">
-                            {(product?.name ?? `Producto #${it.productId}`)} {variant?.name ? `(${variant.name})` : ''}
-                          </div>
-                          {extrasNames ? <div className="ph-checkoutItemMeta">Extras: {extrasNames}</div> : null}
-                          <div className="ph-checkoutItemRow">
+                </div>
+
+                <div className="checkout-items">
+                  {cart.items.map((it) => {
+                    const product = productsById[it.productId];
+                    const variant = product?.variants?.find((v) => v.id === it.variantId) ?? product?.variants?.[0];
+                    const lineVariantPrice = parsePrice(variant?.price);
+                    const lineExtrasPrice = it.extraIds.reduce((sum, id) => sum + parsePrice(extrasById[id]?.price), 0);
+                    const lineTotal = (lineVariantPrice + lineExtrasPrice) * it.quantity;
+                    const extrasNames = it.extraIds
+                      .map((id) => extrasById[id]?.name)
+                      .filter(Boolean)
+                      .join(' · ');
+                    const title = `${product?.name ?? `Producto #${it.productId}`}${variant?.name ? ` (${variant.name})` : ''}`;
+                    return (
+                      <article key={it.key} className="checkout-item">
+                        <div className="checkout-thumb" aria-hidden="true">
+                          {(product?.name ?? 'P').slice(0, 1).toUpperCase()}
+                        </div>
+                        <div className="checkout-itemContent">
+                          <h4>{title}</h4>
+                          {extrasNames ? <p>Extras: {extrasNames}</p> : null}
+                          <div className="checkout-itemRow">
                             <span>x{it.quantity}</span>
                             <strong>{moneyAr(lineTotal)}</strong>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                  {invalidItems.length ? (
-                    <p className="ph-error">Hay {invalidItems.length} ítem(s) sin variante.</p>
-                  ) : null}
-                  {loadingSummary ? (
-                    <div style={{ display: 'grid', gap: 8, marginTop: 10 }} aria-label="Cargando resumen">
-                      <Skeleton variant="text" width="80%" />
-                      <Skeleton variant="text" width="70%" />
-                    </div>
-                  ) : null}
-                  <p className="ph-cartNote">Este checkout crea el pedido en el backend (estado: pending).</p>
+                      </article>
+                    );
+                  })}
                 </div>
+
+                {loadingSummary ? (
+                  <div className="checkout-loading" aria-label="Cargando resumen">
+                    <Skeleton variant="text" width="80%" />
+                    <Skeleton variant="text" width="70%" />
+                  </div>
+                ) : null}
+
+                <p className="checkout-secureText">Transaccion segura. Pedido generado en estado pending.</p>
               </aside>
             </div>
           )}
         </div>
-      </section>
+      </main>
 
       <Footer />
     </div>
