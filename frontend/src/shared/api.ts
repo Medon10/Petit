@@ -9,6 +9,7 @@ export type VariantDto = {
   id: number;
   name: string;
   price: string;
+  imageUrl?: string | null;
   isActive?: boolean;
   product?: { id: number; name: string } | null;
 };
@@ -26,6 +27,7 @@ export type ProductDto = {
   name: string;
   description?: string | null;
   imageUrl?: string | null;
+  galleryImages?: string[] | null;
   isFeatured?: boolean;
   featuredRank?: number;
   isActive?: boolean;
@@ -254,6 +256,7 @@ export async function adminCreateProduct(input: {
   name: string;
   description?: string;
   image_url?: string;
+  gallery_images?: string[];
   is_featured?: boolean;
   featured_rank?: number;
   is_active?: boolean;
@@ -266,6 +269,7 @@ export async function adminUpdateProduct(id: number, input: {
   name?: string;
   description?: string;
   image_url?: string;
+  gallery_images?: string[];
   is_featured?: boolean;
   featured_rank?: number;
   is_active?: boolean;
@@ -312,11 +316,11 @@ export async function adminGetVariants(opts?: { productId?: number }) {
   return Array.isArray((data as any)?.data) ? ((data as any).data as VariantDto[]) : [];
 }
 
-export async function adminCreateVariant(input: { product_id: number; name: string; price: string; is_active?: boolean }) {
+export async function adminCreateVariant(input: { product_id: number; name: string; price: string; image_url?: string; is_active?: boolean }) {
   return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/variants`, { method: 'POST', body: input });
 }
 
-export async function adminUpdateVariant(id: number, input: { product_id?: number; name?: string; price?: string; is_active?: boolean }) {
+export async function adminUpdateVariant(id: number, input: { product_id?: number; name?: string; price?: string; image_url?: string; is_active?: boolean }) {
   return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/variants/${id}`, { method: 'PATCH', body: input });
 }
 

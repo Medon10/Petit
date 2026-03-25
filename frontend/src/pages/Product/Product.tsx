@@ -14,6 +14,15 @@ function formatMoney(price: number) {
   return `$${price.toFixed(2)}`;
 }
 
+function slugifyVariantName(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export default function ProductPage() {
   const params = useParams();
   const productId = Number.parseInt(String(params.id ?? ''), 10);
@@ -24,6 +33,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<ProductDetailDto | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [variantImageById, setVariantImageById] = useState<Record<number, string>>({});
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [extras, setExtras] = useState<ExtraDto[]>([]);
   const [selectedExtraIds, setSelectedExtraIds] = useState<Set<number>>(new Set());
@@ -122,6 +132,13 @@ export default function ProductPage() {
   }, [visibleExtras, selectedExtraIds]);
 
   useEffect(() => {
+    if (selectedVariantId == null) return;
+    const byVariant = variantImageById[selectedVariantId];
+    if (!byVariant) return;
+    setSelectedImage(byVariant);
+  }, [selectedVariantId, variantImageById]);
+
+  useEffect(() => {
     if (!extrasOpen) return;
 
     function onPointerDown(e: PointerEvent) {
@@ -135,15 +152,38 @@ export default function ProductPage() {
     return () => window.removeEventListener('pointerdown', onPointerDown);
   }, [extrasOpen]);
 
-  // Construye la galería: imagen principal + intenta variantes por convención /images/products/{id}-{n}.(jpg|jpeg|png)
+  // Construye la galería: prioridad a URLs en DB, con fallback por convención de archivos para productos legacy.
   useEffect(() => {
     let cancelled = false;
+
+    async function imageExists(url: string) {
+      return await new Promise<boolean>((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve(true);
+        image.onerror = () => resolve(false);
+        image.src = url;
+      });
+    }
 
     async function buildGallery() {
       if (!Number.isFinite(productId)) return;
 
       const candidates: string[] = [];
       if (img) candidates.push(img);
+
+      for (const g of product?.galleryImages || []) {
+        const absolute = toAbsoluteUrl(g);
+        if (absolute) candidates.push(absolute);
+      }
+
+      const byVariant: Record<number, string> = {};
+      for (const variant of product?.variants || []) {
+        const fromDb = toAbsoluteUrl(variant.imageUrl);
+        if (fromDb) {
+          byVariant[variant.id] = fromDb;
+          candidates.push(fromDb);
+        }
+      }
 
       const extensions = ['jpg', 'jpeg', 'png'];
       for (let i = 2; i <= 6; i += 1) {
@@ -173,11 +213,37 @@ export default function ProductPage() {
         )
       );
 
+      for (const variant of product?.variants || []) {
+        if (byVariant[variant.id]) continue;
+        const slug = slugifyVariantName(String(variant.name || ''));
+        const variantCandidates: string[] = [];
+        for (const ext of extensions) {
+          const localCandidates = [
+            toAbsoluteUrl(`/images/products/${productId}-v${variant.id}.${ext}`),
+            toAbsoluteUrl(`/images/products/${productId}-variant-${variant.id}.${ext}`),
+            slug ? toAbsoluteUrl(`/images/products/${productId}-${slug}.${ext}`) : undefined,
+          ].filter(Boolean) as string[];
+          variantCandidates.push(...localCandidates);
+        }
+
+        for (const url of variantCandidates) {
+          if (await imageExists(url)) {
+            byVariant[variant.id] = url;
+            loaded.push(url);
+            break;
+          }
+        }
+      }
+
       if (cancelled) return;
-      const finalList = loaded.length ? loaded : (img ? [img] : []);
+      const withVariantImages = [...loaded, ...Object.values(byVariant)];
+      const finalList = withVariantImages.length ? Array.from(new Set(withVariantImages)) : (img ? [img] : []);
       setGalleryImages(finalList);
+      setVariantImageById(byVariant);
       setSelectedImage((prev) => {
         if (prev && finalList.includes(prev)) return prev;
+        const selectedVariantImage = selectedVariantId != null ? byVariant[selectedVariantId] : undefined;
+        if (selectedVariantImage) return selectedVariantImage;
         return finalList[0] ?? null;
       });
     }
@@ -186,7 +252,7 @@ export default function ProductPage() {
     return () => {
       cancelled = true;
     };
-  }, [productId, img]);
+  }, [productId, img, product?.variants, selectedVariantId]);
 
   return (
     <div className="petit-product">

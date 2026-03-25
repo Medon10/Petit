@@ -16,6 +16,7 @@ export type ProductInput = {
   name?: string;
   description?: string;
   image_url?: string;
+  gallery_images?: string[];
   is_featured?: number | boolean;
   featured_rank?: number;
   is_active?: number | boolean;
@@ -100,6 +101,7 @@ export async function createProduct(input: ProductInput) {
     name: input.name,
     description: input.description,
     imageUrl: input.image_url,
+    galleryImages: Array.isArray(input.gallery_images) ? input.gallery_images : undefined,
     isFeatured: input.is_featured != null ? Boolean(input.is_featured) : undefined,
     featuredRank: input.featured_rank != null && !Number.isNaN(Number(input.featured_rank)) ? Number(input.featured_rank) : undefined,
     isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
@@ -123,6 +125,7 @@ export async function updateProduct(id: number, input: ProductInput) {
     name: input.name,
     description: input.description,
     imageUrl: input.image_url,
+    galleryImages: Array.isArray(input.gallery_images) ? input.gallery_images : undefined,
     isFeatured: input.is_featured != null ? Boolean(input.is_featured) : undefined,
     featuredRank: input.featured_rank != null && !Number.isNaN(Number(input.featured_rank)) ? Number(input.featured_rank) : undefined,
     isActive: input.is_active != null ? Boolean(input.is_active) : undefined,

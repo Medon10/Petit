@@ -12,6 +12,7 @@ export type VariantInput = {
   product_id?: number;
   name?: string;
   price?: string;
+  image_url?: string;
   is_active?: number | boolean;
 };
 
@@ -64,6 +65,7 @@ export async function createVariant(input: VariantInput) {
     product,
     name: input.name,
     price: input.price,
+    imageUrl: input.image_url,
     isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
   });
 
@@ -84,6 +86,7 @@ export async function updateVariant(id: number, input: VariantInput) {
   em.assign(item, {
     name: input.name,
     price: input.price,
+    imageUrl: input.image_url,
     isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
   } as any, { mergeObjects: true } as any);
 

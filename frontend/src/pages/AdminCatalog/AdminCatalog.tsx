@@ -67,6 +67,7 @@ function ProductsTab() {
   const [catId, setCatId] = useState('');
   const [desc, setDesc] = useState('');
   const [imgUrl, setImgUrl] = useState('');
+  const [galleryText, setGalleryText] = useState('');
   const [featured, setFeatured] = useState(false);
   const [rank, setRank] = useState('');
   const [active, setActive] = useState(true);
@@ -91,7 +92,7 @@ function ProductsTab() {
 
   function openCreate() {
     setEditItem(null);
-    setName(''); setCatId(''); setDesc(''); setImgUrl(''); setFeatured(false); setRank(''); setActive(true);
+    setName(''); setCatId(''); setDesc(''); setImgUrl(''); setGalleryText(''); setFeatured(false); setRank(''); setActive(true);
     setError('');
     setModal('create');
   }
@@ -102,6 +103,7 @@ function ProductsTab() {
     setCatId(String(p.category?.id ?? ''));
     setDesc(p.description ?? '');
     setImgUrl(p.imageUrl ?? '');
+    setGalleryText((p.galleryImages || []).join('\n'));
     setFeatured(p.isFeatured ?? false);
     setRank(String(p.featuredRank ?? ''));
     setActive(p.isActive !== false);
@@ -135,6 +137,10 @@ function ProductsTab() {
         name: name.trim(),
         description: desc || undefined,
         image_url: imgUrl || undefined,
+        gallery_images: galleryText
+          .split(/\r?\n|,/)
+          .map((x) => x.trim())
+          .filter(Boolean),
         is_featured: featured,
         featured_rank: rank ? Number(rank) : undefined,
         is_active: active,
@@ -269,6 +275,15 @@ function ProductsTab() {
                     <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onUpload(e.target.files?.[0])} />
                   </div>
                   <input className="adm-input" placeholder="URL manual" value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} style={{ marginTop: 6 }} />
+                </div>
+                <div className="adm-field">
+                  <label className="adm-label">Galería (URLs)</label>
+                  <textarea
+                    className="adm-textarea"
+                    placeholder="Una URL por línea"
+                    value={galleryText}
+                    onChange={(e) => setGalleryText(e.target.value)}
+                  />
                 </div>
                 <label className="adm-checkbox">
                   <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} />
@@ -424,10 +439,13 @@ function VariantsTab() {
   const [editItem, setEditItem] = useState<VariantDto | null>(null);
   const [vName, setVName] = useState('');
   const [vPrice, setVPrice] = useState('');
+  const [vImageUrl, setVImageUrl] = useState('');
   const [vProduct, setVProduct] = useState('');
   const [vActive, setVActive] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const loadProducts = useCallback(async () => {
     try { setProducts(await adminGetProducts()); } catch (e: any) { onAuthErr(e); }
@@ -445,10 +463,25 @@ function VariantsTab() {
   useEffect(() => { setLoading(true); loadVariants(); }, [loadVariants]);
 
   function openCreate() {
-    setEditItem(null); setVName(''); setVPrice(''); setVProduct(selectedProduct); setVActive(true); setError(''); setModal('create');
+    setEditItem(null); setVName(''); setVPrice(''); setVImageUrl(''); setVProduct(selectedProduct); setVActive(true); setError(''); setModal('create');
   }
   function openEdit(v: VariantDto) {
-    setEditItem(v); setVName(v.name); setVPrice(v.price); setVProduct(String(v.product?.id ?? '')); setVActive(v.isActive !== false); setError(''); setModal('edit');
+    setEditItem(v); setVName(v.name); setVPrice(v.price); setVImageUrl(v.imageUrl ?? ''); setVProduct(String(v.product?.id ?? '')); setVActive(v.isActive !== false); setError(''); setModal('edit');
+  }
+
+  async function onUpload(file?: File | null) {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await adminUploadImage(file);
+      const url = (res as any)?.data?.url || '';
+      if (url) setVImageUrl(url);
+    } catch (e: any) {
+      setError(e?.message || 'Error al subir imagen');
+      onAuthErr(e);
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function onSave() {
@@ -458,9 +491,9 @@ function VariantsTab() {
     setSaving(true); setError('');
     try {
       if (modal === 'edit' && editItem) {
-        await adminUpdateVariant(editItem.id, { product_id: Number(vProduct), name: vName.trim(), price: vPrice, is_active: vActive });
+        await adminUpdateVariant(editItem.id, { product_id: Number(vProduct), name: vName.trim(), price: vPrice, image_url: vImageUrl || undefined, is_active: vActive });
       } else {
-        await adminCreateVariant({ product_id: Number(vProduct), name: vName.trim(), price: vPrice, is_active: vActive });
+        await adminCreateVariant({ product_id: Number(vProduct), name: vName.trim(), price: vPrice, image_url: vImageUrl || undefined, is_active: vActive });
       }
       setModal(null); await loadVariants();
     } catch (e: any) { setError(e?.message || 'Error'); onAuthErr(e); }
@@ -502,10 +535,17 @@ function VariantsTab() {
       ) : (
         <div className="adm-card" style={{ padding: 0, overflow: 'hidden' }}>
           <table className="adm-table">
-            <thead><tr><th>Nombre</th><th>Precio</th><th>Producto</th><th>Activa</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Imagen</th><th>Nombre</th><th>Precio</th><th>Producto</th><th>Activa</th><th>Acciones</th></tr></thead>
             <tbody>
               {items.map((v) => (
                 <tr key={v.id}>
+                  <td>
+                    {v.imageUrl ? (
+                      <img className="adm-imgThumb" src={toAbsoluteUrl(v.imageUrl)} alt="" />
+                    ) : (
+                      <div className="adm-imgThumb" />
+                    )}
+                  </td>
                   <td style={{ fontWeight: 700 }}>{v.name}</td>
                   <td>${v.price}</td>
                   <td>{v.product?.name ?? '—'}</td>
@@ -546,6 +586,18 @@ function VariantsTab() {
                 <div className="adm-field">
                   <label className="adm-label">Precio</label>
                   <input className="adm-input" type="number" step="0.01" value={vPrice} onChange={(e) => setVPrice(e.target.value)} />
+                </div>
+                <div className="adm-field">
+                  <label className="adm-label">Imagen de variante</label>
+                  <div className="adm-uploadArea">
+                    {vImageUrl && <img className="adm-uploadPreview" src={toAbsoluteUrl(vImageUrl)} alt="" />}
+                    <button className="adm-uploadBtn" type="button" disabled={uploading} onClick={() => fileRef.current?.click()}>
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
+                      {uploading ? 'Subiendo...' : 'Subir imagen'}
+                    </button>
+                    <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onUpload(e.target.files?.[0])} />
+                  </div>
+                  <input className="adm-input" placeholder="URL manual" value={vImageUrl} onChange={(e) => setVImageUrl(e.target.value)} style={{ marginTop: 6 }} />
                 </div>
                 <label className="adm-checkbox">
                   <input type="checkbox" checked={vActive} onChange={(e) => setVActive(e.target.checked)} /> Activa

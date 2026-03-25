@@ -17,6 +17,9 @@ export class Product extends BaseEntity {
   @Property({ fieldName: 'image_url', nullable: true })
   imageUrl?: string;
 
+  @Property({ fieldName: 'gallery_images', type: 'json', nullable: true })
+  galleryImages?: string[];
+
   @Property({ fieldName: 'is_featured', default: false })
   isFeatured: boolean = false;
 

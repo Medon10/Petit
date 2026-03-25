@@ -300,3 +300,68 @@ INSERT INTO extras (name, price, category_type) VALUES
 ('Cadena Ajustable', 4000, 'cadena'),
 ('Borla', 1000, 'dije'),
 ('Dije Extra con Grabado', 4500, 'dije');
+
+
+-- =====================================================
+-- PostgreSQL - Migración de imágenes administrables
+-- (Galería por producto + imagen por variante)
+-- =====================================================
+
+-- Ejecutar en PostgreSQL (no en MySQL)
+ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS gallery_images JSONB;
+
+ALTER TABLE variants
+    ADD COLUMN IF NOT EXISTS image_url VARCHAR(255);
+
+
+-- =====================================================
+-- PostgreSQL - Ejemplos de carga
+-- =====================================================
+
+-- 1) Setear imagen principal + galería del producto "Circulares"
+--    (ajustar URLs según tu hosting / uploads)
+UPDATE products
+SET
+    image_url = '/uploads/products/circulares/main.jpg',
+    gallery_images = jsonb_build_array(
+        '/uploads/products/circulares/main.jpg',
+        '/uploads/products/circulares/1.jpg',
+        '/uploads/products/circulares/2.jpg',
+        '/uploads/products/circulares/3.jpg',
+        '/uploads/products/circulares/4.jpg',
+        '/uploads/products/circulares/5.jpg'
+    )
+WHERE name = 'Circulares';
+
+-- 2) Asignar imagen específica por variante del producto "Circulares"
+UPDATE variants v
+SET image_url = CASE v.name
+    WHEN '12mm' THEN '/uploads/products/circulares/12mm.jpg'
+    WHEN '15mm' THEN '/uploads/products/circulares/15mm.jpg'
+    WHEN '20mm' THEN '/uploads/products/circulares/20mm.jpg'
+    WHEN '25mm' THEN '/uploads/products/circulares/25mm.jpg'
+    WHEN '30mm' THEN '/uploads/products/circulares/30mm.jpg'
+    ELSE v.image_url
+END
+WHERE v.product_id = (
+    SELECT p.id
+    FROM products p
+    WHERE p.name = 'Circulares'
+    LIMIT 1
+);
+
+-- 3) Verificación rápida
+SELECT p.id, p.name, p.image_url, p.gallery_images
+FROM products p
+WHERE p.name = 'Circulares';
+
+SELECT v.id, v.name, v.image_url
+FROM variants v
+WHERE v.product_id = (
+    SELECT p.id
+    FROM products p
+    WHERE p.name = 'Circulares'
+    LIMIT 1
+)
+ORDER BY v.id;
