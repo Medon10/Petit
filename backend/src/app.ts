@@ -25,7 +25,13 @@ const PORT = Number(process.env.PORT || 3000);
 app.disable('x-powered-by');
 
 app.use(cookieParser());
-app.use(helmet());
+app.use(
+  helmet({
+    // Frontend and backend run on different localhost ports in dev.
+    // Keep security headers, but let images load cross-origin.
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 
 // CORS configuration.
 // - In prod: set FRONTEND_ORIGINS (comma separated) to the exact allowed origins.

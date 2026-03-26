@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import {
   getCategories,
   getProducts,
+  toResponsiveImage,
   toAbsoluteUrl,
   type CategoryDto,
   type ProductDto,
@@ -135,7 +136,8 @@ export default function HomePage() {
 
           <div className="ph-gridProducts">
             {products.map((p) => {
-              const img = toAbsoluteUrl(p.imageUrl) ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
+              const responsive = toResponsiveImage(p.imageUrl);
+              const img = responsive.src ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
               const prices = (p.variants || [])
                 .map((v) => Number.parseFloat(String(v.price)))
                 .filter((n) => Number.isFinite(n));
@@ -145,7 +147,14 @@ export default function HomePage() {
               return (
               <Link key={p.id} className="ph-productCard" to={`/productos/${p.id}`}>
                 <div className="ph-productMedia">
-                  <img className="ph-productImg" src={img} alt={p.name} loading="lazy" />
+                  <img
+                    className="ph-productImg"
+                    src={img}
+                    srcSet={responsive.srcSet}
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                    alt={p.name}
+                    loading="lazy"
+                  />
                   <div className="ph-productCTA" aria-hidden="true">
                     <span className="material-symbols-outlined">shopping_bag</span>
                   </div>
@@ -171,7 +180,8 @@ export default function HomePage() {
             </div>
             <div className="ph-gridProducts">
               {featured.map((p) => {
-                const img = toAbsoluteUrl(p.imageUrl) ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
+                const responsive = toResponsiveImage(p.imageUrl);
+                const img = responsive.src ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
                 const prices = (p.variants || [])
                   .map((v) => Number.parseFloat(String(v.price)))
                   .filter((n) => Number.isFinite(n));
@@ -180,7 +190,14 @@ export default function HomePage() {
                 return (
                   <Link key={p.id} className="ph-productCard" to={`/productos/${p.id}`}>
                     <div className="ph-productMedia">
-                      <img className="ph-productImg" src={img} alt={p.name} loading="lazy" />
+                      <img
+                        className="ph-productImg"
+                        src={img}
+                        srcSet={responsive.srcSet}
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                        alt={p.name}
+                        loading="lazy"
+                      />
                       <div className="ph-productCTA" aria-hidden="true">
                         <span className="material-symbols-outlined">shopping_bag</span>
                       </div>

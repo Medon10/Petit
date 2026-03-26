@@ -5,7 +5,7 @@ import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import Pagination from '../../componentes/shared/Pagination';
 import Skeleton from '../../componentes/shared/Skeleton';
-import { getCategories, getProductsPage, toAbsoluteUrl, type CategoryDto, type ProductDto } from '../../shared/api';
+import { getCategories, getProductsPage, toAbsoluteUrl, toResponsiveImage, type CategoryDto, type ProductDto } from '../../shared/api';
 import '../Home/Home.css';
 import './Category.css';
 
@@ -138,7 +138,8 @@ export default function CategoryPage() {
 
               <div className="ph-gridProducts">
                 {sortedProducts.map((p) => {
-                const img = toAbsoluteUrl(p.imageUrl) ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
+                const responsive = toResponsiveImage(p.imageUrl);
+                const img = responsive.src ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
                 const prices = (p.variants || [])
                   .map((v) => Number.parseFloat(String(v.price)))
                   .filter((n) => Number.isFinite(n));
@@ -148,7 +149,14 @@ export default function CategoryPage() {
                 return (
                   <Link key={p.id} className="ph-productCard" to={`/productos/${p.id}`}>
                     <div className="ph-productMedia">
-                      <img className="ph-productImg" src={img} alt={p.name} loading="lazy" />
+                      <img
+                        className="ph-productImg"
+                        src={img}
+                        srcSet={responsive.srcSet}
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                        alt={p.name}
+                        loading="lazy"
+                      />
                       <div className="ph-productCTA" aria-hidden="true">
                         <span className="material-symbols-outlined">shopping_bag</span>
                       </div>

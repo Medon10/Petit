@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import Skeleton from '../../componentes/shared/Skeleton';
-import { getExtras, getProduct, toAbsoluteUrl, type ExtraDto, type ProductDetailDto, type VariantDto } from '../../shared/api';
+import { getExtras, getProduct, toAbsoluteUrl, toResponsiveImage, type ExtraDto, type ProductDetailDto, type VariantDto } from '../../shared/api';
 import { useCart } from '../../shared/cart';
 import '../Home/Home.css';
 import './Product.css';
@@ -91,6 +91,8 @@ export default function ProductPage() {
     const fromDb = toAbsoluteUrl(product?.imageUrl);
     return fromDb ?? toAbsoluteUrl(`/images/products/${productId}.jpg`);
   }, [productId, product]);
+
+  const selectedImageSource = useMemo(() => toResponsiveImage(selectedImage), [selectedImage]);
 
   const categoryId = product?.category?.id;
   const categoryName = product?.category?.name;
@@ -295,7 +297,15 @@ export default function ProductPage() {
             <div className="ph-productLayout">
               <div className="ph-productLeft">
                 <div className="ph-productHero">
-                  {selectedImage ? <img className="ph-productHeroImg" src={selectedImage} alt={product.name} /> : null}
+                  {selectedImage ? (
+                    <img
+                      className="ph-productHeroImg"
+                      src={selectedImageSource.src ?? selectedImage}
+                      srcSet={selectedImageSource.srcSet}
+                      sizes="(min-width: 1024px) 45vw, 100vw"
+                      alt={product.name}
+                    />
+                  ) : null}
                 </div>
 
                 {galleryImages.length > 1 ? (

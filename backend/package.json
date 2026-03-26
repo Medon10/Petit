@@ -7,7 +7,9 @@
     "build": "tsc -p ./tsconfig.json",
     "start": "node ./dist/app.js",
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/app.js\"",
-    "dev": "npm run start:dev"
+    "dev": "npm run start:dev",
+    "images:migrate:dry": "npm run build && node ./dist/scripts/migrate-uploads-to-webp.js",
+    "images:migrate": "npm run build && node ./dist/scripts/migrate-uploads-to-webp.js --apply-db"
   },
   "keywords": [],
   "author": "",
@@ -41,6 +43,7 @@
     "nodemailer": "^7.0.12",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
+    "sharp": "^0.34.5",
     "typescript": "^5.8.3"
   },
   "devDependencies": {

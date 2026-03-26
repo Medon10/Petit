@@ -1,8 +1,5 @@
 import { Router } from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
 import { verifyToken } from '../shared/middleware/verifytoken.js';
 import { verifyAdmin } from '../shared/middleware/verifyAdmin.js';
 import { sanitizeProductInput } from '../shared/middleware/sanitizeProduct.js';
@@ -40,29 +37,11 @@ import {
 } from './admin-catalog.controller.js';
 import { uploadImage } from './admin-upload.controller.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const uploadsDir = path.join(__dirname, '..', '..', 'public', 'uploads');
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    cb(null, uploadsDir);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname) || '.jpg';
-    const safeExt = ext.toLowerCase();
-    const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}${safeExt}`;
-    cb(null, name);
-  },
-});
-
 const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowed.includes(file.mimetype)) return cb(new Error('Formato de imagen no permitido'));
+    if (!file.mimetype.startsWith('image/')) return cb(new Error('Formato de imagen no permitido'));
     return cb(null, true);
   },
 });

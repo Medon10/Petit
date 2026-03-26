@@ -323,25 +323,24 @@ ALTER TABLE variants
 --    (ajustar URLs según tu hosting / uploads)
 UPDATE products
 SET
-    image_url = '/uploads/products/circulares/main.jpg',
+    image_url = '/uploads/medallas/circulares/20mm.png',
     gallery_images = jsonb_build_array(
-        '/uploads/products/circulares/main.jpg',
-        '/uploads/products/circulares/1.jpg',
-        '/uploads/products/circulares/2.jpg',
-        '/uploads/products/circulares/3.jpg',
-        '/uploads/products/circulares/4.jpg',
-        '/uploads/products/circulares/5.jpg'
+        '/uploads/medallas/circulares/12mm.png',
+        '/uploads/medallas/circulares/15mm.png',
+        '/uploads/medallas/circulares/20mm.png',
+        '/uploads/medallas/circulares/25mm.png',
+        '/uploads/medallas/circulares/30mm.jpeg'
     )
 WHERE name = 'Circulares';
 
 -- 2) Asignar imagen específica por variante del producto "Circulares"
 UPDATE variants v
 SET image_url = CASE v.name
-    WHEN '12mm' THEN '/uploads/products/circulares/12mm.jpg'
-    WHEN '15mm' THEN '/uploads/products/circulares/15mm.jpg'
-    WHEN '20mm' THEN '/uploads/products/circulares/20mm.jpg'
-    WHEN '25mm' THEN '/uploads/products/circulares/25mm.jpg'
-    WHEN '30mm' THEN '/uploads/products/circulares/30mm.jpg'
+    WHEN '12mm' THEN '/uploads/medallas/circulares/12mm.png'
+    WHEN '15mm' THEN '/uploads/medallas/circulares/15mm.png'
+    WHEN '20mm' THEN '/uploads/medallas/circulares/20mm.png'
+    WHEN '25mm' THEN '/uploads/medallas/circulares/25mm.png'
+    WHEN '30mm' THEN '/uploads/medallas/circulares/30mm.jpeg'
     ELSE v.image_url
 END
 WHERE v.product_id = (

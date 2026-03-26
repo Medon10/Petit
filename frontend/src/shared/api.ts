@@ -67,6 +67,26 @@ export function toAbsoluteUrl(pathOrUrl?: string | null) {
   return `${base}${path}`;
 }
 
+export function toResponsiveImage(pathOrUrl?: string | null) {
+  const src = toAbsoluteUrl(pathOrUrl);
+  if (!src) return { src: undefined as string | undefined, srcSet: undefined as string | undefined };
+
+  const raw = String(pathOrUrl ?? '');
+  const smRaw = raw.replace(/-xl\.webp(?=$|[?#])/i, '-sm.webp');
+  if (smRaw === raw) {
+    // Legacy files (png/jpg/jpeg or old webp names) still work without srcSet.
+    return { src, srcSet: undefined as string | undefined };
+  }
+
+  const sm = toAbsoluteUrl(smRaw);
+  if (!sm) return { src, srcSet: undefined as string | undefined };
+
+  return {
+    src,
+    srcSet: `${sm} 600w, ${src} 1800w`,
+  };
+}
+
 function buildQuery(params: Record<string, string | number | boolean | undefined | null>) {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
