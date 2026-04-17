@@ -4,8 +4,25 @@ import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import Skeleton from '../../componentes/shared/Skeleton';
-import { createOrder, getExtras, getProduct, type ExtraDto, type ProductDetailDto } from '../../shared/api';
+import {
+  createOrder,
+  getExtras,
+  getProduct,
+  quoteShipping,
+  type ExtraDto,
+  type ProductDetailDto,
+  type ShippingQuoteDto,
+} from '../../shared/api';
 import { useCart } from '../../shared/cart';
+import {
+  buildShippingQuoteItems,
+  buildShippingQuoteKey,
+  formatQuoteExpiration,
+  formatShippingEta,
+  isPostalCodeValid,
+  isShippingQuoteExpired,
+  normalizePostalCode,
+} from '../../shared/shipping';
 import '../Home/Home.css';
 import './Checkout.css';
 
@@ -18,7 +35,14 @@ type OrderConfirmationItem = {
 
 type OrderConfirmationState = {
   orderNumber: string;
+  subtotal: number;
+  shippingCost: number;
   total: number;
+  shippingMethod: 'pickup' | 'delivery';
+  shippingProvider?: string;
+  shippingService?: string;
+  shippingPostalCode?: string;
+  shippingEta?: string;
   items: OrderConfirmationItem[];
 };
 
@@ -45,11 +69,28 @@ export default function CheckoutPage() {
   const [customerPhone, setCustomerPhone] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [shippingQuoteLoading, setShippingQuoteLoading] = useState(false);
+  const [shippingQuoteError, setShippingQuoteError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const invalidItems = useMemo(() => {
     return cart.items.filter((it) => it.variantId == null);
   }, [cart.items]);
+
+  const shippingMethod = cart.shipping.method;
+  const shippingPostalCode = cart.shipping.postalCode;
+  const shippingQuote = cart.shipping.quote;
+  const shippingQuoteExpired = isShippingQuoteExpired(shippingQuote);
+  const shippingPostalCodeValid = isPostalCodeValid(shippingPostalCode);
+  const quoteItems = useMemo(() => buildShippingQuoteItems(cart.items), [cart.items]);
+  const quoteRequestKey = useMemo(() => buildShippingQuoteKey(shippingPostalCode, quoteItems), [shippingPostalCode, quoteItems]);
+  const shippingCost = shippingMethod === 'delivery' && shippingQuote && !shippingQuoteExpired ? Number(shippingQuote.cost) : 0;
+
+  const shippingAddressLine1 = cart.shipping.addressLine1.trim();
+  const shippingCity = cart.shipping.city.trim();
+  const shippingProvince = cart.shipping.province.trim();
+  const shippingAddressReady =
+    shippingMethod === 'pickup' || (shippingAddressLine1.length > 0 && shippingCity.length > 0 && shippingProvince.length > 0);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,6 +150,83 @@ export default function CheckoutPage() {
     };
   }, [cart.items]);
 
+  async function recalculateShippingQuote(options?: { showLoading?: boolean; isCancelled?: () => boolean }) {
+    const showLoading = options?.showLoading ?? true;
+    const isCancelled = options?.isCancelled ?? (() => false);
+
+    if (shippingMethod !== 'delivery') return null;
+    if (cart.items.length === 0 || invalidItems.length > 0) return null;
+    if (!shippingPostalCodeValid) return null;
+
+    if (showLoading) setShippingQuoteLoading(true);
+    setShippingQuoteError(null);
+
+    try {
+      const quote = await quoteShipping({
+        postal_code: normalizePostalCode(shippingPostalCode),
+        items: quoteItems,
+      });
+
+      if (isCancelled()) return null;
+
+      if (!quote) {
+        cart.clearShippingQuote();
+        setShippingQuoteError('No se pudo obtener una cotizacion para ese codigo postal.');
+        return null;
+      }
+
+      cart.setShippingQuote(quote);
+      setShippingQuoteError(null);
+      return quote;
+    } catch (e: any) {
+      if (isCancelled()) return null;
+      cart.clearShippingQuote();
+      setShippingQuoteError(e?.message || 'No pudimos cotizar el envio. Intenta nuevamente.');
+      return null;
+    } finally {
+      if (showLoading && !isCancelled()) setShippingQuoteLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (shippingMethod !== 'delivery') {
+      setShippingQuoteLoading(false);
+      setShippingQuoteError(null);
+      return;
+    }
+
+    if (cart.items.length === 0) {
+      cart.clearShippingQuote();
+      setShippingQuoteLoading(false);
+      setShippingQuoteError(null);
+      return;
+    }
+
+    if (invalidItems.length > 0) {
+      cart.clearShippingQuote();
+      setShippingQuoteLoading(false);
+      setShippingQuoteError('Hay productos sin variante seleccionada. Corregilos para cotizar envio.');
+      return;
+    }
+
+    if (!shippingPostalCodeValid) {
+      cart.clearShippingQuote();
+      setShippingQuoteLoading(false);
+      setShippingQuoteError(shippingPostalCode ? 'Codigo postal invalido. Usa 4 a 8 caracteres.' : null);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void recalculateShippingQuote({ showLoading: true, isCancelled: () => cancelled });
+    }, 450);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [shippingMethod, shippingPostalCode, shippingPostalCodeValid, quoteRequestKey, invalidItems.length, cart.items.length]);
+
   const summary = useMemo(() => {
     let subtotal = 0;
     for (const it of cart.items) {
@@ -121,7 +239,15 @@ export default function CheckoutPage() {
     return { subtotal };
   }, [cart.items, productsById, extrasById]);
 
-  const canSubmit = cart.items.length > 0 && invalidItems.length === 0 && !submitting;
+  const total = summary.subtotal + shippingCost;
+
+  const canSubmit =
+    cart.items.length > 0 &&
+    invalidItems.length === 0 &&
+    !submitting &&
+    !shippingQuoteLoading &&
+    shippingAddressReady &&
+    (shippingMethod === 'pickup' || (!!shippingQuote && !shippingQuoteExpired));
 
   async function onSubmit() {
     setError(null);
@@ -136,10 +262,42 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (shippingMethod === 'delivery') {
+      if (!shippingPostalCodeValid) {
+        setError('Codigo postal invalido.');
+        return;
+      }
+      if (!shippingAddressLine1 || !shippingCity || !shippingProvince) {
+        setError('Completa direccion, localidad y provincia para continuar con envio.');
+        return;
+      }
+    }
+
     const name = customerName.trim();
+    if (!name) {
+      setError('Ingresa tu nombre completo para confirmar el pedido.');
+      return;
+    }
 
     setSubmitting(true);
     try {
+      let activeQuote: ShippingQuoteDto | null = shippingQuote;
+
+      if (shippingMethod === 'delivery') {
+        const quotePostalMatches =
+          !!activeQuote && normalizePostalCode(activeQuote.postalCode) === normalizePostalCode(shippingPostalCode);
+
+        if (!activeQuote || shippingQuoteExpired || !quotePostalMatches) {
+          const refreshed = await recalculateShippingQuote({ showLoading: true });
+          if (refreshed) {
+            setError(`La cotizacion de envio se actualizo a ${moneyAr(Number(refreshed.cost))}. Revisa el total y confirma nuevamente.`);
+          } else {
+            setError('No se pudo actualizar la cotizacion de envio. Revisa tus datos e intenta otra vez.');
+          }
+          return;
+        }
+      }
+
       const orderItemsSummary: OrderConfirmationItem[] = cart.items.map((it) => {
         const product = productsById[it.productId];
         const variant = product?.variants?.find((v) => v.id === it.variantId) ?? product?.variants?.[0];
@@ -161,6 +319,20 @@ export default function CheckoutPage() {
         customer_email: customerEmail.trim() || undefined,
         customer_phone: customerPhone.trim() || undefined,
         notes: notes.trim() || undefined,
+        shipping:
+          shippingMethod === 'delivery'
+            ? {
+                method: 'delivery' as const,
+                postal_code: normalizePostalCode(shippingPostalCode),
+                quote_id: activeQuote?.quoteId,
+                address_line1: shippingAddressLine1,
+                address_line2: cart.shipping.addressLine2.trim() || undefined,
+                city: shippingCity,
+                province: shippingProvince,
+              }
+            : {
+                method: 'pickup' as const,
+              },
         items: cart.items.map((it) => ({
           product_id: it.productId,
           variant_id: it.variantId as number,
@@ -170,19 +342,45 @@ export default function CheckoutPage() {
       };
 
       const res = await createOrder(payload);
-      const idRaw = (res as any)?.data?.id;
+      const createdOrder = (res as any)?.data;
+      const idRaw = createdOrder?.id;
       const idNum = Number(idRaw);
       const orderNumber = Number.isFinite(idNum) ? String(idNum) : String(idRaw ?? 'ok');
 
+      const subtotal = Number(createdOrder?.subtotal ?? summary.subtotal);
+      const createdShippingCost = Number(createdOrder?.shippingCost ?? shippingCost);
+      const createdTotal = Number(createdOrder?.total ?? subtotal + createdShippingCost);
+
+      const etaFromQuote = shippingMethod === 'delivery' ? formatShippingEta(activeQuote) : undefined;
+
       const orderState: OrderConfirmationState = {
         orderNumber,
-        total: summary.subtotal,
+        subtotal: Number.isFinite(subtotal) ? subtotal : summary.subtotal,
+        shippingCost: Number.isFinite(createdShippingCost) ? createdShippingCost : shippingCost,
+        total: Number.isFinite(createdTotal) ? createdTotal : total,
+        shippingMethod,
+        shippingProvider: createdOrder?.shippingProvider ?? activeQuote?.provider,
+        shippingService: createdOrder?.shippingService ?? activeQuote?.service,
+        shippingPostalCode: createdOrder?.shippingPostalCode ?? normalizePostalCode(shippingPostalCode),
+        shippingEta: createdOrder?.shippingEtaMinDays
+          ? `${createdOrder.shippingEtaMinDays} a ${createdOrder.shippingEtaMaxDays} dias`
+          : etaFromQuote,
         items: orderItemsSummary,
       };
 
       cart.clear();
       nav(`/pedido/${orderNumber}`, { state: orderState });
     } catch (e: any) {
+      const code = String(e?.code ?? '');
+      if (shippingMethod === 'delivery' && code.startsWith('shipping_quote')) {
+        const refreshed = await recalculateShippingQuote({ showLoading: true });
+        if (refreshed) {
+          setError(`La cotizacion de envio cambio y se actualizo a ${moneyAr(Number(refreshed.cost))}. Revisa el total y confirma nuevamente.`);
+        } else {
+          setError(e?.message || 'No se pudo validar la cotizacion de envio.');
+        }
+        return;
+      }
       setError(e?.message || 'No se pudo crear el pedido.');
     } finally {
       setSubmitting(false);
@@ -221,6 +419,117 @@ export default function CheckoutPage() {
                   <h2>Datos del comprador</h2>
                 </div>
 
+                <section className="checkout-deliveryBox" aria-label="Metodo de entrega">
+                  <h3>Metodo de entrega</h3>
+
+                  <div className="checkout-deliveryMethods">
+                    <label className="checkout-deliveryOption">
+                      <input
+                        type="radio"
+                        name="checkout-shipping-method"
+                        checked={shippingMethod === 'pickup'}
+                        onChange={() => cart.setShippingMethod('pickup')}
+                      />
+                      Retiro coordinado
+                    </label>
+
+                    <label className="checkout-deliveryOption">
+                      <input
+                        type="radio"
+                        name="checkout-shipping-method"
+                        checked={shippingMethod === 'delivery'}
+                        onChange={() => cart.setShippingMethod('delivery')}
+                      />
+                      Envio a domicilio
+                    </label>
+                  </div>
+
+                  {shippingMethod === 'delivery' ? (
+                    <div className="checkout-deliveryGrid">
+                      <label className="checkout-field">
+                        Codigo postal
+                        <input
+                          value={shippingPostalCode}
+                          onChange={(e) => cart.setShippingPostalCode(e.target.value)}
+                          placeholder="Ej: 5000"
+                          inputMode="numeric"
+                        />
+                      </label>
+
+                      <div className="checkout-deliveryActions">
+                        <button
+                          type="button"
+                          className="checkout-requoteBtn"
+                          onClick={() => {
+                            void recalculateShippingQuote({ showLoading: true });
+                          }}
+                          disabled={shippingQuoteLoading || invalidItems.length > 0 || !shippingPostalCodeValid}
+                        >
+                          {shippingQuoteLoading ? 'Cotizando...' : 'Recotizar envio'}
+                        </button>
+                      </div>
+
+                      <label className="checkout-field checkout-fieldFull">
+                        Calle y numero
+                        <input
+                          value={cart.shipping.addressLine1}
+                          onChange={(e) => cart.setShippingAddress({ addressLine1: e.target.value })}
+                          placeholder="Ej: Av. Siempre Viva 742"
+                        />
+                      </label>
+
+                      <label className="checkout-field checkout-fieldFull">
+                        Depto / Piso (opcional)
+                        <input
+                          value={cart.shipping.addressLine2}
+                          onChange={(e) => cart.setShippingAddress({ addressLine2: e.target.value })}
+                          placeholder="Ej: Piso 3, Depto B"
+                        />
+                      </label>
+
+                      <label className="checkout-field">
+                        Localidad
+                        <input
+                          value={cart.shipping.city}
+                          onChange={(e) => cart.setShippingAddress({ city: e.target.value })}
+                          placeholder="Ej: Cordoba"
+                        />
+                      </label>
+
+                      <label className="checkout-field">
+                        Provincia
+                        <input
+                          value={cart.shipping.province}
+                          onChange={(e) => cart.setShippingAddress({ province: e.target.value })}
+                          placeholder="Ej: Cordoba"
+                        />
+                      </label>
+
+                      {shippingQuote && !shippingQuoteExpired ? (
+                        <div className="checkout-quoteBox" aria-live="polite">
+                          <p>
+                            {shippingQuote.provider} · {shippingQuote.service}
+                          </p>
+                          <p>
+                            Entrega estimada: {formatShippingEta(shippingQuote)} · Vence {formatQuoteExpiration(shippingQuote.expiresAt)}
+                          </p>
+                          <strong>{moneyAr(Number(shippingQuote.cost))}</strong>
+                        </div>
+                      ) : null}
+
+                      {shippingQuote && shippingQuoteExpired ? (
+                        <p className="checkout-error">La cotizacion de envio vencio. Recotiza antes de confirmar.</p>
+                      ) : null}
+
+                      {shippingQuoteError ? <p className="checkout-error">{shippingQuoteError}</p> : null}
+                    </div>
+                  ) : (
+                    <p className="checkout-deliveryHint">
+                      Retiro por coordinacion. Te contactamos por WhatsApp para definir direccion y horario.
+                    </p>
+                  )}
+                </section>
+
                 <div className="checkout-formGrid">
                   <label className="checkout-field">
                     Nombre completo
@@ -252,19 +561,6 @@ export default function CheckoutPage() {
                     />
                   </label>
                 </div>
-
-                <section className="checkout-pickupBox" aria-label="Informacion de retiro">
-                  <div className="checkout-pickupIcon" aria-hidden="true">
-                    RETIRO
-                  </div>
-                  <div>
-                    <h3>Retiro por coordinacion</h3>
-                    <p>
-                      Te contactamos por WhatsApp luego de confirmar la compra para definir direccion exacta, horario y detalles de
-                      entrega.
-                    </p>
-                  </div>
-                </section>
 
                 <section className="checkout-noteBox" aria-label="Nota de personalizacion">
                   <h4>Personalizacion</h4>
@@ -300,6 +596,14 @@ export default function CheckoutPage() {
                   <div className="checkout-summaryRow">
                     <span>Subtotal</span>
                     <strong>{moneyAr(summary.subtotal)}</strong>
+                  </div>
+                  <div className="checkout-summaryRow">
+                    <span>Envio</span>
+                    <strong>{shippingMethod === 'delivery' ? (shippingQuote && !shippingQuoteExpired ? moneyAr(shippingCost) : 'Por cotizar') : 'Retiro'}</strong>
+                  </div>
+                  <div className="checkout-summaryRow is-total">
+                    <span>Total</span>
+                    <strong>{moneyAr(total)}</strong>
                   </div>
                 </div>
 
@@ -340,7 +644,7 @@ export default function CheckoutPage() {
                   </div>
                 ) : null}
 
-                <p className="checkout-secureText">Transaccion segura. Pedido generado en estado pending.</p>
+                <p className="checkout-secureText">Antes de confirmar validamos cotizacion de envio y generamos el pedido en estado pending.</p>
               </aside>
             </div>
           )}

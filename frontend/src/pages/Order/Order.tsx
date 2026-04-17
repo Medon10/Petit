@@ -14,7 +14,14 @@ type OrderConfirmationItem = {
 
 type OrderConfirmationState = {
   orderNumber: string;
+  subtotal: number;
+  shippingCost: number;
   total: number;
+  shippingMethod: 'pickup' | 'delivery';
+  shippingProvider?: string;
+  shippingService?: string;
+  shippingPostalCode?: string;
+  shippingEta?: string;
   items: OrderConfirmationItem[];
 };
 
@@ -29,7 +36,10 @@ export default function OrderPage() {
   const state = (location.state || null) as OrderConfirmationState | null;
 
   const orderNumber = String(state?.orderNumber || params.id || '');
-  const total = Number(state?.total || 0);
+  const subtotal = Number(state?.subtotal ?? state?.total ?? 0);
+  const shippingCost = Number(state?.shippingCost ?? 0);
+  const total = Number(state?.total ?? subtotal + shippingCost);
+  const shippingMethod = state?.shippingMethod ?? 'pickup';
   const items = Array.isArray(state?.items) ? state.items : [];
 
   const bankAlias = (import.meta as any).env?.VITE_BANK_ALIAS || 'ALIAS.NO.CONFIGURADO';
@@ -79,6 +89,18 @@ export default function OrderPage() {
               <p>
                 Envia el comprobante y coordinamos por WhatsApp los detalles finales de grabado, personalizacion y entrega.
               </p>
+
+              {shippingMethod === 'delivery' ? (
+                <p>
+                  Envio seleccionado: {state?.shippingProvider || 'Agregador'}
+                  {state?.shippingService ? ` · ${state.shippingService}` : ''}
+                  {state?.shippingPostalCode ? ` · CP ${state.shippingPostalCode}` : ''}
+                  {state?.shippingEta ? ` · ETA ${state.shippingEta}` : ''}
+                </p>
+              ) : (
+                <p>Retiro seleccionado. Te escribimos para coordinar direccion y horario.</p>
+              )}
+
               <a className="order-whatsappBtn" href={whatsappHref} target="_blank" rel="noopener noreferrer">
                 Enviar comprobante por WhatsApp
               </a>
@@ -112,11 +134,11 @@ export default function OrderPage() {
                 <div className="order-totals">
                   <div>
                     <span>Subtotal</span>
-                    <span>{moneyAr(total)}</span>
+                    <span>{moneyAr(subtotal)}</span>
                   </div>
                   <div>
                     <span>Envio</span>
-                    <span>Gratis</span>
+                    <span>{shippingMethod === 'delivery' ? moneyAr(shippingCost) : 'Retiro'}</span>
                   </div>
                   <div className="is-total">
                     <span>Total</span>
@@ -132,7 +154,7 @@ export default function OrderPage() {
 
         <div className="order-footNote" aria-hidden="true">
           <span>Autenticidad</span>
-          <span>Retiro coordinado</span>
+          <span>{shippingMethod === 'delivery' ? 'Envio validado' : 'Retiro coordinado'}</span>
           <span>Compra segura</span>
         </div>
       </main>

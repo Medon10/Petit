@@ -18,6 +18,7 @@ import adminCatalogRouter from './admin/admin-catalog.routes.js';
 import { orderRouter } from './order/order.routes.js';
 import { orderItemRouter } from './order-item/order-item.routes.js';
 import { orderItemExtraRouter } from './order-item-extra/order-item-extra.routes.js';
+import { shippingRouter } from './shipping/shipping.routes.js';
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -105,6 +106,7 @@ app.use('/extras', extraRouter);
 app.use('/orders', orderRouter);
 app.use('/order-items', orderItemRouter);
 app.use('/order-item-extras', orderItemExtraRouter);
+app.use('/shipping', shippingRouter);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

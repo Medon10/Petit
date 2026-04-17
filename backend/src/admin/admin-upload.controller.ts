@@ -1,12 +1,6 @@
 import { Request, Response } from 'express';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import sharp from 'sharp';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const uploadsDir = path.join(__dirname, '..', '..', 'public', 'uploads');
+import { getImageStorageDriver, storeImage } from '../shared/storage/image-storage.js';
 
 export async function uploadImage(req: Request, res: Response) {
   if (!(req as any).file) {
@@ -16,13 +10,9 @@ export async function uploadImage(req: Request, res: Response) {
   const file = (req as any).file as Express.Multer.File;
 
   try {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-
     const baseName = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const xlFilename = `${baseName}-xl.webp`;
     const smFilename = `${baseName}-sm.webp`;
-    const xlOutputPath = path.join(uploadsDir, xlFilename);
-    const smOutputPath = path.join(uploadsDir, smFilename);
 
     const prepared = sharp(file.buffer)
       .rotate()
@@ -58,13 +48,21 @@ export async function uploadImage(req: Request, res: Response) {
       })
       .toBuffer({ resolveWithObject: true });
 
-    await Promise.all([
-      fs.promises.writeFile(xlOutputPath, xlProcessed.data),
-      fs.promises.writeFile(smOutputPath, smProcessed.data),
+    const [xlStored, smStored] = await Promise.all([
+      storeImage({
+        fileName: xlFilename,
+        buffer: xlProcessed.data,
+        contentType: 'image/webp',
+      }),
+      storeImage({
+        fileName: smFilename,
+        buffer: smProcessed.data,
+        contentType: 'image/webp',
+      }),
     ]);
 
-    const xlUrl = `/uploads/${xlFilename}`;
-    const smUrl = `/uploads/${smFilename}`;
+    const xlUrl = xlStored.url;
+    const smUrl = smStored.url;
 
     return res.status(201).json({
       message: 'Archivo subido',
@@ -78,6 +76,7 @@ export async function uploadImage(req: Request, res: Response) {
         size: xlProcessed.data.length,
         width: xlProcessed.info.width,
         height: xlProcessed.info.height,
+        storage: getImageStorageDriver(),
         variants: {
           xl: xlUrl,
           sm: smUrl,

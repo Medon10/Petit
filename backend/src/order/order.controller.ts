@@ -7,7 +7,10 @@ async function createOrder(req: Request, res: Response) {
     const populated = await createOrderService(input);
     return res.status(201).json({ message: 'Pedido creado', data: populated });
   } catch (error: any) {
-    return res.status(400).json({ message: error?.message || 'Error al crear pedido' });
+    return res.status(400).json({
+      message: error?.message || 'Error al crear pedido',
+      code: error?.code,
+    });
   }
 }
 

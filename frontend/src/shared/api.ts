@@ -118,7 +118,9 @@ async function apiRequestJson<T>(path: string, options: { method: string; body?:
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = (json as any)?.message || `API ${res.status} ${res.statusText}`;
-    throw new Error(String(msg));
+    const err = new Error(String(msg)) as Error & { code?: string };
+    if (typeof (json as any)?.code === 'string') err.code = (json as any).code;
+    throw err;
   }
   return json as T;
 }
@@ -149,7 +151,9 @@ async function adminRequestJson<T>(path: string, options: { method: string; body
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = (json as any)?.message || (json as any)?.error || `API ${res.status} ${res.statusText}`;
-    throw new Error(String(msg));
+    const err = new Error(String(msg)) as Error & { code?: string };
+    if (typeof (json as any)?.code === 'string') err.code = (json as any).code;
+    throw err;
   }
   return json as T;
 }
@@ -231,11 +235,58 @@ export async function getExtras(options?: { categoryType?: string }) {
   return Array.isArray((data as any)?.data) ? ((data as any).data as ExtraDto[]) : [];
 }
 
+export type ShippingMethod = 'pickup' | 'delivery';
+
+export type ShippingQuoteExtraInput = {
+  extra_id: number;
+  quantity?: number;
+};
+
+export type ShippingQuoteItemInput = {
+  product_id: number;
+  variant_id: number;
+  quantity: number;
+  extras?: ShippingQuoteExtraInput[];
+};
+
+export type ShippingQuoteInput = {
+  postal_code: string;
+  items: ShippingQuoteItemInput[];
+};
+
+export type ShippingQuoteDto = {
+  quoteId: string;
+  provider: string;
+  service: string;
+  postalCode: string;
+  cost: number;
+  etaMinDays: number;
+  etaMaxDays: number;
+  expiresAt: string;
+  expiresInSeconds: number;
+  currency: 'ARS';
+};
+
+export async function quoteShipping(input: ShippingQuoteInput) {
+  const data = await apiRequestJson<{ data?: unknown }>(`/shipping/quotes`, { method: 'POST', body: input });
+  const item = (data as any)?.data;
+  return item && typeof item === 'object' ? (item as ShippingQuoteDto) : null;
+}
+
 export type CreateOrderInput = {
   customer_name: string;
   customer_email?: string;
   customer_phone?: string;
   notes?: string;
+  shipping?: {
+    method?: ShippingMethod;
+    postal_code?: string;
+    quote_id?: string;
+    address_line1?: string;
+    address_line2?: string;
+    city?: string;
+    province?: string;
+  };
   items: Array<{
     product_id: number;
     variant_id: number;
@@ -383,6 +434,20 @@ export type OrderDto = {
   customerEmail?: string;
   customerPhone?: string;
   notes?: string;
+  shippingMethod?: ShippingMethod;
+  shippingPostalCode?: string;
+  shippingAddressLine1?: string;
+  shippingAddressLine2?: string;
+  shippingCity?: string;
+  shippingProvince?: string;
+  shippingProvider?: string;
+  shippingService?: string;
+  shippingQuoteId?: string;
+  shippingQuoteExpiresAt?: string;
+  shippingEtaMinDays?: number;
+  shippingEtaMaxDays?: number;
+  shippingCost?: string;
+  subtotal?: string;
   status: string;
   total: string;
   createdAt?: string;

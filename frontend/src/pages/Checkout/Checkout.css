@@ -110,6 +110,87 @@
   font-size: 1.5rem;
 }
 
+.checkout-deliveryBox {
+  border: 1px solid rgba(161, 70, 89, 0.24);
+  background: var(--checkout-surface-soft);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.checkout-deliveryBox h3 {
+  margin: 0;
+  font-family: 'Noto Serif', serif;
+  font-size: 1.15rem;
+}
+
+.checkout-deliveryMethods {
+  display: grid;
+  gap: 8px;
+}
+
+.checkout-deliveryOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--checkout-muted);
+}
+
+.checkout-deliveryGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+
+.checkout-deliveryActions {
+  display: flex;
+  align-items: end;
+}
+
+.checkout-requoteBtn {
+  width: 100%;
+  border: 1px solid var(--checkout-border);
+  background: #fff;
+  color: var(--checkout-primary);
+  cursor: pointer;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.checkout-requoteBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.checkout-quoteBox {
+  border: 1px solid var(--checkout-border);
+  background: var(--checkout-surface);
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.checkout-quoteBox p {
+  margin: 0;
+  color: var(--checkout-muted);
+  font-size: 12px;
+}
+
+.checkout-quoteBox strong {
+  color: var(--checkout-primary);
+  font-size: 1.1rem;
+}
+
+.checkout-deliveryHint {
+  margin: 0;
+  color: var(--checkout-muted);
+  line-height: 1.55;
+}
+
 .checkout-formGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -301,6 +382,17 @@
   font-weight: 700;
 }
 
+.checkout-summaryRow.is-total {
+  border-top: 1px solid var(--checkout-border);
+  margin-top: 4px;
+  padding-top: 10px;
+}
+
+.checkout-summaryRow.is-total strong {
+  color: var(--checkout-primary);
+  font-size: 1.05rem;
+}
+
 .checkout-items {
   margin-top: 14px;
   display: grid;
@@ -369,6 +461,15 @@
 }
 
 @media (min-width: 860px) {
+  .checkout-deliveryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 22px;
+  }
+
+  .checkout-quoteBox {
+    grid-column: 1 / -1;
+  }
+
   .checkout-formGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 22px 24px;

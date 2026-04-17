@@ -30,6 +30,11 @@ const statusColor: Record<string, string> = {
   cancelled: 'red',
 };
 
+const shippingLabel: Record<string, string> = {
+  pickup: 'Retiro',
+  delivery: 'Envio',
+};
+
 function formatDate(iso?: string) {
   if (!iso) return '—';
   const d = new Date(iso);
@@ -176,6 +181,7 @@ export default function AdminOrdersPage() {
                 <th>#</th>
                 <th>Cliente</th>
                 <th>Estado</th>
+                <th>Entrega</th>
                 <th>Total</th>
                 <th>Fecha</th>
                 <th>Acciones</th>
@@ -191,6 +197,7 @@ export default function AdminOrdersPage() {
                       {statusLabel[o.status] ?? o.status}
                     </span>
                   </td>
+                  <td>{shippingLabel[o.shippingMethod || 'pickup'] || 'Retiro'}</td>
                   <td>${o.total}</td>
                   <td>{formatDate(o.createdAt)}</td>
                   <td>
@@ -247,7 +254,38 @@ export default function AdminOrdersPage() {
                       <div className="adm-label">Fecha</div>
                       <div>{formatDate(detail.createdAt)}</div>
                     </div>
+                    <div>
+                      <div className="adm-label">Entrega</div>
+                      <div>{shippingLabel[detail.shippingMethod || 'pickup'] || 'Retiro'}</div>
+                    </div>
+                    <div>
+                      <div className="adm-label">Codigo postal</div>
+                      <div>{detail.shippingPostalCode || '—'}</div>
+                    </div>
                   </div>
+
+                  {detail.shippingMethod === 'delivery' && (
+                    <div>
+                      <div className="adm-label">Direccion de entrega</div>
+                      <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6, fontSize: 14 }}>
+                        {[detail.shippingAddressLine1, detail.shippingAddressLine2, detail.shippingCity, detail.shippingProvince]
+                          .filter(Boolean)
+                          .join(' · ') || '—'}
+                      </div>
+                    </div>
+                  )}
+
+                  {detail.shippingMethod === 'delivery' && (
+                    <div>
+                      <div className="adm-label">Envio</div>
+                      <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6, fontSize: 14 }}>
+                        {[detail.shippingProvider, detail.shippingService]
+                          .filter(Boolean)
+                          .join(' · ') || 'Agregador'}
+                        {detail.shippingCost ? ` · $${detail.shippingCost}` : ''}
+                      </div>
+                    </div>
+                  )}
 
                   {detail.notes && (
                     <div>

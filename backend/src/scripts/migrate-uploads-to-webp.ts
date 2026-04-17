@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import sharp from 'sharp';
 import { fileURLToPath } from 'url';
 import { Pool } from 'pg';
+import { getImageStorageDriver, storeImage } from '../shared/storage/image-storage.js';
 
 type ProductRow = {
   id: number;
@@ -121,9 +122,6 @@ async function buildWebpVariants(): Promise<{
       const xlFile = `${safeBase}-${hash}-xl.webp`;
       const smFile = `${safeBase}-${hash}-sm.webp`;
 
-      const xlFullPath = path.join(uploadsDir, relDir, xlFile);
-      const smFullPath = path.join(uploadsDir, relDir, smFile);
-
       const sourceBuffer = await fs.promises.readFile(fullPath);
 
       const xl = await sharp(sourceBuffer)
@@ -150,13 +148,24 @@ async function buildWebpVariants(): Promise<{
         .webp({ quality: 82, effort: 4, smartSubsample: true })
         .toBuffer();
 
-      await Promise.all([
-        fs.promises.writeFile(xlFullPath, xl),
-        fs.promises.writeFile(smFullPath, sm),
+      const xlVariantPath = toPosix(path.join(relDir, xlFile));
+      const smVariantPath = toPosix(path.join(relDir, smFile));
+
+      const [xlStored] = await Promise.all([
+        storeImage({
+          fileName: xlVariantPath,
+          buffer: xl,
+          contentType: 'image/webp',
+        }),
+        storeImage({
+          fileName: smVariantPath,
+          buffer: sm,
+          contentType: 'image/webp',
+        }),
       ]);
 
       const oldUrl = `/uploads/${rel}`;
-      const newXlUrl = `/uploads/${toPosix(path.join(relDir, xlFile))}`;
+      const newXlUrl = xlStored.url;
 
       mapOldToNewXl.set(normalizeDbUrl(oldUrl), newXlUrl);
       processedFiles += 1;
@@ -282,6 +291,7 @@ async function main() {
 
   console.log('Starting image migration to WebP variants...');
   console.log(`Uploads dir: ${uploadsDir}`);
+  console.log(`Storage driver: ${getImageStorageDriver()}`);
 
   const { mapOldToNewXl, processedFiles, skippedGeneratedFiles, failedFiles } = await buildWebpVariants();
 
