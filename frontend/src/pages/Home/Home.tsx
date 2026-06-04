@@ -6,6 +6,7 @@ import Footer from '../../componentes/layout/footer/footer';
 import { Link } from 'react-router-dom';
 import {
   getCategories,
+  getHomeSettings,
   getProducts,
   toResponsiveImage,
   toAbsoluteUrl,
@@ -26,6 +27,7 @@ function formatMoney(price: number) {
 export default function HomePage() {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<ProductDto[]>([]);
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
   const carouselRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -33,18 +35,21 @@ export default function HomePage() {
 
     async function load() {
       try {
-        const [cats, prods] = await Promise.all([
+        const [cats, prods, homeSettings] = await Promise.all([
           getCategories({ includeRepresentative: true }),
           getProducts({ limit: 8 }),
+          getHomeSettings(),
         ]);
 
         if (cancelled) return;
         setCategories(cats);
         setProducts(prods);
+        setHeroImageUrl(homeSettings.heroImageUrl ?? null);
       } catch {
         if (cancelled) return;
         setCategories([]);
         setProducts([]);
+        setHeroImageUrl(null);
       }
     }
 
@@ -56,12 +61,13 @@ export default function HomePage() {
 
   const collections = useMemo(() => {
     return categories.map((c) => {
+      const imageUrl = toAbsoluteUrl(c.imageUrl);
       const rep = toAbsoluteUrl(c.representativeImageUrl);
       return {
         id: c.id,
         title: c.name,
         subtitle: 'Ver diseños',
-        image: rep ?? categoryImageUrl(c.id),
+        image: imageUrl ?? rep ?? categoryImageUrl(c.id),
       };
     });
   }, [categories]);
@@ -79,7 +85,10 @@ export default function HomePage() {
       <Header />
 
       <section className="ph-hero" aria-label="Banner principal">
-        <div className="ph-heroImage" />
+        <div
+          className="ph-heroImage"
+          style={heroImageUrl ? { backgroundImage: `url(${toAbsoluteUrl(heroImageUrl)})` } : undefined}
+        />
       </section>
 
       <section className="ph-section" aria-label="Colecciones">

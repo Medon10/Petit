@@ -66,7 +66,7 @@ export default function CategoriesPage() {
           ) : (
             <div className="ph-categoriesGrid">
               {categories.map((c) => {
-                const image = toAbsoluteUrl(c.representativeImageUrl) ?? '/images/placeholder-category.jpg';
+                const image = toAbsoluteUrl(c.imageUrl) ?? toAbsoluteUrl(c.representativeImageUrl) ?? '/images/placeholder-category.jpg';
                 return (
                   <Link key={c.id} to={`/categorias/${c.id}`} className="ph-categoryCard">
                     <div className="ph-categoryMedia">

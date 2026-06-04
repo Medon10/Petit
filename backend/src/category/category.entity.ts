@@ -7,6 +7,9 @@ export class Category extends BaseEntity {
   @Property()
   name!: string;
 
+  @Property({ fieldName: 'image_url', nullable: true })
+  imageUrl?: string;
+
   @Property({ fieldName: 'is_active', default: true })
   isActive: boolean = true;
 

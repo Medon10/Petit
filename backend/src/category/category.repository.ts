@@ -22,6 +22,7 @@ export class CategoryRepository {
       SELECT
         c.id,
         c.name,
+        c.image_url AS imageUrl,
         c.is_active AS isActive,
         (
           SELECT p.image_url
@@ -43,6 +44,7 @@ export class CategoryRepository {
       id: Number(r.id),
       name: r.name,
       isActive: Boolean(r.isActive),
+      imageUrl: r.imageUrl ?? null,
       representativeImageUrl: r.representativeImageUrl ?? null,
     }));
   }

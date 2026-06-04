@@ -8,6 +8,7 @@ import { Category } from '../../category/category.entity.js';
 import { Product } from '../../product/product.entity.js';
 import { Variant } from '../../variant/variant.entity.js';
 import { Extra } from '../../extra/extra.entity.js';
+import { SiteSetting } from '../../site-settings/site-setting.entity.js';
 import { AdminUser } from '../../admin/admin-user.entity.js';
 import { Order } from '../../order/order.entity.js';
 import { OrderItem } from '../../order-item/order-item.entity.js';
@@ -31,8 +32,8 @@ const dbSslEnabled = String(process.env.DB_SSL || '').toLowerCase() === 'true';
 const dbSslRejectUnauthorized = String(process.env.DB_SSL_REJECT_UNAUTHORIZED || 'true').toLowerCase() !== 'false';
 
 export const orm = await MikroORM.init({
-    entities: [Category, Product, Variant, Extra, AdminUser, Order, OrderItem, OrderItemExtra],
-    entitiesTs: [Category, Product, Variant, Extra, AdminUser, Order, OrderItem, OrderItemExtra],
+    entities: [Category, Product, Variant, Extra, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra],
+    entitiesTs: [Category, Product, Variant, Extra, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra],
     driver: PostgreSqlDriver,
     clientUrl: buildClientUrlFromEnv(),
         driverOptions: dbSslEnabled

@@ -13,6 +13,7 @@
 - [Categories](category.md)
 - [Variants](variant.md)
 - [Extras](extra.md)
+- [Site Settings](site-settings.md)
 - [Orders](order.md)
 - [Order Items](order-item.md)
 - [Order Item Extras](order-item-extra.md)

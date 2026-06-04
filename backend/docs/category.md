@@ -8,7 +8,7 @@
 ### Example: listar categorías
 Response 200:
 ```json
-{ "data": [{ "id": 1, "name": "Dijes", "isActive": true }] }
+{ "data": [{ "id": 1, "name": "Dijes", "isActive": true, "imageUrl": "/uploads/categorias/dijes.jpg" }] }
 ```
 
 ## Endpoints admin (CRUD)
@@ -20,7 +20,7 @@ Response 200:
 ### Example: crear categoría
 Request:
 ```json
-{ "name": "Cadenas", "is_active": true }
+{ "name": "Cadenas", "image_url": "/uploads/categorias/cadenas.jpg", "is_active": true }
 ```
 Response 201:
 ```json
@@ -29,6 +29,7 @@ Response 201:
 
 ## Campos clave
 - `is_active`
+- `image_url`
 
 ## Archivos
 - src/category/category.routes.ts
@@ -40,3 +41,9 @@ Response 201:
 ## Notas
 - Públicos filtran `is_active = true`.
 - `include_representative` usa query SQL y filtra activos.
+- La base de datos guarda solo la URL o ruta de la imagen en `image_url`; el archivo vive en storage local o en R2/S3.
+- Si la base ya existe y no usa `syncSchema`, ejecutar:
+```sql
+ALTER TABLE categories
+ADD COLUMN IF NOT EXISTS image_url TEXT;
+```

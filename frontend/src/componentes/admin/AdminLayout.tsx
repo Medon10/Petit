@@ -16,12 +16,10 @@ export default function AdminLayout({ children }: Props) {
     <div className="adm-layout">
       <aside className="adm-sidebar">
         <div className="adm-sidebarBrand">
-          <span className="adm-brandIcon">
-            <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" width="22" height="22">
-              <path d="M12,24 L24,6 L36,24 L24,42 Z" />
-            </svg>
-          </span>
-          <span className="adm-brandText">Petit Admin</span>
+          <div className="adm-brandCopy">
+            <span className="adm-brandText">Petit</span>
+            <span className="adm-brandSubtext">Admin Studio</span>
+          </div>
         </div>
 
         <nav className="adm-nav">

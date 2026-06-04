@@ -142,8 +142,8 @@ async function buildWebpVariants(): Promise<{
         .resize({
           width: MAX_SM,
           height: MAX_SM,
-          fit: 'cover',
-          position: sharp.strategy.attention,
+          fit: 'contain',
+          background: { r: 255, g: 255, b: 255, alpha: 0 },
         })
         .webp({ quality: 82, effort: 4, smartSubsample: true })
         .toBuffer();

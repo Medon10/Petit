@@ -38,8 +38,8 @@ export async function uploadImage(req: Request, res: Response) {
       .resize({
         width: 600,
         height: 600,
-        fit: 'cover',
-        position: sharp.strategy.attention,
+        fit: 'contain',
+        background: { r: 255, g: 255, b: 255, alpha: 0 },
       })
       .webp({
         quality: 82,

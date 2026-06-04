@@ -10,6 +10,7 @@ export type CategoryFilters = {
 
 export type CategoryInput = {
   name?: string;
+  image_url?: string;
   is_active?: number | boolean;
 };
 

@@ -2,6 +2,7 @@ export type CategoryDto = {
   id: number;
   name: string;
   isActive?: boolean;
+  imageUrl?: string | null;
   representativeImageUrl?: string | null;
 };
 
@@ -43,6 +44,10 @@ export type CategoryRefDto = {
 export type ProductDetailDto = ProductDto & {
   description?: string | null;
   category?: CategoryRefDto | null;
+};
+
+export type HomeSettingsDto = {
+  heroImageUrl?: string | null;
 };
 
 export type ProductsPageDto = {
@@ -235,6 +240,12 @@ export async function getExtras(options?: { categoryType?: string }) {
   return Array.isArray((data as any)?.data) ? ((data as any).data as ExtraDto[]) : [];
 }
 
+export async function getHomeSettings() {
+  const data = await apiGetJson<{ data?: unknown }>(`/site-settings/home`);
+  const item = (data as any)?.data;
+  return item && typeof item === 'object' ? (item as HomeSettingsDto) : { heroImageUrl: null };
+}
+
 export type ShippingMethod = 'pickup' | 'delivery';
 
 export type ShippingQuoteExtraInput = {
@@ -309,6 +320,16 @@ export async function adminUploadImage(file: File) {
   return await adminRequestForm<{ data?: { url?: string } }>(`/admin/catalog/uploads`, form);
 }
 
+export async function adminGetHomeSettings() {
+  const data = await adminRequestJson<{ data?: unknown }>(`/site-settings/home`, { method: 'GET' });
+  const item = (data as any)?.data;
+  return item && typeof item === 'object' ? (item as HomeSettingsDto) : { heroImageUrl: null };
+}
+
+export async function adminUpdateHomeSettings(input: { hero_image_url?: string }) {
+  return await adminRequestJson<{ data?: unknown }>(`/site-settings/home`, { method: 'PATCH', body: input });
+}
+
 // ── Admin Products ──────────────────────────────────────────
 
 export async function adminGetProducts(opts?: { categoryId?: number }) {
@@ -363,11 +384,11 @@ export async function adminGetCategories() {
   return Array.isArray((data as any)?.data) ? ((data as any).data as CategoryDto[]) : [];
 }
 
-export async function adminCreateCategory(input: { name: string; is_active?: boolean }) {
+export async function adminCreateCategory(input: { name: string; image_url?: string; is_active?: boolean }) {
   return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/categories`, { method: 'POST', body: input });
 }
 
-export async function adminUpdateCategory(id: number, input: { name?: string; is_active?: boolean }) {
+export async function adminUpdateCategory(id: number, input: { name?: string; image_url?: string; is_active?: boolean }) {
   return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/categories/${id}`, { method: 'PATCH', body: input });
 }
 

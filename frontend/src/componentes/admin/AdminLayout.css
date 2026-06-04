@@ -2,13 +2,16 @@
 .adm-layout {
   display: flex;
   min-height: 100vh;
-  background: #f8f8fa;
+  background:
+    radial-gradient(circle at top left, rgba(219, 39, 119, 0.08), transparent 28%),
+    linear-gradient(180deg, #f9f5f2 0%, #f4efe9 100%);
 }
 
 .adm-sidebar {
-  width: 240px;
+  width: 258px;
   min-height: 100vh;
-  background: #111;
+  background:
+    linear-gradient(180deg, #050505 0%, #101010 100%);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -18,49 +21,69 @@
   height: 100vh;
   overflow-y: auto;
   flex-shrink: 0;
+  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.18);
 }
 
 .adm-sidebarBrand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 22px 20px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 12px;
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .adm-brandIcon {
   display: inline-flex;
-  color: #db2777;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  color: #f8b4d9;
+  background: rgba(219, 39, 119, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(248, 180, 217, 0.12);
+}
+
+.adm-brandCopy {
+  display: grid;
+  gap: 3px;
 }
 
 .adm-brandText {
   font-family: "Playfair Display", ui-serif, Georgia, serif;
   font-weight: 900;
-  font-size: 17px;
-  letter-spacing: 0.1em;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.adm-brandSubtext {
+  font-size: 10px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.56);
 }
 
 .adm-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 12px 10px;
+  gap: 4px;
+  padding: 16px 10px;
   flex: 1;
 }
 
 .adm-navLink {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 10px;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  transition: background 150ms, color 150ms;
+  letter-spacing: 0.03em;
+  transition: background 150ms, color 150ms, transform 150ms;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -75,19 +98,31 @@
 .adm-navLink:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
+  transform: translateX(2px);
 }
 
 .adm-navLink.active {
-  background: rgba(219, 39, 119, 0.18);
-  color: #f472b6;
+  background: linear-gradient(90deg, rgba(219, 39, 119, 0.28), rgba(219, 39, 119, 0.12));
+  color: #ffd5e9;
+  box-shadow: inset 0 0 0 1px rgba(248, 180, 217, 0.16);
 }
 
 .adm-sidebarFooter {
-  padding: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
+}
+
+.adm-sidebarFooter::before {
+  content: 'Gestión del catálogo';
+  display: block;
+  padding: 0 10px 6px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .adm-logoutBtn {
@@ -97,7 +132,7 @@
 .adm-main {
   flex: 1;
   min-width: 0;
-  padding: 32px 36px;
+  padding: 34px 38px;
   overflow-y: auto;
 }
 
@@ -121,11 +156,12 @@
 .adm-tabs {
   display: flex;
   gap: 4px;
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  border-radius: 16px;
   padding: 4px;
   margin-bottom: 24px;
+  box-shadow: 0 10px 28px rgba(17, 17, 17, 0.05);
 }
 
 .adm-tab {
@@ -133,21 +169,21 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  border-radius: 9px;
+  border-radius: 12px;
   font-weight: 700;
   font-size: 13px;
-  color: #71717a;
+  color: #6b6470;
   transition: all 150ms;
   letter-spacing: 0.01em;
 }
 
 .adm-tab:hover {
   color: #111;
-  background: #f4f4f5;
+  background: rgba(17, 17, 17, 0.05);
 }
 
 .adm-tab.active {
-  background: #111;
+  background: linear-gradient(180deg, #111 0%, #1f1f1f 100%);
   color: #fff;
 }
 
@@ -354,6 +390,10 @@
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
 }
 
+.adm-cropModal {
+  width: min(760px, 100%);
+}
+
 .adm-modalHeader {
   display: flex;
   align-items: center;
@@ -384,6 +424,40 @@
 
 .adm-modalBody {
   padding: 22px;
+}
+
+.adm-cropHint {
+  margin: 0 0 14px;
+  color: #52525b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.adm-cropStage {
+  position: relative;
+  width: 100%;
+  height: min(56vw, 420px);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111;
+}
+
+.adm-cropControls {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.adm-cropZoomLabel {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #52525b;
+}
+
+.adm-cropZoomLabel input {
+  width: 100%;
 }
 
 .adm-form {
@@ -520,6 +594,45 @@
 .adm-uploadBtn:hover {
   border-color: #db2777;
   color: #db2777;
+}
+
+.adm-homeCard {
+  padding: 20px;
+}
+
+.adm-homePreviewWrap {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #eee2ea;
+  background: linear-gradient(135deg, #fff 0%, #faf7f9 100%);
+}
+
+.adm-homePreview {
+  position: relative;
+  min-height: 280px;
+  background-color: #f5e9ee;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.adm-homePreviewEmpty {
+  margin: 20px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.72);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.adm-homeNote {
+  color: #6b6470;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 @media (max-width: 768px) {

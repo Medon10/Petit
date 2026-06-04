@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import AdminLayout from '../../componentes/admin/AdminLayout';
+import ImageCropModal from '../../componentes/admin/ImageCropModal';
 import Skeleton from '../../componentes/shared/Skeleton';
 import {
   adminGetProducts,
@@ -24,6 +25,8 @@ import {
   adminUpdateExtra,
   adminDeleteExtra,
   adminSetExtraActive,
+  adminGetHomeSettings,
+  adminUpdateHomeSettings,
   adminUploadImage,
   clearAdminToken,
   toAbsoluteUrl,
@@ -34,7 +37,7 @@ import {
 } from '../../shared/api';
 import '../../componentes/admin/AdminLayout.css';
 
-type Tab = 'products' | 'categories' | 'variants' | 'extras';
+type Tab = 'home' | 'products' | 'categories' | 'variants' | 'extras';
 
 /* ─── hook: handle 401 redirect ──────────────────────────── */
 function useAuthRedirect() {
@@ -48,6 +51,136 @@ function useAuthRedirect() {
       }
     },
     [nav],
+  );
+}
+
+/* ================================================================
+   HOME TAB
+   ================================================================ */
+function HomeTab() {
+  const onAuthErr = useAuthRedirect();
+  const [heroImageUrl, setHeroImageUrl] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await adminGetHomeSettings();
+      setHeroImageUrl(data.heroImageUrl ?? '');
+    } catch (e: any) {
+      onAuthErr(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [onAuthErr]);
+
+  useEffect(() => { load(); }, [load]);
+
+  function onPickImage(file?: File | null) {
+    if (!file) return;
+    setCropFile(file);
+    setCropOpen(true);
+  }
+
+  async function onUpload(file: File) {
+    setUploading(true);
+    try {
+      const res = await adminUploadImage(file);
+      const url = (res as any)?.data?.url || '';
+      if (url) setHeroImageUrl(url);
+    } catch (e: any) {
+      setError(e?.message || 'Error al subir imagen');
+      onAuthErr(e);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function onSave() {
+    setSaving(true);
+    setError('');
+    try {
+      await adminUpdateHomeSettings({ hero_image_url: heroImageUrl || undefined });
+      await load();
+    } catch (e: any) {
+      setError(e?.message || 'Error');
+      onAuthErr(e);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return <div className="adm-card" style={{ display: 'grid', gap: 10 }}><Skeleton variant="text" /><Skeleton variant="text" /><Skeleton variant="text" /></div>;
+  }
+
+  return (
+    <>
+      <div className="adm-header">
+        <h1 className="adm-h1">Portada</h1>
+        <button className="adm-btnPrimary" onClick={() => fileRef.current?.click()}>
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>upload</span> Elegir foto
+        </button>
+      </div>
+
+      <div className="adm-card adm-homeCard">
+        <div className="adm-homePreviewWrap">
+          <div className="adm-homePreview" style={heroImageUrl ? { backgroundImage: `url(${toAbsoluteUrl(heroImageUrl)})` } : undefined}>
+            {!heroImageUrl && <span className="adm-homePreviewEmpty">Aún no hay foto de portada</span>}
+          </div>
+        </div>
+
+        <div className="adm-form" style={{ marginTop: 18 }}>
+          <div className="adm-field">
+            <label className="adm-label">URL manual</label>
+            <input className="adm-input" placeholder="Pegá una URL o subí una imagen" value={heroImageUrl} onChange={(e) => setHeroImageUrl(e.target.value)} />
+          </div>
+
+          {error && <p className="adm-error">{error}</p>}
+
+          <div className="adm-homeNote">
+            Esta imagen se usa como banner principal de Home. Conviene una composición ancha, con el centro protagonista.
+          </div>
+        </div>
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => {
+            onPickImage(e.target.files?.[0]);
+            e.target.value = '';
+          }}
+        />
+      </div>
+
+      <div className="adm-modalFooter" style={{ paddingLeft: 0, paddingRight: 0, borderTop: 0, justifyContent: 'flex-start' }}>
+        <button className="adm-btnPrimary" disabled={saving || uploading} onClick={onSave}>
+          {saving ? 'Guardando...' : 'Guardar portada'}
+        </button>
+      </div>
+
+      <ImageCropModal
+        file={cropFile}
+        open={cropOpen}
+        title="Recortar foto de Home"
+        aspect={16 / 9}
+        onClose={() => {
+          setCropOpen(false);
+          setCropFile(null);
+        }}
+        onConfirm={async (croppedFile) => {
+          await onUpload(croppedFile);
+          setCropFile(null);
+        }}
+      />
+    </>
   );
 }
 
@@ -75,6 +208,8 @@ function ProductsTab() {
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -111,8 +246,13 @@ function ProductsTab() {
     setModal('edit');
   }
 
-  async function onUpload(file?: File | null) {
+  function onPickImage(file?: File | null) {
     if (!file) return;
+    setCropFile(file);
+    setCropOpen(true);
+  }
+
+  async function onUpload(file: File) {
     setUploading(true);
     try {
       const res = await adminUploadImage(file);
@@ -272,7 +412,16 @@ function ProductsTab() {
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
                       {uploading ? 'Subiendo...' : 'Subir imagen'}
                     </button>
-                    <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onUpload(e.target.files?.[0])} />
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => {
+                        onPickImage(e.target.files?.[0]);
+                        e.target.value = '';
+                      }}
+                    />
                   </div>
                   <input className="adm-input" placeholder="URL manual" value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} style={{ marginTop: 6 }} />
                 </div>
@@ -311,6 +460,20 @@ function ProductsTab() {
           </div>
         </div>
       )}
+
+      <ImageCropModal
+        file={cropFile}
+        open={cropOpen}
+        title="Recortar imagen del producto"
+        onClose={() => {
+          setCropOpen(false);
+          setCropFile(null);
+        }}
+        onConfirm={async (croppedFile) => {
+          await onUpload(croppedFile);
+          setCropFile(null);
+        }}
+      />
     </>
   );
 }
@@ -325,9 +488,14 @@ function CategoriesTab() {
   const [modal, setModal] = useState<'create' | 'edit' | null>(null);
   const [editItem, setEditItem] = useState<CategoryDto | null>(null);
   const [name, setName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
 
   const load = useCallback(async () => {
     try { setItems(await adminGetCategories()); } catch (e: any) { onAuthErr(e); }
@@ -336,17 +504,37 @@ function CategoriesTab() {
 
   useEffect(() => { load(); }, [load]);
 
-  function openCreate() { setEditItem(null); setName(''); setActive(true); setError(''); setModal('create'); }
-  function openEdit(c: CategoryDto) { setEditItem(c); setName(c.name); setActive(c.isActive !== false); setError(''); setModal('edit'); }
+  function openCreate() { setEditItem(null); setName(''); setImageUrl(''); setActive(true); setError(''); setModal('create'); }
+  function openEdit(c: CategoryDto) { setEditItem(c); setName(c.name); setImageUrl(c.imageUrl ?? ''); setActive(c.isActive !== false); setError(''); setModal('edit'); }
+
+  function onPickImage(file?: File | null) {
+    if (!file) return;
+    setCropFile(file);
+    setCropOpen(true);
+  }
+
+  async function onUpload(file: File) {
+    setUploading(true);
+    try {
+      const res = await adminUploadImage(file);
+      const url = (res as any)?.data?.url || '';
+      if (url) setImageUrl(url);
+    } catch (e: any) {
+      setError(e?.message || 'Error al subir imagen');
+      onAuthErr(e);
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function onSave() {
     if (!name.trim()) { setError('Nombre requerido'); return; }
     setSaving(true); setError('');
     try {
       if (modal === 'edit' && editItem) {
-        await adminUpdateCategory(editItem.id, { name: name.trim(), is_active: active });
+        await adminUpdateCategory(editItem.id, { name: name.trim(), image_url: imageUrl || undefined, is_active: active });
       } else {
-        await adminCreateCategory({ name: name.trim(), is_active: active });
+        await adminCreateCategory({ name: name.trim(), image_url: imageUrl || undefined, is_active: active });
       }
       setModal(null); await load();
     } catch (e: any) { setError(e?.message || 'Error'); onAuthErr(e); }
@@ -409,6 +597,27 @@ function CategoriesTab() {
                   <label className="adm-label">Nombre</label>
                   <input className="adm-input" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
+                <div className="adm-field">
+                  <label className="adm-label">Imagen</label>
+                  <div className="adm-uploadArea">
+                    {imageUrl && <img className="adm-uploadPreview" src={toAbsoluteUrl(imageUrl)} alt="" />}
+                    <button className="adm-uploadBtn" type="button" disabled={uploading} onClick={() => fileRef.current?.click()}>
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
+                      {uploading ? 'Subiendo...' : 'Subir imagen'}
+                    </button>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => {
+                        onPickImage(e.target.files?.[0]);
+                        e.target.value = '';
+                      }}
+                    />
+                  </div>
+                  <input className="adm-input" placeholder="URL manual" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} style={{ marginTop: 6 }} />
+                </div>
                 <label className="adm-checkbox">
                   <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Activa
                 </label>
@@ -422,6 +631,20 @@ function CategoriesTab() {
           </div>
         </div>
       )}
+
+      <ImageCropModal
+        file={cropFile}
+        open={cropOpen}
+        title="Recortar imagen de la categoría"
+        onClose={() => {
+          setCropOpen(false);
+          setCropFile(null);
+        }}
+        onConfirm={async (croppedFile) => {
+          await onUpload(croppedFile);
+          setCropFile(null);
+        }}
+      />
     </>
   );
 }
@@ -446,6 +669,8 @@ function VariantsTab() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
 
   const loadProducts = useCallback(async () => {
     try { setProducts(await adminGetProducts()); } catch (e: any) { onAuthErr(e); }
@@ -469,8 +694,13 @@ function VariantsTab() {
     setEditItem(v); setVName(v.name); setVPrice(v.price); setVImageUrl(v.imageUrl ?? ''); setVProduct(String(v.product?.id ?? '')); setVActive(v.isActive !== false); setError(''); setModal('edit');
   }
 
-  async function onUpload(file?: File | null) {
+  function onPickImage(file?: File | null) {
     if (!file) return;
+    setCropFile(file);
+    setCropOpen(true);
+  }
+
+  async function onUpload(file: File) {
     setUploading(true);
     try {
       const res = await adminUploadImage(file);
@@ -595,7 +825,16 @@ function VariantsTab() {
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
                       {uploading ? 'Subiendo...' : 'Subir imagen'}
                     </button>
-                    <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onUpload(e.target.files?.[0])} />
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => {
+                        onPickImage(e.target.files?.[0]);
+                        e.target.value = '';
+                      }}
+                    />
                   </div>
                   <input className="adm-input" placeholder="URL manual" value={vImageUrl} onChange={(e) => setVImageUrl(e.target.value)} style={{ marginTop: 6 }} />
                 </div>
@@ -612,6 +851,20 @@ function VariantsTab() {
           </div>
         </div>
       )}
+
+      <ImageCropModal
+        file={cropFile}
+        open={cropOpen}
+        title="Recortar imagen de la variante"
+        onClose={() => {
+          setCropOpen(false);
+          setCropFile(null);
+        }}
+        onConfirm={async (croppedFile) => {
+          await onUpload(croppedFile);
+          setCropFile(null);
+        }}
+      />
     </>
   );
 }
@@ -753,12 +1006,14 @@ export default function AdminCatalogPage() {
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
       <div className="adm-tabs">
+        <button className={`adm-tab${tab === 'home' ? ' active' : ''}`} onClick={() => setTab('home')}>Portada</button>
         <button className={`adm-tab${tab === 'products' ? ' active' : ''}`} onClick={() => setTab('products')}>Productos</button>
         <button className={`adm-tab${tab === 'categories' ? ' active' : ''}`} onClick={() => setTab('categories')}>Categorías</button>
         <button className={`adm-tab${tab === 'variants' ? ' active' : ''}`} onClick={() => setTab('variants')}>Variantes</button>
         <button className={`adm-tab${tab === 'extras' ? ' active' : ''}`} onClick={() => setTab('extras')}>Extras</button>
       </div>
 
+      {tab === 'home' && <HomeTab />}
       {tab === 'products' && <ProductsTab />}
       {tab === 'categories' && <CategoriesTab />}
       {tab === 'variants' && <VariantsTab />}

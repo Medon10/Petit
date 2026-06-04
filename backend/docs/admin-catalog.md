@@ -25,6 +25,7 @@ Response 200:
   - Query: `include_representative`, `include_inactive`, `is_active`
 - `GET /admin/catalog/categories/:id`
 - `PATCH /admin/catalog/categories/:id/active` (body: `is_active`)
+- `POST /admin/catalog/categories` y `PATCH /admin/catalog/categories/:id` aceptan `image_url`
 
 #### Example: activar/desactivar
 Request:
