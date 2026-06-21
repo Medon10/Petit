@@ -142,6 +142,7 @@ export async function createAdminExtra(input: any) {
   return await createExtra(input);
 }
 
+
 export async function updateAdminExtra(id: number, input: any) {
   return await updateExtra(id, input);
 }
@@ -156,7 +157,7 @@ export async function setAdminExtraActive(id: number, isActive: boolean) {
 
 // ── Orders (admin) ──────────────────────────────────────────
 
-export async function listAdminOrders(params: { limit?: unknown }) {
+export async function listAdminOrders(params: { limit?: unknown; page?: unknown; status?: unknown; q?: unknown }) {
   return await listOrdersSvc(params);
 }
 

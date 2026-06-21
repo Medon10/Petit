@@ -258,7 +258,7 @@ export async function getOrderById(id: number) {
   return await OrderRepository.populateOrder(em, id);
 }
 
-const VALID_STATUSES = ['pending', 'paid', 'cancelled', 'completed'] as const;
+const VALID_STATUSES = ['pending', 'processing', 'completed', 'cancelled'] as const;
 
 export async function updateOrderStatus(id: number, status: string) {
   if (!VALID_STATUSES.includes(status as any)) {

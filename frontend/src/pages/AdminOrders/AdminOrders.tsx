@@ -14,18 +14,25 @@ import {
 import '../../componentes/admin/AdminLayout.css';
 import './AdminOrders.css';
 
-const STATUS_OPTIONS = ['pending', 'paid', 'completed', 'cancelled'] as const;
+const STATUS_OPTIONS = ['pending', 'processing', 'completed', 'cancelled'] as const;
 
 const statusLabel: Record<string, string> = {
+  pending: 'Orden creada, esperando transferencia',
+  processing: 'Comprobante recibido, en proceso',
+  completed: 'Pedido completado',
+  cancelled: 'Cancelado',
+};
+
+const statusLabelShort: Record<string, string> = {
   pending: 'Pendiente',
-  paid: 'Pagado',
+  processing: 'En proceso',
   completed: 'Completado',
   cancelled: 'Cancelado',
 };
 
 const statusColor: Record<string, string> = {
   pending: 'yellow',
-  paid: 'blue',
+  processing: 'blue',
   completed: 'green',
   cancelled: 'red',
 };
@@ -41,11 +48,22 @@ function formatDate(iso?: string) {
   return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+function copyToClipboard(text: string) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+  });
+}
+
 export default function AdminOrdersPage() {
   const nav = useNavigate();
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'paid' | 'completed' | 'cancelled'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'processing' | 'completed' | 'cancelled'>('all');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -141,11 +159,11 @@ export default function AdminOrdersPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
           >
-            <option value="all">Todos</option>
-            <option value="pending">Pendiente</option>
-            <option value="paid">Pagado</option>
-            <option value="completed">Completado</option>
-            <option value="cancelled">Cancelado</option>
+              <option value="all">Todos</option>
+              <option value="pending">Pendiente de pago</option>
+              <option value="processing">En proceso</option>
+              <option value="completed">Completado</option>
+              <option value="cancelled">Cancelado</option>
           </select>
         </div>
 
@@ -194,7 +212,7 @@ export default function AdminOrdersPage() {
                   <td>{o.customerName}</td>
                   <td>
                     <span className={`adm-badge ${statusColor[o.status] ?? 'gray'}`}>
-                      {statusLabel[o.status] ?? o.status}
+                      {statusLabelShort[o.status] ?? o.status}
                     </span>
                   </td>
                   <td>{shippingLabel[o.shippingMethod || 'pickup'] || 'Retiro'}</td>
@@ -266,11 +284,23 @@ export default function AdminOrdersPage() {
 
                   {detail.shippingMethod === 'delivery' && (
                     <div>
-                      <div className="adm-label">Direccion de entrega</div>
-                      <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6, fontSize: 14 }}>
-                        {[detail.shippingAddressLine1, detail.shippingAddressLine2, detail.shippingCity, detail.shippingProvince]
-                          .filter(Boolean)
-                          .join(' · ') || '—'}
+                      <div className="adm-label">Dirección de entrega</div>
+                      <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{ flex: 1 }}>
+                          {[detail.shippingAddressLine1, detail.shippingAddressLine2, detail.shippingCity, detail.shippingProvince]
+                            .filter(Boolean)
+                            .join(' · ') || '—'}
+                        </span>
+                        <button
+                          className="adm-btnSmall"
+                          title="Copiar datos de envío"
+                          onClick={() => {
+                            const addr = [detail.shippingAddressLine1, detail.shippingAddressLine2, detail.shippingCity, detail.shippingProvince, detail.shippingPostalCode ? `CP ${detail.shippingPostalCode}` : ''].filter(Boolean).join(', ');
+                            copyToClipboard(`Pedido #${detail.id} — ${detail.customerName}\nDirección: ${addr}`);
+                          }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>content_copy</span>
+                        </button>
                       </div>
                     </div>
                   )}
@@ -305,12 +335,14 @@ export default function AdminOrdersPage() {
                             cursor: detail.status === s ? 'default' : 'pointer',
                             opacity: statusUpdating ? 0.5 : 1,
                             border: detail.status === s ? '2px solid currentColor' : '2px solid transparent',
-                            padding: '4px 12px',
+                            padding: '6px 14px',
+                            fontSize: 12,
+                            whiteSpace: 'nowrap',
                           }}
                           disabled={statusUpdating || detail.status === s}
                           onClick={() => changeStatus(detail.id, s)}
                         >
-                          {statusLabel[s]}
+                          {statusLabelShort[s]}
                         </button>
                       ))}
                     </div>
@@ -349,6 +381,35 @@ export default function AdminOrdersPage() {
 
                   <div style={{ textAlign: 'right', fontWeight: 700, fontSize: 18, marginTop: 8 }}>
                     Total: ${detail.total}
+                  </div>
+
+                  {/* Quick-action buttons */}
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', borderTop: '1px solid #eee', paddingTop: 12, marginTop: 4 }}>
+                    {detail.customerPhone && (
+                      <a
+                        href={`https://wa.me/${detail.customerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${detail.customerName.split(' ')[0]}! Te escribimos por tu pedido #${detail.id} de Petit Accesorios.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="adm-btnSmall"
+                        title="Escribir por WhatsApp"
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', textDecoration: 'none' }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chat</span>
+                        WhatsApp
+                      </a>
+                    )}
+                    <button
+                      className="adm-btnSmall"
+                      title="Copiar resumen del pedido"
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px' }}
+                      onClick={() => {
+                        const itemsText = (detail.items || []).map(it => `  - ${it.productName}${it.variantName ? ` (${it.variantName})` : ''} x${it.quantity}`).join('\n');
+                        copyToClipboard(`Pedido #${detail.id}\nCliente: ${detail.customerName}\nEstado: ${statusLabel[detail.status] ?? detail.status}\nTotal: $${detail.total}\nItems:\n${itemsText}`);
+                      }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>summarize</span>
+                      Copiar resumen
+                    </button>
                   </div>
                 </div>
               </div>

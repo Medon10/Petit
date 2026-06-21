@@ -268,6 +268,21 @@
   color: #6b7280;
 }
 
+.adm-badge.purple {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.adm-badge.orange {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.adm-badge.teal {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
 .adm-btnPrimary {
   display: inline-flex;
   align-items: center;

@@ -330,6 +330,9 @@ export async function listOrders(req: Request, res: Response) {
   try {
     const result = await listAdminOrders({
       limit: req.query.limit ?? req.query.take,
+      page: req.query.page,
+      status: req.query.status,
+      q: req.query.q,
     });
     return res.json(result);
   } catch (error) {

@@ -1,7 +1,5 @@
 import { randomUUID } from 'node:crypto';
-
-import { orm } from '../shared/bdd/orm.js';
-import { OrderRepository } from '../order/order.repository.js';
+import { quoteCorreoArgentino } from './correo-ar.service.js';
 
 export type ShippingQuoteExtraInput = {
   extra_id?: number;
@@ -164,88 +162,7 @@ export function buildOrderItemsSignature(itemsInput: unknown) {
   return sortedItems.join('|');
 }
 
-async function calculateItemsSubtotal(items: NormalizedItem[]) {
-  const em = orm.em.fork();
-  let subtotal = 0;
 
-  for (const item of items) {
-    const product = await OrderRepository.findProductOrThrow(em, item.productId);
-    const variant = await OrderRepository.findVariantOrThrow(em, item.variantId, item.productId);
-
-    const unitPrice = Number((variant as any).price);
-    if (!Number.isFinite(unitPrice)) {
-      throw new ShippingQuoteError('shipping_variant_price_invalid', 'No se pudo calcular la cotizacion: precio de variante invalido.');
-    }
-
-    subtotal += unitPrice * item.quantity;
-
-    for (const extraInput of item.extras) {
-      const extra = await OrderRepository.findExtraOrThrow(em, extraInput.extraId);
-      const extraUnitPrice = Number((extra as any).price);
-      if (!Number.isFinite(extraUnitPrice)) {
-        throw new ShippingQuoteError('shipping_extra_price_invalid', 'No se pudo calcular la cotizacion: precio de extra invalido.');
-      }
-      subtotal += extraUnitPrice * extraInput.quantity;
-    }
-  }
-
-  return subtotal;
-}
-
-function getUnits(items: NormalizedItem[]) {
-  let units = 0;
-  for (const item of items) {
-    units += item.quantity;
-    for (const extra of item.extras) units += extra.quantity;
-  }
-  return Math.max(units, 1);
-}
-
-function getZone(postalCode: string) {
-  const digits = postalCode.replace(/\D/g, '');
-  const first = Number.parseInt(digits.slice(0, 1) || '0', 10);
-
-  if (!Number.isFinite(first)) {
-    return { multiplier: 1.2, etaMinDays: 3, etaMaxDays: 6, service: 'Estandar Nacional' };
-  }
-
-  if (first <= 1) {
-    return { multiplier: 1.0, etaMinDays: 1, etaMaxDays: 3, service: 'Urbano Express' };
-  }
-
-  if (first <= 4) {
-    return { multiplier: 1.2, etaMinDays: 2, etaMaxDays: 4, service: 'Estandar Centro' };
-  }
-
-  if (first <= 6) {
-    return { multiplier: 1.35, etaMinDays: 3, etaMaxDays: 6, service: 'Regional' };
-  }
-
-  return { multiplier: 1.55, etaMinDays: 4, etaMaxDays: 8, service: 'Larga Distancia' };
-}
-
-function roundCost(value: number) {
-  const rounded = Math.round(value / 50) * 50;
-  return Math.max(1200, rounded);
-}
-
-function buildAggregatorQuote(input: { postalCode: string; subtotal: number; units: number }) {
-  const provider = process.env.SHIPPING_AGGREGATOR_PROVIDER || 'Agregador Nacional';
-  const zone = getZone(input.postalCode);
-
-  const base = 1800;
-  const perUnit = input.units * 220;
-  const insured = Math.min(input.subtotal * 0.025, 5500);
-  const cost = roundCost((base + perUnit + insured) * zone.multiplier);
-
-  return {
-    provider,
-    service: zone.service,
-    cost,
-    etaMinDays: zone.etaMinDays,
-    etaMaxDays: zone.etaMaxDays,
-  };
-}
 
 function pruneExpiredQuotes(nowMs = Date.now()) {
   for (const [quoteId, quote] of quoteStore.entries()) {
@@ -286,24 +203,20 @@ export async function createShippingQuote(input: CreateShippingQuoteInput) {
   const postalCode = normalizeAndValidatePostalCode(input.postal_code ?? input.postalCode);
   const normalizedItems = normalizeItems(input.items);
   const itemsSignature = buildOrderItemsSignature(normalizedItems);
-  const subtotal = await calculateItemsSubtotal(normalizedItems);
 
-  const quoteFromAggregator = buildAggregatorQuote({
-    postalCode,
-    subtotal,
-    units: getUnits(normalizedItems),
-  });
+  // Cotizar con Correo Argentino (API real o tabla de tarifas segun config).
+  const correoQuote = await quoteCorreoArgentino(postalCode);
 
   const quoteId = randomUUID();
   const now = Date.now();
   const quote: StoredShippingQuote = {
     quoteId,
-    provider: quoteFromAggregator.provider,
-    service: quoteFromAggregator.service,
+    provider: correoQuote.provider,
+    service: correoQuote.service,
     postalCode,
-    cost: quoteFromAggregator.cost,
-    etaMinDays: quoteFromAggregator.etaMinDays,
-    etaMaxDays: quoteFromAggregator.etaMaxDays,
+    cost: correoQuote.cost,
+    etaMinDays: correoQuote.etaMinDays,
+    etaMaxDays: correoQuote.etaMaxDays,
     expiresAtMs: now + quoteTtlMs,
     itemsSignature,
   };
