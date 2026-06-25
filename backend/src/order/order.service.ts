@@ -4,11 +4,7 @@ import { Order, ShippingMethod } from './order.entity.js';
 import { OrderItem } from '../order-item/order-item.entity.js';
 import { OrderItemExtra } from '../order-item-extra/order-item-extra.entity.js';
 import { OrderRepository } from './order.repository.js';
-import {
-  ShippingQuoteError,
-  normalizeAndValidatePostalCode,
-  validateShippingQuoteForOrder,
-} from '../shipping/shipping.service.js';
+import { normalizeAndValidatePostalCode } from '../shipping/shipping.service.js';
 
 export type OrderItemExtraInput = {
   extra_id?: number;
@@ -73,12 +69,6 @@ export async function createOrder(input: CreateOrderInput) {
   let shippingCity: string | undefined;
   let shippingProvince: string | undefined;
   let shippingCost = 0;
-  let shippingProvider: string | undefined;
-  let shippingService: string | undefined;
-  let shippingQuoteId: string | undefined;
-  let shippingQuoteExpiresAt: Date | undefined;
-  let shippingEtaMinDays: number | undefined;
-  let shippingEtaMaxDays: number | undefined;
 
   if (shippingMethod === ShippingMethod.DELIVERY) {
     shippingPostalCode = normalizeAndValidatePostalCode(shippingRaw.postal_code ?? shippingRaw.postalCode);
@@ -96,25 +86,8 @@ export async function createOrder(input: CreateOrderInput) {
     if (!shippingProvince) {
       throw inputError('shipping_province_required', 'shipping.province es requerido para envio a domicilio.');
     }
-
-    try {
-      const validatedQuote = validateShippingQuoteForOrder({
-        quoteId: shippingRaw.quote_id ?? shippingRaw.quoteId,
-        postalCode: shippingPostalCode,
-        items: input.items,
-      });
-
-      shippingCost = validatedQuote.cost;
-      shippingProvider = validatedQuote.provider;
-      shippingService = validatedQuote.service;
-      shippingQuoteId = validatedQuote.quoteId;
-      shippingQuoteExpiresAt = validatedQuote.expiresAt;
-      shippingEtaMinDays = validatedQuote.etaMinDays;
-      shippingEtaMaxDays = validatedQuote.etaMaxDays;
-    } catch (error: any) {
-      if (error instanceof ShippingQuoteError) throw error;
-      throw inputError('shipping_quote_invalid', 'No se pudo validar la cotizacion de envio.');
-    }
+    // Costo de envio = 0. Se coordina por WhatsApp con el cliente.
+    shippingCost = 0;
   }
 
   const em = orm.em.fork();
@@ -131,12 +104,12 @@ export async function createOrder(input: CreateOrderInput) {
       shippingAddressLine2: shippingMethod === ShippingMethod.DELIVERY ? shippingAddressLine2 : undefined,
       shippingCity: shippingMethod === ShippingMethod.DELIVERY ? shippingCity : undefined,
       shippingProvince: shippingMethod === ShippingMethod.DELIVERY ? shippingProvince : undefined,
-      shippingProvider: shippingMethod === ShippingMethod.DELIVERY ? shippingProvider : undefined,
-      shippingService: shippingMethod === ShippingMethod.DELIVERY ? shippingService : undefined,
-      shippingQuoteId: shippingMethod === ShippingMethod.DELIVERY ? shippingQuoteId : undefined,
-      shippingQuoteExpiresAt: shippingMethod === ShippingMethod.DELIVERY ? shippingQuoteExpiresAt : undefined,
-      shippingEtaMinDays: shippingMethod === ShippingMethod.DELIVERY ? shippingEtaMinDays : undefined,
-      shippingEtaMaxDays: shippingMethod === ShippingMethod.DELIVERY ? shippingEtaMaxDays : undefined,
+      shippingProvider: undefined,
+      shippingService: undefined,
+      shippingQuoteId: undefined,
+      shippingQuoteExpiresAt: undefined,
+      shippingEtaMinDays: undefined,
+      shippingEtaMaxDays: undefined,
       shippingCost: toDecimalString(shippingCost),
       status: 'pending',
       subtotal: '0.00',

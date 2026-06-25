@@ -13,6 +13,9 @@ export async function login(req: Request, res: Response) {
     return res.status(result.status).json(result.payload);
   } catch (err: any) {
     console.error('[admin login] error:', err);
-    return res.status(500).json({ error: 'Error interno', details: err?.message });
+    return res.status(500).json({
+      error: 'Error interno',
+      ...(process.env.NODE_ENV !== 'production' ? { details: err?.message } : {}),
+    });
   }
 }

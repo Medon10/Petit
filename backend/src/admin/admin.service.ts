@@ -51,7 +51,8 @@ export async function loginAdmin(input: AdminLoginInput) {
   }
 
   const payload = { id: Number((admin as any).id), role: 'admin', username: String((admin as any).username) };
-  const secret = process.env.JWT_SECRET || process.env.TOKEN_SECRET || 'supersecret';
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET no está configurado. No se puede firmar el token.');
   const signOptions: SignOptions = {
     expiresIn: (process.env.JWT_EXPIRES_IN || '12h') as any,
   };

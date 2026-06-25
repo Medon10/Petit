@@ -2,16 +2,90 @@ services:
   - type: web
     name: petit-backend
     env: node
+    region: oregon           # us-west-2, más cercano a Argentina que us-east
+    plan: starter            # Plan pago (no duerme). Cambiar a "free" para probar.
     buildCommand: npm install && npm run build
     startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+
     envVars:
+      # ── App ─────────────────────────────────────────────────
       - key: NODE_ENV
         value: production
-      - key: IMAGE_STORAGE_DRIVER
-        value: local
-      - key: DB_URL
-        sync: false
-      - key: TOKEN_SECRET
-        sync: false
       - key: PORT
         value: 3000
+
+      # ── Seguridad ────────────────────────────────────────────
+      # IMPORTANTE: cambiar en el dashboard de Render (sync: false = secreto)
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 12h
+      - key: ADMIN_USER
+        sync: false
+      - key: ADMIN_PASS
+        sync: false
+
+      # ── Base de datos (Neon PostgreSQL) ──────────────────────
+      # Pegar la connection string de Neon en el dashboard de Render
+      - key: DB_URL
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: DB_SSL_REJECT_UNAUTHORIZED
+        value: "true"
+
+      # ── CORS (URL del frontend en Vercel) ────────────────────
+      # Ejemplo: https://petit-joyeria.vercel.app
+      - key: FRONTEND_ORIGINS
+        sync: false
+
+      # ── Imágenes (Cloudflare R2) ─────────────────────────────
+      - key: IMAGE_STORAGE_DRIVER
+        value: s3
+      - key: IMAGE_STORAGE_PUBLIC_BASE_URL
+        sync: false          # URL pública de tu bucket R2 (ej: https://cdn.tudominio.com)
+      - key: IMAGE_STORAGE_PREFIX
+        value: uploads
+      - key: S3_ENDPOINT
+        sync: false          # https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+      - key: S3_REGION
+        value: auto
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_FORCE_PATH_STYLE
+        value: "false"
+
+      # ── Email ────────────────────────────────────────────────
+      - key: MAIL_ENABLED
+        value: "true"
+      - key: MAIL_TO
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+
+      # ── Correo Argentino ────────────────────────────────────
+      - key: CORREO_AR_ORIGIN_POSTAL_CODE
+        value: "2720"
+      - key: CORREO_AR_DEFAULT_WEIGHT_GRAMS
+        value: "300"
+      - key: CORREO_AR_BASE_COST_ZONE_1
+        value: "4000"
+      - key: CORREO_AR_BASE_COST_ZONE_2
+        value: "5500"
+      - key: CORREO_AR_BASE_COST_ZONE_3
+        value: "6500"
+      - key: CORREO_AR_BASE_COST_ZONE_4
+        value: "8500"
+      # Descomentar cuando tengas credenciales MiCorreo:
+      # - key: CORREO_AR_CLIENT_ID
+      #   sync: false
+      # - key: CORREO_AR_CLIENT_SECRET
+      #   sync: false

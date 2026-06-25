@@ -19,7 +19,7 @@ async function findAll(req: Request, res: Response) {
     });
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener productos', error });
+    res.status(500).json({ message: 'Error al obtener productos' });
   }
 }
 
@@ -30,7 +30,7 @@ async function findOne(req: Request, res: Response) {
     if (!item) return res.status(404).send({ message: 'No encontrado' });
     res.status(200).json({ message: 'Producto encontrado', data: item });
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener producto', error });
+    res.status(500).json({ message: 'Error al obtener producto' });
   }
 }
 
@@ -40,7 +40,7 @@ async function add(req: Request, res: Response) {
     const nuevo = await createProduct(input);
     res.status(201).json({ message: 'Producto creado', data: nuevo });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error al crear producto', error: error.message });
+    res.status(500).json({ message: 'Error al crear producto', ...(process.env.NODE_ENV !== 'production' ? { error: error.message } : {}) });
   }
 }
 
@@ -53,7 +53,7 @@ async function update(req: Request, res: Response) {
     if (!item) return res.status(404).send({ message: 'No encontrado' });
     res.status(200).send({ message: 'Producto actualizado', data: item });
   } catch (error) {
-    res.status(500).send({ message: 'Error al actualizar producto', error });
+    res.status(500).send({ message: 'Error al actualizar producto' });
   }
 }
 
@@ -64,7 +64,7 @@ async function remove(req: Request, res: Response) {
     if (!item) return res.status(404).send({ message: 'No encontrado' });
     res.status(200).send({ message: 'Producto borrado', data: item });
   } catch (error) {
-    res.status(500).send({ message: 'Error al borrar producto', error });
+    res.status(500).send({ message: 'Error al borrar producto' });
   }
 }
 
@@ -73,7 +73,7 @@ async function bestSellers(req: Request, res: Response) {
     const result = await bestSellersService(req.query.limit ?? req.query.take);
     return res.json(result);
   } catch (error) {
-    return res.status(500).json({ message: 'Error al obtener más vendidos', error });
+    return res.status(500).json({ message: 'Error al obtener más vendidos' });
   }
 }
 
@@ -82,7 +82,7 @@ async function search(req: Request, res: Response) {
     const result = await searchProducts(req.query.q, req.query.page, req.query.limit ?? req.query.take);
     return res.json(result);
   } catch (error) {
-    return res.status(500).json({ message: 'Error al buscar productos', error });
+    return res.status(500).json({ message: 'Error al buscar productos' });
   }
 }
 

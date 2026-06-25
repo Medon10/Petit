@@ -63,13 +63,20 @@ export const syncSchema = async () => {
             // Continue booting the server; schema might be managed manually.
         }
     }
-    console.log('Esquema actualizado');
+    if (process.env.NODE_ENV !== 'production') {
+        console.log('Esquema actualizado');
+    }
 
     // Auto-seed: create default admin user if none exists
     await seedDefaultAdmin();
 }
 
 async function seedDefaultAdmin() {
+    // In production, require explicit credentials – never use defaults.
+    if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_USER || !process.env.ADMIN_PASS)) {
+        console.warn('[seed] ADMIN_USER y ADMIN_PASS deben estar configurados en producción. Saltando seed.');
+        return;
+    }
     const { default: bcrypt } = await import('bcryptjs');
     const em = orm.em.fork();
     try {

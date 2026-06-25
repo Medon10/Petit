@@ -18,10 +18,6 @@ type OrderConfirmationState = {
   shippingCost: number;
   total: number;
   shippingMethod: 'pickup' | 'delivery';
-  shippingProvider?: string;
-  shippingService?: string;
-  shippingPostalCode?: string;
-  shippingEta?: string;
   items: OrderConfirmationItem[];
 };
 
@@ -37,8 +33,7 @@ export default function OrderPage() {
 
   const orderNumber = String(state?.orderNumber || params.id || '');
   const subtotal = Number(state?.subtotal ?? state?.total ?? 0);
-  const shippingCost = Number(state?.shippingCost ?? 0);
-  const total = Number(state?.total ?? subtotal + shippingCost);
+
   const shippingMethod = state?.shippingMethod ?? 'pickup';
   const items = Array.isArray(state?.items) ? state.items : [];
 
@@ -47,7 +42,7 @@ export default function OrderPage() {
   const whatsappNumber = String((import.meta as any).env?.VITE_WHATSAPP_NUMBER || '5491100000000').replace(/\D/g, '');
 
   const whatsappText = encodeURIComponent(
-    `Hola! Acabo de realizar el pedido #${orderNumber} por ${moneyAr(total)}. Adjunto comprobante de transferencia y coordinamos por acá los detalles finales de grabado/diseño.`
+    `Hola! Acabo de realizar el pedido #${orderNumber} por ${moneyAr(subtotal)}. Adjunto comprobante de transferencia y coordinamos por acá los detalles de grabado, diseño y envío.`
   );
   const whatsappHref = `https://wa.me/${whatsappNumber}?text=${whatsappText}`;
 
@@ -91,14 +86,15 @@ export default function OrderPage() {
               </p>
 
               {shippingMethod === 'delivery' ? (
-                <p>
-                  Envio seleccionado: {state?.shippingProvider || 'Agregador'}
-                  {state?.shippingService ? ` · ${state.shippingService}` : ''}
-                  {state?.shippingPostalCode ? ` · CP ${state.shippingPostalCode}` : ''}
-                  {state?.shippingEta ? ` · ETA ${state.shippingEta}` : ''}
-                </p>
+                <div className="order-shippingNotice">
+                  <span aria-hidden="true">📦</span>
+                  <p>
+                    <strong>Envío a domicilio — Correo Argentino.</strong><br />
+                    Te cotizamos el envío y coordinamos el pago por WhatsApp.
+                  </p>
+                </div>
               ) : (
-                <p>Retiro seleccionado. Te escribimos para coordinar direccion y horario.</p>
+                <p>Retiro seleccionado. Te escribimos para coordinar dirección y horario.</p>
               )}
 
               <a className="order-whatsappBtn" href={whatsappHref} target="_blank" rel="noopener noreferrer">
@@ -133,16 +129,20 @@ export default function OrderPage() {
 
                 <div className="order-totals">
                   <div>
-                    <span>Subtotal</span>
+                    <span>Subtotal productos</span>
                     <span>{moneyAr(subtotal)}</span>
                   </div>
                   <div>
-                    <span>Envio</span>
-                    <span>{shippingMethod === 'delivery' ? moneyAr(shippingCost) : 'Retiro'}</span>
+                    <span>Envío</span>
+                    <span>
+                      {shippingMethod === 'delivery'
+                        ? <em style={{ color: '#a14659', fontStyle: 'normal', fontWeight: 700, fontSize: '0.85em' }}>A coordinar por WhatsApp</em>
+                        : 'Retiro'}
+                    </span>
                   </div>
                   <div className="is-total">
-                    <span>Total</span>
-                    <strong>{moneyAr(total)}</strong>
+                    <span>Total productos</span>
+                    <strong>{moneyAr(subtotal)}</strong>
                   </div>
                 </div>
               </>
@@ -154,7 +154,7 @@ export default function OrderPage() {
 
         <div className="order-footNote" aria-hidden="true">
           <span>Autenticidad</span>
-          <span>{shippingMethod === 'delivery' ? 'Envio validado' : 'Retiro coordinado'}</span>
+          <span>{shippingMethod === 'delivery' ? 'Envío por Correo Argentino' : 'Retiro coordinado'}</span>
           <span>Compra segura</span>
         </div>
       </main>
@@ -163,4 +163,3 @@ export default function OrderPage() {
     </div>
   );
 }
-

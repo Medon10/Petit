@@ -20,16 +20,6 @@
     "@mikro-orm/postgresql": "6.5.9",
     "@mikro-orm/sql-highlighter": "^1.0.1",
     "@sendgrid/mail": "^8.1.6",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/cookie-parser": "^1.4.9",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.5",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.0.0",
-    "@types/node": "^24.10.0",
-    "@types/nodemailer": "^7.0.4",
-    "@types/pg": "^8.18.0",
-    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
@@ -44,11 +34,20 @@
     "nodemailer": "^7.0.12",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
-    "sharp": "^0.34.5",
-    "typescript": "^5.8.3"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
-    "tsc-watch": "^6.0.4"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.10.0",
+    "@types/nodemailer": "^7.0.4",
+    "@types/pg": "^8.18.0",
+    "tsc-watch": "^6.0.4",
+    "typescript": "^5.8.3"
   },
   "description": ""
 }

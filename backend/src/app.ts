@@ -78,8 +78,8 @@ app.use(cors({
     // Allow server-to-server or curl (no origin)
     if (!origin) return callback(null, true);
 
-    // Dev convenience: allow any localhost origin
-    if (isLocalDevOrigin(origin)) return callback(null, true);
+    // Dev convenience: allow any localhost origin (disabled in production)
+    if (process.env.NODE_ENV !== 'production' && isLocalDevOrigin(origin)) return callback(null, true);
 
     if (isAllowedConfiguredOrigin(origin)) return callback(null, true);
     return callback(new Error(`Not allowed by CORS: ${origin}`));
@@ -87,7 +87,7 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
@@ -123,7 +123,11 @@ app.use((req, res) => {
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err);
-  res.status(err.status || 500).json({ message: err.message || 'Error interno del servidor' });
+  const status = err.status || 500;
+  const message = process.env.NODE_ENV === 'production' && status === 500
+    ? 'Error interno del servidor'
+    : (err.message || 'Error interno del servidor');
+  res.status(status).json({ message });
 });
 
 

@@ -23,7 +23,7 @@ async function listOrders(req: Request, res: Response) {
     const result = await listOrdersService({ limit, page, status, q });
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener pedidos', error });
+    res.status(500).json({ message: 'Error al obtener pedidos' });
   }
 }
 
@@ -34,7 +34,7 @@ async function getOrder(req: Request, res: Response) {
     if (!item) return res.status(404).send({ message: 'No encontrado' });
     res.status(200).json({ message: 'Pedido encontrado', data: item });
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener pedido', error });
+    res.status(500).json({ message: 'Error al obtener pedido' });
   }
 }
 

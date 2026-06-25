@@ -25,7 +25,12 @@ export function verifyToken(req: Request, res: Response, next: NextFunction): vo
     ? authHeader.substring('Bearer '.length)
     : undefined;
   const token = bearer || (req as any).cookies?.token;
-  const secret = process.env.JWT_SECRET || process.env.TOKEN_SECRET || 'supersecret';
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    res.status(500).json({ message: 'Error de configuración del servidor' });
+    return;
+  }
 
   if (!token) {
     res.status(401).json({ message: 'token no proporcionado' });
@@ -37,7 +42,10 @@ export function verifyToken(req: Request, res: Response, next: NextFunction): vo
     req.user = decoded;
     next();
   } catch (error: any) {
-    res.status(403).json({ message: 'token inválido', error: error.message });
+    res.status(403).json({
+      message: 'token inválido',
+      ...(process.env.NODE_ENV !== 'production' ? { error: error.message } : {}),
+    });
     return;
   }
 }

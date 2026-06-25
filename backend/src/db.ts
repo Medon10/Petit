@@ -14,6 +14,8 @@ export const pool = new pg.Pool({
   database: dbUrl ? undefined : process.env.DB_NAME || 'petit',
   ssl: sslEnabled ? { rejectUnauthorized } : undefined,
   max: 10,
+  connectionTimeoutMillis: 5000,
+  idleTimeoutMillis: 30000,
 });
 
 export async function query<T = any>(sql: string, params?: any[]): Promise<T[]> {
