@@ -74,13 +74,11 @@ export default function Footer() {
             <ul className="ph-footerLinks">
               <li><a href="https://wa.me/5491100000000" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
               <li><a href="https://www.instagram.com/petit.laser/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
-              <li><span className="ph-footerMuted">Lun a Sáb · 10:00 a 20:00</span></li>
             </ul>
           </div>
         </div>
 
         <div className="ph-footerBottom">
-          <p>© 2026 Petit Accesorios. Todos los derechos reservados.</p>
           <div className="ph-footerBottomLinks">
             <a href="/login" className="ph-adminLink" title="Administración">
               <svg viewBox="0 0 24 24" className="ph-adminLock" aria-hidden="true">

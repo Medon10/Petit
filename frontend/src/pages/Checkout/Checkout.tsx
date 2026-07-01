@@ -268,7 +268,7 @@ export default function CheckoutPage() {
                         checked={shippingMethod === 'pickup'}
                         onChange={() => cart.setShippingMethod('pickup')}
                       />
-                      Retiro coordinado
+                      Retirar en domicilio
                     </label>
 
                     <label className="checkout-deliveryOption">
@@ -278,7 +278,7 @@ export default function CheckoutPage() {
                         checked={shippingMethod === 'delivery'}
                         onChange={() => cart.setShippingMethod('delivery')}
                       />
-                      Envio a domicilio (Correo Argentino)
+                      Envio a domicilio
                     </label>
                   </div>
 
@@ -385,7 +385,7 @@ export default function CheckoutPage() {
                 <section className="checkout-noteBox" aria-label="Nota de personalizacion">
                   <h4>Personalización</h4>
                   <p>
-                    Los detalles de grabado, tipografía y ubicación se coordinan por WhatsApp al enviar el comprobante.
+                    Los detalles de grabado y tipografía se coordinan por WhatsApp al enviar el comprobante.
                   </p>
                 </section>
 
