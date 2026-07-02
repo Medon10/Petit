@@ -13,8 +13,6 @@ type ShippingInput = {
   method?: string;
   postal_code?: string;
   postalCode?: string;
-  quote_id?: string;
-  quoteId?: string;
   address_line1?: string;
   addressLine1?: string;
   address_line2?: string;
@@ -56,7 +54,6 @@ export function sanitizeOrderInput(req: Request, res: Response, next: NextFuncti
     shipping: {
       method: shippingMethod,
       postal_code: readString(shippingRaw.postal_code ?? shippingRaw.postalCode),
-      quote_id: readString(shippingRaw.quote_id ?? shippingRaw.quoteId),
       address_line1: readString(shippingRaw.address_line1 ?? shippingRaw.addressLine1),
       address_line2: readString(shippingRaw.address_line2 ?? shippingRaw.addressLine2),
       city: readString(shippingRaw.city),

@@ -39,7 +39,7 @@ const statusColor: Record<string, string> = {
 
 const shippingLabel: Record<string, string> = {
   pickup: 'Retiro',
-  delivery: 'Envio',
+  delivery: 'Envio coordinado',
 };
 
 function formatDate(iso?: string) {
@@ -309,10 +309,7 @@ export default function AdminOrdersPage() {
                     <div>
                       <div className="adm-label">Envio</div>
                       <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6, fontSize: 14 }}>
-                        {[detail.shippingProvider, detail.shippingService]
-                          .filter(Boolean)
-                          .join(' · ') || 'Agregador'}
-                        {detail.shippingCost ? ` · $${detail.shippingCost}` : ''}
+                        Coordinado por WhatsApp{detail.shippingCost ? ` · $${detail.shippingCost}` : ''}
                       </div>
                     </div>
                   )}

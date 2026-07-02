@@ -46,24 +46,6 @@ export class Order extends BaseEntity {
   @Property({ fieldName: 'shipping_province', nullable: true })
   shippingProvince?: string;
 
-  @Property({ fieldName: 'shipping_provider', nullable: true })
-  shippingProvider?: string;
-
-  @Property({ fieldName: 'shipping_service', nullable: true })
-  shippingService?: string;
-
-  @Property({ fieldName: 'shipping_quote_id', nullable: true })
-  shippingQuoteId?: string;
-
-  @Property({ fieldName: 'shipping_quote_expires_at', type: 'datetime', nullable: true })
-  shippingQuoteExpiresAt?: Date;
-
-  @Property({ fieldName: 'shipping_eta_min_days', type: 'integer', nullable: true })
-  shippingEtaMinDays?: number;
-
-  @Property({ fieldName: 'shipping_eta_max_days', type: 'integer', nullable: true })
-  shippingEtaMaxDays?: number;
-
   @Property({ fieldName: 'shipping_cost', type: 'decimal', precision: 10, scale: 2, default: 0 })
   shippingCost: string = '0.00';
 

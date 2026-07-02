@@ -260,30 +260,6 @@ export type ShippingQuoteItemInput = {
   extras?: ShippingQuoteExtraInput[];
 };
 
-export type ShippingQuoteInput = {
-  postal_code: string;
-  items: ShippingQuoteItemInput[];
-};
-
-export type ShippingQuoteDto = {
-  quoteId: string;
-  provider: string;
-  service: string;
-  postalCode: string;
-  cost: number;
-  etaMinDays: number;
-  etaMaxDays: number;
-  expiresAt: string;
-  expiresInSeconds: number;
-  currency: 'ARS';
-};
-
-export async function quoteShipping(input: ShippingQuoteInput) {
-  const data = await apiRequestJson<{ data?: unknown }>(`/shipping/quotes`, { method: 'POST', body: input });
-  const item = (data as any)?.data;
-  return item && typeof item === 'object' ? (item as ShippingQuoteDto) : null;
-}
-
 export type CreateOrderInput = {
   customer_name: string;
   customer_email?: string;
@@ -292,7 +268,6 @@ export type CreateOrderInput = {
   shipping?: {
     method?: ShippingMethod;
     postal_code?: string;
-    quote_id?: string;
     address_line1?: string;
     address_line2?: string;
     city?: string;
@@ -461,12 +436,6 @@ export type OrderDto = {
   shippingAddressLine2?: string;
   shippingCity?: string;
   shippingProvince?: string;
-  shippingProvider?: string;
-  shippingService?: string;
-  shippingQuoteId?: string;
-  shippingQuoteExpiresAt?: string;
-  shippingEtaMinDays?: number;
-  shippingEtaMaxDays?: number;
   shippingCost?: string;
   subtotal?: string;
   status: string;

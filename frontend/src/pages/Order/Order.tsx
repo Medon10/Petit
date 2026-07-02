@@ -89,8 +89,8 @@ export default function OrderPage() {
                 <div className="order-shippingNotice">
                   <span aria-hidden="true">📦</span>
                   <p>
-                    <strong>Envío a domicilio — Correo Argentino.</strong><br />
-                    Te cotizamos el envío y coordinamos el pago por WhatsApp.
+                    <strong>Envío a domicilio.</strong><br />
+                    Te contactamos por WhatsApp para coordinar la entrega.
                   </p>
                 </div>
               ) : (
@@ -154,7 +154,7 @@ export default function OrderPage() {
 
         <div className="order-footNote" aria-hidden="true">
           <span>Autenticidad</span>
-          <span>{shippingMethod === 'delivery' ? 'Envío por Correo Argentino' : 'Retiro coordinado'}</span>
+          <span>{shippingMethod === 'delivery' ? 'Envío coordinado por WhatsApp' : 'Retiro coordinado'}</span>
           <span>Compra segura</span>
         </div>
       </main>

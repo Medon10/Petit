@@ -4,7 +4,6 @@ import { Order, ShippingMethod } from './order.entity.js';
 import { OrderItem } from '../order-item/order-item.entity.js';
 import { OrderItemExtra } from '../order-item-extra/order-item-extra.entity.js';
 import { OrderRepository } from './order.repository.js';
-import { normalizeAndValidatePostalCode } from '../shipping/shipping.service.js';
 
 export type OrderItemExtraInput = {
   extra_id?: number;
@@ -27,7 +26,6 @@ export type CreateOrderInput = {
     method?: string;
     postal_code?: string;
     postalCode?: string;
-    quote_id?: string;
     quoteId?: string;
     address_line1?: string;
     addressLine1?: string;
@@ -52,6 +50,19 @@ function inputError(code: string, message: string) {
 
 function toTrimmedString(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function normalizeAndValidatePostalCode(raw: unknown) {
+  const normalized = String(raw ?? '')
+    .toUpperCase()
+    .replace(/\s+/g, '')
+    .replace(/[^A-Z0-9]/g, '');
+
+  if (!/^[A-Z0-9]{4,8}$/.test(normalized)) {
+    throw inputError('shipping_postal_code_invalid', 'Codigo postal invalido. Usa 4 a 8 caracteres alfanumericos.');
+  }
+
+  return normalized;
 }
 
 export async function createOrder(input: CreateOrderInput) {
@@ -104,12 +115,6 @@ export async function createOrder(input: CreateOrderInput) {
       shippingAddressLine2: shippingMethod === ShippingMethod.DELIVERY ? shippingAddressLine2 : undefined,
       shippingCity: shippingMethod === ShippingMethod.DELIVERY ? shippingCity : undefined,
       shippingProvince: shippingMethod === ShippingMethod.DELIVERY ? shippingProvince : undefined,
-      shippingProvider: undefined,
-      shippingService: undefined,
-      shippingQuoteId: undefined,
-      shippingQuoteExpiresAt: undefined,
-      shippingEtaMinDays: undefined,
-      shippingEtaMaxDays: undefined,
       shippingCost: toDecimalString(shippingCost),
       status: 'pending',
       subtotal: '0.00',

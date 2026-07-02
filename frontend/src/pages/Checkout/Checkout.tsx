@@ -284,14 +284,12 @@ export default function CheckoutPage() {
 
                   {shippingMethod === 'delivery' ? (
                     <div className="checkout-deliveryGrid">
-                      {/* Aviso de costo por WhatsApp */}
                       <div className="checkout-shippingNotice">
                         <span className="checkout-shippingNoticeIcon" aria-hidden="true">📦</span>
                         <div>
                           <strong>El costo de envío se coordina por WhatsApp</strong>
                           <p>
-                            Una vez que confirmes tu pedido, te contactamos por WhatsApp para
-                            cotizar el envío según tu ubicación y acordar el pago.
+                            Una vez que confirmes tu pedido, contactanos por WhatsApp para coordinar el envío y detalles del pedido.
                           </p>
                         </div>
                       </div>
@@ -470,7 +468,7 @@ export default function CheckoutPage() {
                 ) : null}
 
                 <p className="checkout-secureText">
-                  Al confirmar, generamos tu pedido y te contactamos por WhatsApp para coordinar el pago y el envío.
+                  Al confirmar,  contactanos por WhatsApp para coordinar el envío y detalles del pedido.
                 </p>
               </aside>
             </div>

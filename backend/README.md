@@ -3,7 +3,7 @@
 Backend para el catálogo de joyería Petit.
 
 ## Quick start
-- Configurar `backend/.env` (MySQL local `petit`)
+- Configurar `backend/.env` (PostgreSQL local `petit`)
 - Ejecutar el SQL de `docs/petit-catalog.sql`
 - Correr:
 
@@ -12,14 +12,24 @@ npm install
 npm run dev
 ```
 
-## Shipping quotes (agregador)
+## Migración de esquema local
 
-Variables opcionales para la cotización de envío:
+Si ya tenés una base local creada con una versión anterior, podés sincronizarla con el código actual con MikroORM:
 
-```env
-SHIPPING_QUOTE_TTL_MINUTES=15
-SHIPPING_AGGREGATOR_PROVIDER=Agregador Nacional
+```bash
+npm run db:schema:dump
+npm run db:schema:sync
 ```
+
+El primer comando te muestra el SQL que MikroORM ve como diferencia; el segundo lo aplica a tu PostgreSQL local.
+
+Si ya habías quedado con columnas viejas de shipping, también podés ejecutar primero la migración manual:
+
+```sql
+\i backend/docs/migrations/20260702_drop_shipping_quote_fields_postgres.sql
+```
+
+Después podés hacer el dump para producción.
 
 ## Uploads de Imágenes (Local vs Object Storage)
 

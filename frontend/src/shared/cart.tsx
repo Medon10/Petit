@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import type { ShippingMethod, ShippingQuoteDto } from './api';
+import type { ShippingMethod } from './api';
 
 export type CartItem = {
   key: string;
@@ -18,7 +18,6 @@ type CartState = {
 export type CartShippingState = {
   method: ShippingMethod;
   postalCode: string;
-  quote: ShippingQuoteDto | null;
   addressLine1: string;
   addressLine2: string;
   city: string;
@@ -38,8 +37,6 @@ type CartContextValue = {
   setQuantity: (key: string, quantity: number) => void;
   setShippingMethod: (method: ShippingMethod) => void;
   setShippingPostalCode: (postalCode: string) => void;
-  setShippingQuote: (quote: ShippingQuoteDto | null) => void;
-  clearShippingQuote: () => void;
   setShippingAddress: (patch: Partial<Pick<CartShippingState, 'addressLine1' | 'addressLine2' | 'city' | 'province'>>) => void;
   resetShipping: () => void;
   clear: () => void;
@@ -58,44 +55,10 @@ function defaultShippingState(): CartShippingState {
   return {
     method: 'pickup',
     postalCode: '',
-    quote: null,
     addressLine1: '',
     addressLine2: '',
     city: '',
     province: '',
-  };
-}
-
-function normalizeQuote(raw: any): ShippingQuoteDto | null {
-  if (!raw || typeof raw !== 'object') return null;
-
-  const quoteId = String(raw.quoteId ?? '').trim();
-  const provider = String(raw.provider ?? '').trim();
-  const service = String(raw.service ?? '').trim();
-  const postalCode = normalizePostalCode(raw.postalCode);
-  const cost = Number(raw.cost);
-  const etaMinDays = Number(raw.etaMinDays);
-  const etaMaxDays = Number(raw.etaMaxDays);
-  const expiresAt = String(raw.expiresAt ?? '').trim();
-  const expiresInSeconds = Number(raw.expiresInSeconds ?? 0);
-  const currency = String(raw.currency ?? 'ARS').toUpperCase() as 'ARS';
-
-  if (!quoteId || !provider || !service || !postalCode) return null;
-  if (!Number.isFinite(cost) || cost < 0) return null;
-  if (!Number.isFinite(etaMinDays) || !Number.isFinite(etaMaxDays)) return null;
-  if (!expiresAt) return null;
-
-  return {
-    quoteId,
-    provider,
-    service,
-    postalCode,
-    cost,
-    etaMinDays,
-    etaMaxDays,
-    expiresAt,
-    expiresInSeconds: Number.isFinite(expiresInSeconds) ? Math.max(0, Math.trunc(expiresInSeconds)) : 0,
-    currency,
   };
 }
 
@@ -105,12 +68,10 @@ function normalizeShipping(raw: any): CartShippingState {
 
   const method = String(raw.method ?? '').toLowerCase() === 'delivery' ? 'delivery' : 'pickup';
   const postalCode = normalizePostalCode(raw.postalCode);
-  const quote = normalizeQuote(raw.quote);
 
   return {
     method,
     postalCode,
-    quote,
     addressLine1: typeof raw.addressLine1 === 'string' ? raw.addressLine1 : '',
     addressLine2: typeof raw.addressLine2 === 'string' ? raw.addressLine2 : '',
     city: typeof raw.city === 'string' ? raw.city : '',
@@ -234,7 +195,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           shipping: {
             ...prev.shipping,
             method: normalizedMethod,
-            quote: normalizedMethod === 'pickup' ? null : prev.shipping.quote,
           },
         }));
       },
@@ -245,27 +205,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           shipping: {
             ...prev.shipping,
             postalCode: normalized,
-            quote: prev.shipping.quote?.postalCode === normalized ? prev.shipping.quote : null,
-          },
-        }));
-      },
-      setShippingQuote: (quote: ShippingQuoteDto | null) => {
-        setState((prev) => ({
-          ...prev,
-          shipping: {
-            ...prev.shipping,
-            method: quote ? 'delivery' : prev.shipping.method,
-            postalCode: quote ? normalizePostalCode(quote.postalCode) : prev.shipping.postalCode,
-            quote,
-          },
-        }));
-      },
-      clearShippingQuote: () => {
-        setState((prev) => ({
-          ...prev,
-          shipping: {
-            ...prev.shipping,
-            quote: null,
           },
         }));
       },

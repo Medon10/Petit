@@ -2,20 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
-import { getExtras, getProduct, quoteShipping, toAbsoluteUrl, type ExtraDto, type ProductDetailDto } from '../../shared/api';
+import { getExtras, getProduct, toAbsoluteUrl, type ExtraDto, type ProductDetailDto } from '../../shared/api';
 import { useCart } from '../../shared/cart';
-import {
-  buildShippingQuoteItems,
-  buildShippingQuoteKey,
-  formatQuoteExpiration,
-  formatShippingEta,
-  hasItemsWithoutVariant,
-  isPostalCodeValid,
-  isShippingQuoteExpired,
-  normalizePostalCode,
-} from '../../shared/shipping';
 import '../Home/Home.css';
 import './Cart.css';
+
+function hasItemsWithoutVariant(items: Array<{ variantId: number | null }>) {
+  return items.some((item) => item.variantId == null);
+}
 
 function moneyAr(amount: number) {
   if (!Number.isFinite(amount)) return '$0';
@@ -31,8 +25,6 @@ export default function CartPage() {
   const cart = useCart();
   const [productsById, setProductsById] = useState<Record<number, ProductDetailDto>>({});
   const [extrasById, setExtrasById] = useState<Record<number, ExtraDto>>({});
-  const [shippingQuoteLoading, setShippingQuoteLoading] = useState(false);
-  const [shippingQuoteError, setShippingQuoteError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -106,79 +98,8 @@ export default function CartPage() {
 
   const hasInvalidVariants = hasItemsWithoutVariant(cart.items);
   const shippingMethod = cart.shipping.method;
-  const shippingPostalCode = cart.shipping.postalCode;
-  const shippingQuote = cart.shipping.quote;
-  const shippingPostalCodeValid = isPostalCodeValid(shippingPostalCode);
-  const quoteItems = useMemo(() => buildShippingQuoteItems(cart.items), [cart.items]);
-  const quoteRequestKey = useMemo(() => buildShippingQuoteKey(shippingPostalCode, quoteItems), [shippingPostalCode, quoteItems]);
-  const quoteExpired = isShippingQuoteExpired(shippingQuote);
-
-  const shippingCost = shippingMethod === 'delivery' && shippingQuote && !quoteExpired ? Number(shippingQuote.cost) : 0;
-  const total = summary.subtotal + shippingCost;
-  const canProceedToCheckout = shippingMethod === 'pickup' || (!!shippingQuote && !quoteExpired);
-
-  useEffect(() => {
-    if (shippingMethod !== 'delivery') {
-      setShippingQuoteLoading(false);
-      setShippingQuoteError(null);
-      return;
-    }
-
-    if (cart.items.length === 0) {
-      cart.clearShippingQuote();
-      setShippingQuoteError(null);
-      setShippingQuoteLoading(false);
-      return;
-    }
-
-    if (hasInvalidVariants) {
-      cart.clearShippingQuote();
-      setShippingQuoteLoading(false);
-      setShippingQuoteError('Hay productos sin variante seleccionada. Corregilos para cotizar envio.');
-      return;
-    }
-
-    if (!shippingPostalCodeValid) {
-      cart.clearShippingQuote();
-      setShippingQuoteLoading(false);
-      setShippingQuoteError(shippingPostalCode ? 'Codigo postal invalido. Usa 4 a 8 caracteres.' : null);
-      return;
-    }
-
-    let cancelled = false;
-    const timer = window.setTimeout(async () => {
-      setShippingQuoteLoading(true);
-      setShippingQuoteError(null);
-
-      try {
-        const quote = await quoteShipping({
-          postal_code: normalizePostalCode(shippingPostalCode),
-          items: quoteItems,
-        });
-
-        if (cancelled) return;
-        if (!quote) {
-          cart.clearShippingQuote();
-          setShippingQuoteError('No se pudo obtener cotizacion para ese codigo postal.');
-          return;
-        }
-
-        cart.setShippingQuote(quote);
-        setShippingQuoteError(null);
-      } catch (e: any) {
-        if (cancelled) return;
-        cart.clearShippingQuote();
-        setShippingQuoteError(e?.message || 'No pudimos cotizar el envio. Intenta nuevamente.');
-      } finally {
-        if (!cancelled) setShippingQuoteLoading(false);
-      }
-    }, 450);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [shippingMethod, shippingPostalCodeValid, shippingPostalCode, quoteRequestKey, hasInvalidVariants]);
+  const total = summary.subtotal;
+  const canProceedToCheckout = cart.items.length > 0 && !hasInvalidVariants;
 
   return (
     <div className="petit-cart">
@@ -275,38 +196,10 @@ export default function CartPage() {
 
                     {shippingMethod === 'delivery' ? (
                       <div className="ph-cartShipFields">
-                        <label className="ph-cartShipField">
-                          Codigo postal
-                          <input
-                            value={shippingPostalCode}
-                            onChange={(e) => cart.setShippingPostalCode(e.target.value)}
-                            placeholder="Ej: 5000"
-                            inputMode="numeric"
-                          />
-                        </label>
-
-                        {shippingQuoteLoading ? <p className="ph-cartShipMeta">Cotizando envio...</p> : null}
-
-                        {!shippingQuoteLoading && shippingQuote && !quoteExpired ? (
-                          <div className="ph-cartShipQuote" aria-live="polite">
-                            <p>
-                              {shippingQuote.provider} · {shippingQuote.service}
-                            </p>
-                            <p>
-                              Entrega estimada: {formatShippingEta(shippingQuote)} · Vence {formatQuoteExpiration(shippingQuote.expiresAt)}
-                            </p>
-                            <strong>{moneyAr(Number(shippingQuote.cost))}</strong>
-                          </div>
-                        ) : null}
-
-                        {shippingQuote && quoteExpired ? (
-                          <p className="ph-cartShipError">La cotizacion vencio. Reingresa o edita el codigo postal para recotizar.</p>
-                        ) : null}
-
-                        {shippingQuoteError ? <p className="ph-cartShipError">{shippingQuoteError}</p> : null}
+                        <p className="ph-cartShipMeta">El envío se coordina por WhatsApp al finalizar la compra.</p>
                       </div>
                     ) : (
-                      <p className="ph-cartShipMeta">Retiro sin costo. En checkout podras cambiar a envio si lo necesitas.</p>
+                      <p className="ph-cartShipMeta">Retiro sin costo. También podés coordinar envío por WhatsApp en checkout.</p>
                     )}
                   </div>
 
@@ -317,7 +210,7 @@ export default function CartPage() {
 
                   <div className="ph-cartSummaryRow">
                     <span>Envio</span>
-                    <strong>{shippingMethod === 'delivery' ? (shippingQuote && !quoteExpired ? moneyAr(shippingCost) : 'Por cotizar') : 'Retiro'}</strong>
+                    <strong>{shippingMethod === 'delivery' ? 'A coordinar por WhatsApp' : 'Retiro'}</strong>
                   </div>
 
                   <div className="ph-cartSummaryRow isTotal">
@@ -325,7 +218,7 @@ export default function CartPage() {
                     <strong>{moneyAr(total)}</strong>
                   </div>
 
-                  <p className="ph-cartNote">En checkout confirmamos direccion completa y recotizamos antes de generar el pedido.</p>
+                  <p className="ph-cartNote">En checkout confirmamos direccion completa y coordinamos el envio por WhatsApp antes de generar el pedido.</p>
 
                   <Link
                     className={`ph-primaryButton ph-primaryLink${canProceedToCheckout ? '' : ' isDisabled'}`}
