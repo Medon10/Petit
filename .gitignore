@@ -27,3 +27,7 @@ backend/public/uploads/
 
 # Optional: keep curated images tracked (remove if you don't want them)
 # backend/public/images/
+
+# bdd
+petit_bdd.sql
+petit_bdd.neon.sql

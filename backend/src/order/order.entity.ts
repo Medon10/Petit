@@ -4,7 +4,7 @@ import { OrderItem } from '../order-item/order-item.entity.js';
 
 export enum OrderStatus {
   PENDING = 'pending',
-  PAID = 'paid',
+  PROCESSING = 'processing',
   CANCELLED = 'cancelled',
   COMPLETED = 'completed',
 }
