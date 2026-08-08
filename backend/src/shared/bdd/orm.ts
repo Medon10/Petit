@@ -15,9 +15,14 @@ import { OrderItem } from '../../order-item/order-item.entity.js';
 import { OrderItemExtra } from '../../order-item-extra/order-item-extra.entity.js';
 
 function buildClientUrlFromEnv() {
-    if (process.env.DB_URL && process.env.DB_URL.trim()) return process.env.DB_URL;
+    // 1. Buscamos primero DATABASE_URL (Railway/Neon) o DB_URL
+    const connectionString = process.env.DATABASE_URL || process.env.DB_URL;
+    if (connectionString && connectionString.trim()) {
+        return connectionString.trim();
+    }
 
-    const host = process.env.DB_HOST;
+    // 2. Fallback a variables individuales (Entorno local)
+    const host = process.env.DB_HOST || 'localhost';
     const port = process.env.DB_PORT || '5432';
     const user = process.env.DB_USER || 'postgres';
     const password = process.env.DB_PASSWORD || '';
@@ -28,7 +33,9 @@ function buildClientUrlFromEnv() {
     return `postgresql://${authPart}@${host}:${port}/${database}`;
 }
 
-const dbSslEnabled = String(process.env.DB_SSL || '').toLowerCase() === 'true';
+// Habilitar SSL automáticamente si estamos en producción o si la variable DB_SSL es 'true'
+const isProduction = process.env.NODE_ENV === 'production';
+const dbSslEnabled = String(process.env.DB_SSL || '').toLowerCase() === 'true' || isProduction;
 const dbSslRejectUnauthorized = String(process.env.DB_SSL_REJECT_UNAUTHORIZED || 'true').toLowerCase() !== 'false';
 
 export const orm = await MikroORM.init({
@@ -36,15 +43,15 @@ export const orm = await MikroORM.init({
     entitiesTs: [Category, Product, Variant, Extra, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra],
     driver: PostgreSqlDriver,
     clientUrl: buildClientUrlFromEnv(),
-        driverOptions: dbSslEnabled
-            ? ({
-                    connection: {
-                        ssl: { rejectUnauthorized: dbSslRejectUnauthorized },
-                    },
-                } as any)
-            : undefined,
+    driverOptions: dbSslEnabled
+        ? {
+              connection: {
+                  ssl: { rejectUnauthorized: false }, // 'false' permite la conexión con los certificados de Neon
+              },
+          } as any
+        : undefined,
     debug: false,
-    schemaGenerator: { //nunca en producción, solo desarrollo
+    schemaGenerator: {
         disableForeignKeys: true,
         createForeignKeyConstraints: true,
         ignoreSchema: [],
@@ -53,26 +60,19 @@ export const orm = await MikroORM.init({
 
 export const syncSchema = async () => {
     const generator = orm.getSchemaGenerator();
-    // In development, keep the DB schema aligned with entities.
-    // This avoids runtime 500s due to missing tables/columns.
     if (process.env.NODE_ENV !== 'production') {
         try {
             await generator.updateSchema({ safe: true });
+            console.log('Esquema actualizado');
         } catch (e: any) {
             console.error('[syncSchema] No se pudo actualizar el esquema automáticamente:', e?.message || e);
-            // Continue booting the server; schema might be managed manually.
         }
     }
-    if (process.env.NODE_ENV !== 'production') {
-        console.log('Esquema actualizado');
-    }
 
-    // Auto-seed: create default admin user if none exists
     await seedDefaultAdmin();
 }
 
 async function seedDefaultAdmin() {
-    // In production, require explicit credentials – never use defaults.
     if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_USER || !process.env.ADMIN_PASS)) {
         console.warn('[seed] ADMIN_USER y ADMIN_PASS deben estar configurados en producción. Saltando seed.');
         return;
@@ -89,7 +89,6 @@ async function seedDefaultAdmin() {
 
         const existing = await em.findOne(AdminUser as any, { id: 1 } as any);
         if (existing) {
-            // In development, keep credentials in sync with env vars
             if (process.env.NODE_ENV !== 'production') {
                 (existing as any).username = username;
                 (existing as any).passwordHash = hash;
