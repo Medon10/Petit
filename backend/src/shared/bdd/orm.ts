@@ -17,7 +17,7 @@ import { OrderItemExtra } from '../../order-item-extra/order-item-extra.entity.j
 function buildClientUrlFromEnv() {
     if (process.env.DB_URL && process.env.DB_URL.trim()) return process.env.DB_URL;
 
-    const host = process.env.DB_HOST || 'localhost';
+    const host = process.env.DB_HOST;
     const port = process.env.DB_PORT || '5432';
     const user = process.env.DB_USER || 'postgres';
     const password = process.env.DB_PASSWORD || '';
