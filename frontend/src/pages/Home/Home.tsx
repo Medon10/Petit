@@ -24,6 +24,38 @@ function formatMoney(price: number) {
   return `$${price.toFixed(2)}`;
 }
 
+function CategoryCoverImage({
+  id,
+  name,
+  imageUrl,
+  representativeImageUrl,
+}: {
+  id: number;
+  name: string;
+  imageUrl?: string | null;
+  representativeImageUrl?: string | null;
+}) {
+  const sources = [
+    toAbsoluteUrl(imageUrl),
+    toAbsoluteUrl(representativeImageUrl),
+    categoryImageUrl(id),
+    '/images/placeholder-category.jpg',
+  ].filter(Boolean) as string[];
+
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const src = sources[Math.min(sourceIndex, sources.length - 1)];
+
+  return (
+    <img
+      className="ph-collectionImg"
+      src={src}
+      alt={name}
+      loading="lazy"
+      onError={() => setSourceIndex((current) => Math.min(current + 1, sources.length - 1))}
+    />
+  );
+}
+
 export default function HomePage() {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<ProductDto[]>([]);
@@ -61,13 +93,12 @@ export default function HomePage() {
 
   const collections = useMemo(() => {
     return categories.map((c) => {
-      const imageUrl = toAbsoluteUrl(c.imageUrl);
-      const rep = toAbsoluteUrl(c.representativeImageUrl);
       return {
         id: c.id,
         title: c.name,
         subtitle: 'Ver diseños',
-        image: imageUrl ?? rep ?? categoryImageUrl(c.id),
+        imageUrl: c.imageUrl,
+        representativeImageUrl: c.representativeImageUrl,
       };
     });
   }, [categories]);
@@ -113,7 +144,12 @@ export default function HomePage() {
                 {collections.map((c) => (
                   <Link key={c.id} className="ph-collectionCard ph-carouselItem" to={`/categorias/${c.id}`}>
                     <div className="ph-collectionMedia">
-                      <img className="ph-collectionImg" src={c.image} alt={c.title} loading="lazy" />
+                      <CategoryCoverImage
+                        id={c.id}
+                        name={c.title}
+                        imageUrl={c.imageUrl}
+                        representativeImageUrl={c.representativeImageUrl}
+                      />
                     </div>
                     <div className="ph-collectionText">
                       <h3 className="ph-h3">{c.title}</h3>

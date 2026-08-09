@@ -8,6 +8,38 @@ import { getCategories, toAbsoluteUrl, type CategoryDto } from '../../shared/api
 import '../Home/Home.css';
 import './Categories.css';
 
+function CategoryCoverImage({
+  id,
+  name,
+  imageUrl,
+  representativeImageUrl,
+}: {
+  id: number;
+  name: string;
+  imageUrl?: string | null;
+  representativeImageUrl?: string | null;
+}) {
+  const sources = [
+    toAbsoluteUrl(imageUrl),
+    toAbsoluteUrl(representativeImageUrl),
+    toAbsoluteUrl(`/images/categories/${id}.jpg`),
+    '/images/placeholder-category.jpg',
+  ].filter(Boolean) as string[];
+
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const src = sources[Math.min(sourceIndex, sources.length - 1)];
+
+  return (
+    <img
+      src={src}
+      alt={name}
+      className="ph-categoryImg"
+      loading="lazy"
+      onError={() => setSourceIndex((current) => Math.min(current + 1, sources.length - 1))}
+    />
+  );
+}
+
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,11 +98,15 @@ export default function CategoriesPage() {
           ) : (
             <div className="ph-categoriesGrid">
               {categories.map((c) => {
-                const image = toAbsoluteUrl(c.imageUrl) ?? toAbsoluteUrl(c.representativeImageUrl) ?? '/images/placeholder-category.jpg';
                 return (
                   <Link key={c.id} to={`/categorias/${c.id}`} className="ph-categoryCard">
                     <div className="ph-categoryMedia">
-                      <img src={image} alt={c.name} className="ph-categoryImg" loading="lazy" />
+                      <CategoryCoverImage
+                        id={c.id}
+                        name={c.name}
+                        imageUrl={c.imageUrl}
+                        representativeImageUrl={c.representativeImageUrl}
+                      />
                     </div>
                     <div className="ph-categoryBody">
                       <h3 className="ph-categoryName">{c.name}</h3>
