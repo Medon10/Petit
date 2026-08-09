@@ -57,7 +57,11 @@ export async function findOneCategory(id: number, options?: { includeInactive?: 
 
 export async function createCategory(input: CategoryInput) {
   const em = orm.em.fork();
-  const nuevo = em.create(Category as any, input);
+  const nuevo = em.create(Category as any, {
+    name: input.name,
+    imageUrl: input.image_url,
+    isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
+  });
   await em.flush();
   return nuevo;
 }
@@ -66,7 +70,11 @@ export async function updateCategory(id: number, input: CategoryInput) {
   const em = orm.em.fork();
   const item = await CategoryRepository.findOnePlain(em, id);
   if (!item) return null;
-  em.assign(item, input as any);
+  em.assign(item, {
+    name: input.name,
+    imageUrl: input.image_url,
+    isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
+  } as any);
   await em.flush();
   return item;
 }
