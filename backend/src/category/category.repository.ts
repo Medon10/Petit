@@ -22,8 +22,8 @@ export class CategoryRepository {
       SELECT
         c.id,
         c.name,
-        c.image_url AS imageUrl,
-        c.is_active AS isActive,
+        c.image_url AS "imageUrl",
+        c.is_active AS "isActive",
         (
           SELECT p.image_url
           FROM products p
@@ -33,7 +33,7 @@ export class CategoryRepository {
             AND p.image_url <> ''
           ORDER BY p.is_featured DESC, p.featured_rank ASC, p.id ASC
           LIMIT 1
-        ) AS representativeImageUrl
+        ) AS "representativeImageUrl"
       FROM categories c
       WHERE ${whereClause}
       ORDER BY c.name ASC
