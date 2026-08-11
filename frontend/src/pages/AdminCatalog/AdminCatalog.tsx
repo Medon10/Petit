@@ -327,7 +327,7 @@ function ProductsTab() {
       {items.length === 0 ? (
         <div className="adm-empty">No hay productos.</div>
       ) : (
-        <div className="adm-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="adm-card" style={{ padding: 0, overflowX: 'auto' }}>
           <table className="adm-table">
             <thead>
               <tr>
@@ -563,7 +563,7 @@ function CategoriesTab() {
       {items.length === 0 ? (
         <div className="adm-empty">No hay categorías.</div>
       ) : (
-        <div className="adm-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="adm-card" style={{ padding: 0, overflowX: 'auto' }}>
           <table className="adm-table">
             <thead><tr><th>ID</th><th>Nombre</th><th>Activa</th><th>Acciones</th></tr></thead>
             <tbody>
@@ -763,7 +763,7 @@ function VariantsTab() {
       ) : items.length === 0 ? (
         <div className="adm-empty">No hay variantes{selectedProduct ? ' para este producto' : ''}.</div>
       ) : (
-        <div className="adm-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="adm-card" style={{ padding: 0, overflowX: 'auto' }}>
           <table className="adm-table">
             <thead><tr><th>Imagen</th><th>Nombre</th><th>Precio</th><th>Producto</th><th>Activa</th><th>Acciones</th></tr></thead>
             <tbody>

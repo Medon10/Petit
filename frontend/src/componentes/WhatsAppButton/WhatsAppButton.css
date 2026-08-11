@@ -25,3 +25,10 @@
   width: 28px;
   height: 28px;
 }
+
+@media (max-width: 767px) {
+  .ph-waButton {
+    bottom: 90px;
+    right: 16px;
+  }
+}
