@@ -59,7 +59,7 @@ export async function findAllProducts(filters: ProductFilters) {
 
   const limitRaw = filters.limit as any;
   const limitParsed = limitRaw != null && String(limitRaw).trim() !== '' ? Number(limitRaw) : 12;
-  const limit = Number.isFinite(limitParsed) ? Math.min(Math.max(1, limitParsed), 50) : 12;
+  const limit = Number.isFinite(limitParsed) ? Math.min(Math.max(1, limitParsed), 200) : 12;
 
   const pageRaw = filters.page as any;
   const pageParsed = pageRaw != null && String(pageRaw).trim() !== '' ? Number(pageRaw) : 1;

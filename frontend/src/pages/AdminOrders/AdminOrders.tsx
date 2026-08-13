@@ -192,7 +192,7 @@ export default function AdminOrdersPage() {
       ) : orders.length === 0 ? (
         <div className="adm-empty">No hay pedidos.</div>
       ) : (
-        <div className="adm-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="adm-card" style={{ padding: 0, overflowX: 'auto' }}>
           <table className="adm-table">
             <thead>
               <tr>

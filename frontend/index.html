@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="/favicon.jpg" />
+  <link rel="icon" href="/PetitIcon.jpg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Petit Accesorios</title>
 
@@ -17,9 +17,18 @@
     rel="stylesheet" />
 </head>
 
-<body>
-  <div id="root"></div>
+<body style="background:#fff;margin:0">
+  <div id="root" style="opacity:0;transition:opacity .15s ease"></div>
   <script type="module" src="/src/main.tsx"></script>
+  <script>
+    // Reveal the app once React has rendered (prevents flash of unstyled content)
+    new MutationObserver(function(m,o){
+      var r=document.getElementById('root');
+      if(r&&r.children.length){r.style.opacity='1';o.disconnect()}
+    }).observe(document.getElementById('root'),{childList:true});
+    // Fallback: reveal after 1.5s even if mutation observer fails
+    setTimeout(function(){var r=document.getElementById('root');if(r)r.style.opacity='1'},1500);
+  </script>
 </body>
 
 </html>

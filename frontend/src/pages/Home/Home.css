@@ -4,32 +4,70 @@
 
 .ph-hero {
   width: 100%;
-  height: 70vh;
   overflow: hidden;
   position: relative;
 }
 
-@media (min-width: 1024px) {
-  .ph-hero {
+/* ── 3-panel hero collage ─────────────────────────────────── */
+.ph-heroCollage {
+  display: flex;
+  width: 100%;
+  height: 70vh;
+}
+
+.ph-heroPanel {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #f5e9ee;
+}
+
+/* On mobile: hide left & right panels, show only center */
+.ph-heroPanel--left,
+.ph-heroPanel--right {
+  display: none;
+}
+
+.ph-heroPanel--center {
+  flex: 1;
+}
+
+@media (min-width: 768px) {
+  .ph-heroCollage {
     height: 85vh;
+  }
+
+  .ph-heroPanel--left,
+  .ph-heroPanel--right {
+    display: block;
+    flex: 0.8;
+  }
+
+  .ph-heroPanel--center {
+    flex: 1.4;
   }
 }
 
+@media (min-width: 1200px) {
+  .ph-heroPanel--left,
+  .ph-heroPanel--right {
+    flex: 1;
+  }
+
+  .ph-heroPanel--center {
+    flex: 1;
+  }
+}
+
+/* ── Fallback: single image mode (when no collage images) ── */
 .ph-heroImage {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transform: scale(1);
-  transition: transform 3000ms ease;
-  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCjrlyJwi9uCl8ALI1Zo3C8TPnNMQqQXS0TdmQXYU8dShtaKbfCMVW4QaH_ckffPTafgrBbS5TnHbZMRkZ2OSq1pe-A5pSIN5TdETee7EmWoADhRQTJVInfLwUc5p7-cJJ8xpXZmnYTS-ifmbmtSpbKbGJf2BdvOuZm80EfFr42LtCR0FoVT9d0BK3T7F94BsgnAzV6Q8nXL8M-5c5oklQ0QJ6pWApAKmogqDBXcVcmMNa1Mbv8nRbf4TJlf9Ie-Mp7VDT-_4W8ZZ8');
-}
-
-@media (hover: hover) {
-  .ph-hero:hover .ph-heroImage {
-    transform: scale(1.05);
-  }
+  background-color: #f5e9ee;
 }
 
 .ph-section {

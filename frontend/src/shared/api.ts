@@ -48,6 +48,8 @@ export type ProductDetailDto = ProductDto & {
 
 export type HomeSettingsDto = {
   heroImageUrl?: string | null;
+  heroImageLeftUrl?: string | null;
+  heroImageRightUrl?: string | null;
 };
 
 export type ProductsPageDto = {
@@ -301,14 +303,14 @@ export async function adminGetHomeSettings() {
   return item && typeof item === 'object' ? (item as HomeSettingsDto) : { heroImageUrl: null };
 }
 
-export async function adminUpdateHomeSettings(input: { hero_image_url?: string }) {
+export async function adminUpdateHomeSettings(input: { hero_image_url?: string; hero_image_left_url?: string; hero_image_right_url?: string }) {
   return await adminRequestJson<{ data?: unknown }>(`/site-settings/home`, { method: 'PATCH', body: input });
 }
 
 // ── Admin Products ──────────────────────────────────────────
 
 export async function adminGetProducts(opts?: { categoryId?: number }) {
-  const qs = buildQuery({ category_id: opts?.categoryId, include_inactive: 1 });
+  const qs = buildQuery({ category_id: opts?.categoryId, include_inactive: 1, limit: 200 });
   const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/products${qs}`, { method: 'GET' });
   return Array.isArray((data as any)?.data) ? ((data as any).data as ProductDto[]) : [];
 }

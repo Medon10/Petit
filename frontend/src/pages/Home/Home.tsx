@@ -60,6 +60,8 @@ export default function HomePage() {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<ProductDto[]>([]);
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
+  const [heroImageLeftUrl, setHeroImageLeftUrl] = useState<string | null>(null);
+  const [heroImageRightUrl, setHeroImageRightUrl] = useState<string | null>(null);
   const carouselRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -77,11 +79,15 @@ export default function HomePage() {
         setCategories(cats);
         setProducts(prods);
         setHeroImageUrl(homeSettings.heroImageUrl ?? null);
+        setHeroImageLeftUrl(homeSettings.heroImageLeftUrl ?? null);
+        setHeroImageRightUrl(homeSettings.heroImageRightUrl ?? null);
       } catch {
         if (cancelled) return;
         setCategories([]);
         setProducts([]);
         setHeroImageUrl(null);
+        setHeroImageLeftUrl(null);
+        setHeroImageRightUrl(null);
       }
     }
 
@@ -116,10 +122,33 @@ export default function HomePage() {
       <Header />
 
       <section className="ph-hero" aria-label="Banner principal">
-        <div
-          className="ph-heroImage"
-          style={heroImageUrl ? { backgroundImage: `url(${toAbsoluteUrl(heroImageUrl)})` } : undefined}
-        />
+        {heroImageLeftUrl && heroImageRightUrl ? (
+          <div className="ph-heroCollage">
+            <div
+              className="ph-heroPanel ph-heroPanel--left"
+              style={{ backgroundImage: `url(${toAbsoluteUrl(heroImageLeftUrl)})` }}
+            />
+            <div
+              className="ph-heroPanel ph-heroPanel--center"
+              style={heroImageUrl ? { backgroundImage: `url(${toAbsoluteUrl(heroImageUrl)})` } : undefined}
+            />
+            <div
+              className="ph-heroPanel ph-heroPanel--right"
+              style={{ backgroundImage: `url(${toAbsoluteUrl(heroImageRightUrl)})` }}
+            />
+          </div>
+        ) : heroImageUrl ? (
+          <div className="ph-heroCollage">
+            <div
+              className="ph-heroPanel ph-heroPanel--center"
+              style={{ backgroundImage: `url(${toAbsoluteUrl(heroImageUrl)})` }}
+            />
+          </div>
+        ) : (
+          <div className="ph-heroCollage">
+            <div className="ph-heroPanel ph-heroPanel--center" />
+          </div>
+        )}
       </section>
 
       <section className="ph-section" aria-label="Colecciones">

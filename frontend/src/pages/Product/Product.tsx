@@ -199,21 +199,18 @@ export default function ProductPage() {
       const unique = Array.from(new Set(candidates));
       if (unique.length === 0) return;
 
-      const loaded: string[] = [];
-      await Promise.all(
+      const loadedResults = await Promise.all(
         unique.map(
           (u) =>
-            new Promise<void>((resolve) => {
+            new Promise<string | null>((resolve) => {
               const image = new Image();
-              image.onload = () => {
-                loaded.push(u);
-                resolve();
-              };
-              image.onerror = () => resolve();
+              image.onload = () => resolve(u);
+              image.onerror = () => resolve(null);
               image.src = u;
             })
         )
       );
+      const loaded = loadedResults.filter((u): u is string => u !== null);
 
       for (const variant of product?.variants || []) {
         if (byVariant[variant.id]) continue;

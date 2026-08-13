@@ -60,10 +60,13 @@ function useAuthRedirect() {
 function HomeTab() {
   const onAuthErr = useAuthRedirect();
   const [heroImageUrl, setHeroImageUrl] = useState('');
+  const [heroImageLeftUrl, setHeroImageLeftUrl] = useState('');
+  const [heroImageRightUrl, setHeroImageRightUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploadTarget, setUploadTarget] = useState<'center' | 'left' | 'right'>('center');
   const fileRef = useRef<HTMLInputElement>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropOpen, setCropOpen] = useState(false);
@@ -72,6 +75,8 @@ function HomeTab() {
     try {
       const data = await adminGetHomeSettings();
       setHeroImageUrl(data.heroImageUrl ?? '');
+      setHeroImageLeftUrl((data as any).heroImageLeftUrl ?? '');
+      setHeroImageRightUrl((data as any).heroImageRightUrl ?? '');
     } catch (e: any) {
       onAuthErr(e);
     } finally {
@@ -87,12 +92,21 @@ function HomeTab() {
     setCropOpen(true);
   }
 
+  function triggerUpload(target: 'center' | 'left' | 'right') {
+    setUploadTarget(target);
+    fileRef.current?.click();
+  }
+
   async function onUpload(file: File) {
     setUploading(true);
     try {
       const res = await adminUploadImage(file);
       const url = (res as any)?.data?.url || '';
-      if (url) setHeroImageUrl(url);
+      if (url) {
+        if (uploadTarget === 'left') setHeroImageLeftUrl(url);
+        else if (uploadTarget === 'right') setHeroImageRightUrl(url);
+        else setHeroImageUrl(url);
+      }
     } catch (e: any) {
       setError(e?.message || 'Error al subir imagen');
       onAuthErr(e);
@@ -105,7 +119,11 @@ function HomeTab() {
     setSaving(true);
     setError('');
     try {
-      await adminUpdateHomeSettings({ hero_image_url: heroImageUrl || undefined });
+      await adminUpdateHomeSettings({
+        hero_image_url: heroImageUrl || undefined,
+        hero_image_left_url: heroImageLeftUrl || undefined,
+        hero_image_right_url: heroImageRightUrl || undefined,
+      });
       await load();
     } catch (e: any) {
       setError(e?.message || 'Error');
@@ -123,29 +141,61 @@ function HomeTab() {
     <>
       <div className="adm-header">
         <h1 className="adm-h1">Portada</h1>
-        <button className="adm-btnPrimary" onClick={() => fileRef.current?.click()}>
-          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>upload</span> Elegir foto
-        </button>
       </div>
 
       <div className="adm-card adm-homeCard">
-        <div className="adm-homePreviewWrap">
-          <div className="adm-homePreview" style={heroImageUrl ? { backgroundImage: `url(${toAbsoluteUrl(heroImageUrl)})` } : undefined}>
-            {!heroImageUrl && <span className="adm-homePreviewEmpty">Aún no hay foto de portada</span>}
-          </div>
+        <div className="adm-homeNote" style={{ marginBottom: 16 }}>
+          La portada usa 3 imágenes en modo collage. En PC se ven las 3 fotos; en celulares se ve solo la del centro.
         </div>
 
-        <div className="adm-form" style={{ marginTop: 18 }}>
+        {/* Preview collage */}
+        <div style={{ display: 'flex', gap: 6, borderRadius: 14, overflow: 'hidden', border: '1px solid #eee2ea', marginBottom: 18 }}>
+          <div style={{ flex: '0.8', minHeight: 120, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#f5e9ee', backgroundImage: heroImageLeftUrl ? `url(${toAbsoluteUrl(heroImageLeftUrl)})` : undefined }} />
+          <div style={{ flex: '1.4', minHeight: 120, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#f5e9ee', backgroundImage: heroImageUrl ? `url(${toAbsoluteUrl(heroImageUrl)})` : undefined }} />
+          <div style={{ flex: '0.8', minHeight: 120, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#f5e9ee', backgroundImage: heroImageRightUrl ? `url(${toAbsoluteUrl(heroImageRightUrl)})` : undefined }} />
+        </div>
+
+        <div className="adm-form">
+          {/* Center (main) image */}
           <div className="adm-field">
-            <label className="adm-label">URL manual</label>
-            <input className="adm-input" placeholder="Pegá una URL o subí una imagen" value={heroImageUrl} onChange={(e) => setHeroImageUrl(e.target.value)} />
+            <label className="adm-label">Imagen central (obligatoria, visible en mobile)</label>
+            <div className="adm-uploadArea">
+              {heroImageUrl && <img className="adm-uploadPreview" src={toAbsoluteUrl(heroImageUrl)} alt="" />}
+              <button className="adm-uploadBtn" type="button" disabled={uploading} onClick={() => triggerUpload('center')}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
+                {uploading && uploadTarget === 'center' ? 'Subiendo...' : 'Subir'}
+              </button>
+            </div>
+            <input className="adm-input" placeholder="URL manual" value={heroImageUrl} onChange={(e) => setHeroImageUrl(e.target.value)} style={{ marginTop: 6 }} />
+          </div>
+
+          {/* Left image */}
+          <div className="adm-field">
+            <label className="adm-label">Imagen izquierda (solo PC)</label>
+            <div className="adm-uploadArea">
+              {heroImageLeftUrl && <img className="adm-uploadPreview" src={toAbsoluteUrl(heroImageLeftUrl)} alt="" />}
+              <button className="adm-uploadBtn" type="button" disabled={uploading} onClick={() => triggerUpload('left')}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
+                {uploading && uploadTarget === 'left' ? 'Subiendo...' : 'Subir'}
+              </button>
+            </div>
+            <input className="adm-input" placeholder="URL manual" value={heroImageLeftUrl} onChange={(e) => setHeroImageLeftUrl(e.target.value)} style={{ marginTop: 6 }} />
+          </div>
+
+          {/* Right image */}
+          <div className="adm-field">
+            <label className="adm-label">Imagen derecha (solo PC)</label>
+            <div className="adm-uploadArea">
+              {heroImageRightUrl && <img className="adm-uploadPreview" src={toAbsoluteUrl(heroImageRightUrl)} alt="" />}
+              <button className="adm-uploadBtn" type="button" disabled={uploading} onClick={() => triggerUpload('right')}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
+                {uploading && uploadTarget === 'right' ? 'Subiendo...' : 'Subir'}
+              </button>
+            </div>
+            <input className="adm-input" placeholder="URL manual" value={heroImageRightUrl} onChange={(e) => setHeroImageRightUrl(e.target.value)} style={{ marginTop: 6 }} />
           </div>
 
           {error && <p className="adm-error">{error}</p>}
-
-          <div className="adm-homeNote">
-            Esta imagen se usa como banner principal de Home. Conviene una composición ancha, con el centro protagonista.
-          </div>
         </div>
 
         <input

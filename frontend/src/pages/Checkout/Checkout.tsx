@@ -8,6 +8,8 @@ import {
   createOrder,
   getExtras,
   getProduct,
+  toAbsoluteUrl,
+  toResponsiveImage,
   type ExtraDto,
   type ProductDetailDto,
 } from '../../shared/api';
@@ -181,13 +183,13 @@ export default function CheckoutPage() {
         shipping:
           shippingMethod === 'delivery'
             ? {
-                method: 'delivery' as const,
-                postal_code: shippingPostalCode,
-                address_line1: shippingAddressLine1,
-                address_line2: cart.shipping.addressLine2.trim() || undefined,
-                city: shippingCity,
-                province: shippingProvince,
-              }
+              method: 'delivery' as const,
+              postal_code: shippingPostalCode,
+              address_line1: shippingAddressLine1,
+              address_line2: cart.shipping.addressLine2.trim() || undefined,
+              city: shippingCity,
+              province: shippingProvince,
+            }
             : { method: 'pickup' as const },
         items: cart.items.map((it) => ({
           product_id: it.productId,
@@ -351,11 +353,11 @@ export default function CheckoutPage() {
                 <div className="checkout-formGrid">
                   <label className="checkout-field">
                     Nombre completo
-                    <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Ej: Elena Rossi" />
+                    <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                   </label>
 
                   <label className="checkout-field">
-                    Correo electronico
+                    Correo electronico (opcional)
                     <input
                       type="email"
                       value={customerEmail}
@@ -365,7 +367,7 @@ export default function CheckoutPage() {
                   </label>
 
                   <label className="checkout-field checkout-fieldFull">
-                    Telefono
+                    Telefono (opcional)
                     <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+54 9..." />
                   </label>
 
@@ -442,10 +444,30 @@ export default function CheckoutPage() {
                       .filter(Boolean)
                       .join(' · ');
                     const title = `${product?.name ?? `Producto #${it.productId}`}${variant?.name ? ` (${variant.name})` : ''}`;
+                    const thumbUrl = variant?.imageUrl ?? product?.imageUrl;
+                    const fallbackUrl = toAbsoluteUrl(`/images/products/${it.productId}.jpg`);
+                    const img = thumbUrl ? toResponsiveImage(thumbUrl) : { src: fallbackUrl, srcSet: undefined };
+
                     return (
                       <article key={it.key} className="checkout-item">
                         <div className="checkout-thumb" aria-hidden="true">
-                          {(product?.name ?? 'P').slice(0, 1).toUpperCase()}
+                          {img.src ? (
+                            <img
+                              src={img.src}
+                              srcSet={img.srcSet}
+                              alt=""
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                if (e.currentTarget.nextElementSibling) {
+                                  (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
+                                }
+                              }}
+                            />
+                          ) : null}
+                          <span style={{ display: img.src ? 'none' : 'block' }}>
+                            {(product?.name ?? 'P').slice(0, 1).toUpperCase()}
+                          </span>
                         </div>
                         <div className="checkout-itemContent">
                           <h4>{title}</h4>
@@ -468,7 +490,7 @@ export default function CheckoutPage() {
                 ) : null}
 
                 <p className="checkout-secureText">
-                  Al confirmar,  contactanos por WhatsApp para coordinar el envío y detalles del pedido.
+                  Al confirmar,  contactanos por WhatsApp para coordinar el envío/retiro y detalles del pedido.
                 </p>
               </aside>
             </div>
