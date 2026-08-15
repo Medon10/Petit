@@ -1,0 +1,211 @@
+/* ── Cómo Comprar page ──────────────────────────────────── */
+.cc-page {
+  min-height: 100vh;
+}
+
+.cc-main {
+  padding: 80px 0 120px;
+  background: var(--ph-background);
+}
+
+.cc-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.cc-hero {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.cc-title {
+  margin: 0 0 12px;
+  font-family: 'Alkalami', serif;
+  font-size: 40px;
+  font-weight: 400;
+  color: var(--ph-primary);
+  letter-spacing: 0.02em;
+}
+
+.cc-divider {
+  width: 48px;
+  height: 2px;
+  background: var(--ph-primary);
+  margin: 0 auto;
+}
+
+.cc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+
+/* ── Steps ──────────────────────────────────────────────── */
+.cc-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.cc-step {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.cc-stepNum {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ph-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--ph-primary);
+  margin-top: 2px;
+}
+
+.cc-stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cc-stepTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.cc-stepContent p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ph-text-subtle);
+}
+
+/* ── FAQ ────────────────────────────────────────────────── */
+.cc-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.cc-faqTitle {
+  margin: 0;
+  font-family: 'Alkalami', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--ph-primary);
+  letter-spacing: 0.02em;
+}
+
+.cc-faqItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--ph-border);
+}
+
+.cc-faqItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.cc-faqQ {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.cc-faqItem p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ph-text-subtle);
+}
+
+/* ── CTA ────────────────────────────────────────────────── */
+.cc-cta {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.cc-cta p {
+  margin: 0;
+  font-size: 16px;
+  color: var(--ph-text-subtle);
+}
+
+.cc-ctaBtn {
+  display: inline-block;
+  padding: 14px 32px;
+  background: var(--ph-primary);
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transition: opacity 200ms ease;
+}
+
+.cc-ctaBtn:hover {
+  opacity: 0.85;
+}
+
+.cc-ctaBtnSecondary {
+  display: inline-block;
+  padding: 13px 28px;
+  background: transparent;
+  color: var(--ph-primary);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  border: 1.5px solid var(--ph-primary);
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.cc-ctaBtnSecondary:hover {
+  background: var(--ph-primary);
+  color: #fff;
+}
+
+@media (max-width: 639px) {
+  .cc-title {
+    font-size: 30px;
+  }
+
+  .cc-main {
+    padding: 56px 0 80px;
+  }
+
+  .cc-step {
+    gap: 18px;
+  }
+
+  .cc-stepNum {
+    width: 40px;
+    height: 40px;
+    font-size: 11px;
+  }
+}

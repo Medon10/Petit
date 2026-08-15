@@ -41,17 +41,6 @@
   .ph-heroPanel--left,
   .ph-heroPanel--right {
     display: block;
-    flex: 0.8;
-  }
-
-  .ph-heroPanel--center {
-    flex: 1.4;
-  }
-}
-
-@media (min-width: 1200px) {
-  .ph-heroPanel--left,
-  .ph-heroPanel--right {
     flex: 1;
   }
 
@@ -59,6 +48,8 @@
     flex: 1;
   }
 }
+
+/* All three panels are equal at all breakpoints — no override needed at 1200px */
 
 /* ── Fallback: single image mode (when no collage images) ── */
 .ph-heroImage {

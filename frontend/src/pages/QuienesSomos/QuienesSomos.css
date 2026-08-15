@@ -1,0 +1,107 @@
+/* ── Quiénes Somos page ─────────────────────────────────── */
+.qs-page {
+  min-height: 100vh;
+}
+
+.qs-main {
+  padding: 80px 0 120px;
+  background: var(--ph-background);
+}
+
+.qs-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.qs-hero {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.qs-title {
+  margin: 0 0 12px;
+  font-family: 'Alkalami', serif;
+  font-size: 40px;
+  font-weight: 400;
+  color: var(--ph-primary);
+  letter-spacing: 0.02em;
+}
+
+.qs-divider {
+  width: 48px;
+  height: 2px;
+  background: var(--ph-primary);
+  margin: 0 auto;
+}
+
+.qs-body {
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.qs-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.qs-subtitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.qs-section p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ph-text-subtle);
+}
+
+.qs-cta {
+  text-align: center;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.qs-cta p {
+  margin: 0;
+  font-size: 16px;
+  color: var(--ph-text-subtle);
+}
+
+.qs-ctaBtn {
+  display: inline-block;
+  padding: 14px 32px;
+  background: var(--ph-primary);
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transition: opacity 200ms ease;
+}
+
+.qs-ctaBtn:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 639px) {
+  .qs-title {
+    font-size: 30px;
+  }
+
+  .qs-main {
+    padding: 56px 0 80px;
+  }
+}

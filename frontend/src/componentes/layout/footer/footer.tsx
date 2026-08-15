@@ -70,6 +70,14 @@ export default function Footer() {
           </div>
 
           <div>
+            <h5 className="ph-footerTitle">Información</h5>
+            <ul className="ph-footerLinks">
+              <li><Link to="/quienes-somos">Quiénes Somos</Link></li>
+              <li><Link to="/como-comprar">Cómo Comprar</Link></li>
+            </ul>
+          </div>
+
+          <div>
             <h5 className="ph-footerTitle">Contacto</h5>
             <ul className="ph-footerLinks">
               <li><a href="https://wa.me/5491100000000" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>

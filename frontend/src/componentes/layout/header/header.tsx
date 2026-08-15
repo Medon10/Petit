@@ -466,6 +466,14 @@ export default function Header() {
             >
               Carrito
             </button>
+
+            <NavLink className="ph-mobileNavLink" to="/quienes-somos" onClick={() => setMobileMenuOpen(false)}>
+              Quiénes Somos
+            </NavLink>
+
+            <NavLink className="ph-mobileNavLink" to="/como-comprar" onClick={() => setMobileMenuOpen(false)}>
+              Cómo Comprar
+            </NavLink>
           </nav>
         </aside>
       </div>

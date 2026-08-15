@@ -13,6 +13,8 @@ import AdminCatalogPage from './pages/AdminCatalog/AdminCatalog'
 import AdminOrdersPage from './pages/AdminOrders/AdminOrders'
 import ProtectedAdminRoute from './shared/ProtectedAdminRoute'
 import WhatsAppButton from './componentes/WhatsAppButton/WhatsAppButton'
+import QuienesSomosPage from './pages/QuienesSomos/QuienesSomos'
+import ComoComprarPage from './pages/ComoComprar/ComoComprar'
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
         <Route path="/carrito" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/pedido/:id" element={<OrderPage />} />
+        <Route path="/quienes-somos" element={<QuienesSomosPage />} />
+        <Route path="/como-comprar" element={<ComoComprarPage />} />
         <Route path="/login" element={<Navigate to="/admin/login" replace />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/catalogo" element={<ProtectedAdminRoute><AdminCatalogPage /></ProtectedAdminRoute>} />
