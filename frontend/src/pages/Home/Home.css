@@ -17,10 +17,19 @@
 
 .ph-heroPanel {
   flex: 1;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
   background-color: #f5e9ee;
+}
+
+.ph-heroPanelImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 /* On mobile: hide left & right panels, show only center */

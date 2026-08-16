@@ -124,25 +124,23 @@ export default function HomePage() {
       <section className="ph-hero" aria-label="Banner principal">
         {heroImageLeftUrl && heroImageRightUrl ? (
           <div className="ph-heroCollage">
-            <div
-              className="ph-heroPanel ph-heroPanel--left"
-              style={{ backgroundImage: `url(${toAbsoluteUrl(heroImageLeftUrl)})` }}
-            />
-            <div
-              className="ph-heroPanel ph-heroPanel--center"
-              style={heroImageUrl ? { backgroundImage: `url(${toAbsoluteUrl(heroImageUrl)})` } : undefined}
-            />
-            <div
-              className="ph-heroPanel ph-heroPanel--right"
-              style={{ backgroundImage: `url(${toAbsoluteUrl(heroImageRightUrl)})` }}
-            />
+            <div className="ph-heroPanel ph-heroPanel--left">
+              <img className="ph-heroPanelImg" src={toAbsoluteUrl(heroImageLeftUrl)} alt="" aria-hidden="true" />
+            </div>
+            <div className="ph-heroPanel ph-heroPanel--center">
+              {heroImageUrl && (
+                <img className="ph-heroPanelImg" src={toAbsoluteUrl(heroImageUrl)} alt="" aria-hidden="true" />
+              )}
+            </div>
+            <div className="ph-heroPanel ph-heroPanel--right">
+              <img className="ph-heroPanelImg" src={toAbsoluteUrl(heroImageRightUrl)} alt="" aria-hidden="true" />
+            </div>
           </div>
         ) : heroImageUrl ? (
           <div className="ph-heroCollage">
-            <div
-              className="ph-heroPanel ph-heroPanel--center"
-              style={{ backgroundImage: `url(${toAbsoluteUrl(heroImageUrl)})` }}
-            />
+            <div className="ph-heroPanel ph-heroPanel--center">
+              <img className="ph-heroPanelImg" src={toAbsoluteUrl(heroImageUrl)} alt="" aria-hidden="true" />
+            </div>
           </div>
         ) : (
           <div className="ph-heroCollage">

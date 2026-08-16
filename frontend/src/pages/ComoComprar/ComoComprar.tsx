@@ -79,8 +79,7 @@ export default function ComoComprarPage() {
                   <h2 className="cc-stepTitle">Medios de pago</h2>
                   <p>
                     Aceptamos transferencia bancaria / Mercado Pago y efectivo. Una vez que
-                    recibamos la confirmación del pago, comenzamos a preparar tu pedido. Si pagás
-                    por transferencia, tenés un descuento especial del <strong>10 % OFF</strong>.
+                    recibamos la confirmación del pago, comenzamos a preparar tu pedido.
                   </p>
                 </div>
               </div>
@@ -90,7 +89,7 @@ export default function ComoComprarPage() {
                 <div className="cc-stepContent">
                   <h2 className="cc-stepTitle">Envío y retiro</h2>
                   <p>
-                    Enviamos a todo el país por correo o servicio de mensajería. También podés
+                    Enviamos a todo el país por correo argentino. También podés
                     coordinar el retiro en persona si estás en la zona. Los tiempos de entrega
                     varían según el destino y la disponibilidad de stock.
                   </p>
@@ -102,47 +101,8 @@ export default function ComoComprarPage() {
               </div>
             </div>
 
-            <section className="cc-faq">
-              <h2 className="cc-faqTitle">Preguntas frecuentes</h2>
-
-              <div className="cc-faqItem">
-                <h3 className="cc-faqQ">¿Cuánto tarda en llegar mi pedido?</h3>
-                <p>
-                  El tiempo de producción es de 3 a 5 días hábiles para productos con grabado
-                  personalizado. A eso se suma el tiempo de envío según tu ubicación (generalmente
-                  2 a 5 días hábiles adicionales).
-                </p>
-              </div>
-
-              <div className="cc-faqItem">
-                <h3 className="cc-faqQ">¿Puedo cambiar o cancelar mi pedido?</h3>
-                <p>
-                  Si necesitás hacer algún cambio, escribinos lo antes posible por WhatsApp.
-                  Mientras el pedido no haya entrado en producción, podemos ajustarlo sin problema.
-                  Una vez iniciado el grabado, no es posible modificar el texto personalizado.
-                </p>
-              </div>
-
-              <div className="cc-faqItem">
-                <h3 className="cc-faqQ">¿Los productos son resistentes al agua?</h3>
-                <p>
-                  Sí. El acero quirúrgico es resistente al agua, al sudor y a la mayoría de los
-                  productos de higiene personal. Podés usarlos en la ducha o en la pileta sin
-                  problema.
-                </p>
-              </div>
-
-              <div className="cc-faqItem">
-                <h3 className="cc-faqQ">¿Hacen envíos a todo el país?</h3>
-                <p>
-                  Sí, enviamos a todo el territorio argentino. El costo de envío se calcula al
-                  momento del checkout según tu código postal.
-                </p>
-              </div>
-            </section>
-
             <div className="cc-cta">
-              <p>¿Todavía tenés dudas? Escribinos y te ayudamos.</p>
+              <p>¿Tenés dudas? Escribinos y te ayudamos.</p>
               <a
                 href="https://wa.me/5492473417518"
                 className="cc-ctaBtn"

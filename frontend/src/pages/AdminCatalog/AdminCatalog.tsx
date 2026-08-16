@@ -150,9 +150,9 @@ function HomeTab() {
 
         {/* Preview collage */}
         <div style={{ display: 'flex', gap: 6, borderRadius: 14, overflow: 'hidden', border: '1px solid #eee2ea', marginBottom: 18 }}>
-          <div style={{ flex: '0.8', minHeight: 120, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#f5e9ee', backgroundImage: heroImageLeftUrl ? `url(${toAbsoluteUrl(heroImageLeftUrl)})` : undefined }} />
-          <div style={{ flex: '1.4', minHeight: 120, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#f5e9ee', backgroundImage: heroImageUrl ? `url(${toAbsoluteUrl(heroImageUrl)})` : undefined }} />
-          <div style={{ flex: '0.8', minHeight: 120, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#f5e9ee', backgroundImage: heroImageRightUrl ? `url(${toAbsoluteUrl(heroImageRightUrl)})` : undefined }} />
+          <div style={{ flex: '1', minHeight: 140, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#f5e9ee', backgroundImage: heroImageLeftUrl ? `url(${toAbsoluteUrl(heroImageLeftUrl)})` : undefined }} />
+          <div style={{ flex: '1', minHeight: 140, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#f5e9ee', backgroundImage: heroImageUrl ? `url(${toAbsoluteUrl(heroImageUrl)})` : undefined }} />
+          <div style={{ flex: '1', minHeight: 140, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#f5e9ee', backgroundImage: heroImageRightUrl ? `url(${toAbsoluteUrl(heroImageRightUrl)})` : undefined }} />
         </div>
 
         <div className="adm-form">
@@ -220,7 +220,7 @@ function HomeTab() {
         file={cropFile}
         open={cropOpen}
         title="Recortar foto de Home"
-        aspect={16 / 9}
+        aspect={1}
         onClose={() => {
           setCropOpen(false);
           setCropFile(null);

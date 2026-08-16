@@ -465,7 +465,7 @@ button.ph-iconLink {
   text-align: left;
   text-decoration: none;
   color: var(--ph-text-main);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -475,6 +475,10 @@ button.ph-iconLink {
   justify-content: space-between;
   width: 100%;
   cursor: pointer;
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none;
 }
 
 .ph-mobileNavLink:hover,
