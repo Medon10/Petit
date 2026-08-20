@@ -31,7 +31,7 @@ export default function OrderPage() {
   const location = useLocation();
   const state = (location.state || null) as OrderConfirmationState | null;
 
-  const orderNumber = String(state?.orderNumber || params.id || '');
+
   const subtotal = Number(state?.subtotal ?? state?.total ?? 0);
 
   const shippingMethod = state?.shippingMethod ?? 'pickup';

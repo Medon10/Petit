@@ -99,6 +99,22 @@ export default function ComoComprarPage() {
                   </p>
                 </div>
               </div>
+
+              <div className="cc-step">
+                <div className="cc-stepNum">07</div>
+                <div className="cc-stepContent">
+                  <h2 className="cc-stepTitle">Aclaraciones</h2>
+                  <p>
+                    Cada pieza incluye una cadena simple y el grabado de un lado sin costo adicional.
+                    Si haces un fotograbado el grabado extra no se te cobra.
+                    Para los pedidos en el mismo día se cobra un extra.
+                  </p>
+                  <p>
+                    Antes de realizar el grabado en tu accesorio, te enviamos una muestra del diseño para que puedas verla y aprobarla con tranquilidad.
+                    De esta forma te asegurás de que el grabado quede exactamente como querés. Cada pieza está hecha con mucho amor y sabemos que te va a encantar.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="cc-cta">
