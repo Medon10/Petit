@@ -1,4 +1,4 @@
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
@@ -27,7 +27,6 @@ function moneyAr(amount: number) {
 }
 
 export default function OrderPage() {
-  const params = useParams();
   const location = useLocation();
   const state = (location.state || null) as OrderConfirmationState | null;
 
