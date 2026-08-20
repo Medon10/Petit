@@ -40,7 +40,7 @@ export default function ComoComprarPage() {
               <div className="cc-step">
                 <div className="cc-stepNum">02</div>
                 <div className="cc-stepContent">
-                  <h2 className="cc-stepTitle">Personalizalo (si aplica)</h2>
+                  <h2 className="cc-stepTitle">Personalizalo</h2>
                   <p>
                     Muchos de nuestros productos pueden grabarse con un texto a elección: nombres,
                     fechas, frases o firmas. En la página del producto vas a encontrar el campo para

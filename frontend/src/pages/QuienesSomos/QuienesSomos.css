@@ -58,9 +58,10 @@
 
 .qs-section p {
   margin: 0;
-  font-size: 15px;
-  line-height: 1.75;
+  font-size: 16px;
+  line-height: 1.85;
   color: var(--ph-text-subtle);
+  text-align: center;
 }
 
 .qs-cta {

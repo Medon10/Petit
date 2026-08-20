@@ -6,15 +6,29 @@
 
 .ph-footerGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 48px;
-  margin-bottom: 64px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px 16px;
+  margin-bottom: 48px;
+}
+
+.ph-footerBrand {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 @media (min-width: 768px) {
   .ph-footerGrid {
     grid-template-columns: 1.5fr 1fr 1fr 1fr;
     align-items: start;
+    gap: 48px;
+  }
+  .ph-footerBrand {
+    grid-column: auto;
+    align-items: flex-start;
+    text-align: left;
   }
 }
 
@@ -27,7 +41,7 @@
 .ph-footerBrandWrap {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: inherit;
   gap: 0;
 }
 

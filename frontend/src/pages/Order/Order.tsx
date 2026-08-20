@@ -42,7 +42,7 @@ export default function OrderPage() {
   const whatsappNumber = String((import.meta as any).env?.VITE_WHATSAPP_NUMBER || '5491100000000').replace(/\D/g, '');
 
   const whatsappText = encodeURIComponent(
-    `Hola! Acabo de realizar el pedido #${orderNumber} por ${moneyAr(subtotal)}. Adjunto comprobante de transferencia y coordinamos por acá los detalles de grabado, diseño y envío.`
+    `Hola! Acabo de realizar un pedido por la página, coordinamos por acá los detalles de grabado y diseño?.`
   );
   const whatsappHref = `https://wa.me/${whatsappNumber}?text=${whatsappText}`;
 
@@ -59,7 +59,7 @@ export default function OrderPage() {
           <div className="order-check" aria-hidden="true">OK</div>
           <h1>Gracias por tu compra</h1>
           <p>
-            Tu pedido <strong>#{orderNumber || 'N/A'}</strong> fue recibido correctamente.
+            Tu pedido fue recibido correctamente.
           </p>
           <div className="order-heroDivider" />
         </section>

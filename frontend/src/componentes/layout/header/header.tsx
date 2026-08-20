@@ -280,6 +280,8 @@ export default function Header() {
             </div>
           </div>
 
+          <NavLink className="ph-navLink" to="/quienes-somos">Quiénes Somos</NavLink>
+          <NavLink className="ph-navLink" to="/como-comprar">Cómo comprar</NavLink>
         </nav>
 
         <Link className="ph-logo" aria-label="Petit" to="/">
@@ -472,8 +474,18 @@ export default function Header() {
             </NavLink>
 
             <NavLink className="ph-mobileNavLink" to="/como-comprar" onClick={() => setMobileMenuOpen(false)}>
-              Cómo Comprar
+              Cómo comprar
             </NavLink>
+
+            <a
+              className="ph-mobileNavLink"
+              href="https://www.instagram.com/petit.laser/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Instagram
+            </a>
           </nav>
         </aside>
       </div>

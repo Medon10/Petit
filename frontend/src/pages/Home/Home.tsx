@@ -116,7 +116,7 @@ export default function HomePage() {
   return (
     <div className="petit-home">
       <Helmet>
-        <title>Petit Accesorios | Joyas de Acero Quirúrgico</title>
+        <title>Petit Accesorios</title>
         <meta name="description" content="Descubrí colecciones de accesorios personalizados en acero quirúrgico. Envíos a todo el país y atención por WhatsApp." />
       </Helmet>
       <Header />
@@ -217,25 +217,25 @@ export default function HomePage() {
               const priceLabel = min != null ? formatMoney(min) : undefined;
 
               return (
-              <Link key={p.id} className="ph-productCard" to={`/productos/${p.id}`}>
-                <div className="ph-productMedia">
-                  <img
-                    className="ph-productImg"
-                    src={img}
-                    srcSet={responsive.srcSet}
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                    alt={p.name}
-                    loading="lazy"
-                  />
-                  <div className="ph-productCTA" aria-hidden="true">
-                    <span className="material-symbols-outlined">shopping_bag</span>
+                <Link key={p.id} className="ph-productCard" to={`/productos/${p.id}`}>
+                  <div className="ph-productMedia">
+                    <img
+                      className="ph-productImg"
+                      src={img}
+                      srcSet={responsive.srcSet}
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                      alt={p.name}
+                      loading="lazy"
+                    />
+                    <div className="ph-productCTA" aria-hidden="true">
+                      <span className="material-symbols-outlined">shopping_bag</span>
+                    </div>
                   </div>
-                </div>
-                <div className="ph-productText">
-                  <h3 className="ph-productName">{p.name}</h3>
-                  {priceLabel ? <p className="ph-price">{priceLabel}</p> : null}
-                </div>
-              </Link>
+                  <div className="ph-productText">
+                    <h3 className="ph-productName">{p.name}</h3>
+                    {priceLabel ? <p className="ph-price">{priceLabel}</p> : null}
+                  </div>
+                </Link>
               );
             })}
           </div>

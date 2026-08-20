@@ -169,7 +169,7 @@ export default function CheckoutPage() {
         const variantName = variant?.name ? ` (${variant.name})` : '';
         return {
           key: it.key,
-          name: `${product?.name ?? `Producto #${it.productId}`}${variantName}`,
+          name: `${product?.name ?? `Producto sin nombre`}${variantName}`,
           quantity: it.quantity,
           total: lineTotal,
         };
@@ -443,7 +443,7 @@ export default function CheckoutPage() {
                       .map((id) => extrasById[id]?.name)
                       .filter(Boolean)
                       .join(' · ');
-                    const title = `${product?.name ?? `Producto #${it.productId}`}${variant?.name ? ` (${variant.name})` : ''}`;
+                    const title = `${product?.name ?? `Producto sin nombre`}${variant?.name ? ` (${variant.name})` : ''}`;
                     const thumbUrl = variant?.imageUrl ?? product?.imageUrl;
                     const fallbackUrl = toAbsoluteUrl(`/images/products/${it.productId}.jpg`);
                     const img = thumbUrl ? toResponsiveImage(thumbUrl) : { src: fallbackUrl, srcSet: undefined };
