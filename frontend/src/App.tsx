@@ -15,6 +15,8 @@ import ProtectedAdminRoute from './shared/ProtectedAdminRoute'
 import WhatsAppButton from './componentes/WhatsAppButton/WhatsAppButton'
 import QuienesSomosPage from './pages/QuienesSomos/QuienesSomos'
 import ComoComprarPage from './pages/ComoComprar/ComoComprar'
+import TerminosCondicionesPage from './pages/Legal/TerminosCondiciones'
+import PoliticaPrivacidadPage from './pages/Legal/PoliticaPrivacidad'
 
 function App() {
   return (
@@ -31,6 +33,8 @@ function App() {
         <Route path="/pedido/:id" element={<OrderPage />} />
         <Route path="/quienes-somos" element={<QuienesSomosPage />} />
         <Route path="/como-comprar" element={<ComoComprarPage />} />
+        <Route path="/terminos" element={<TerminosCondicionesPage />} />
+        <Route path="/privacidad" element={<PoliticaPrivacidadPage />} />
         <Route path="/login" element={<Navigate to="/admin/login" replace />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/catalogo" element={<ProtectedAdminRoute><AdminCatalogPage /></ProtectedAdminRoute>} />

@@ -13,6 +13,12 @@ export default function QuienesSomosPage() {
           name="description"
           content="Conocé la historia de Petit Accesorios: una marca argentina de joyas personalizadas en acero quirúrgico con grabado láser."
         />
+        <link rel="canonical" href="https://petitaccesorios.com.ar/quienes-somos" />
+        <meta property="og:title" content="Quiénes Somos | Petit Accesorios" />
+        <meta property="og:description" content="Conocé la historia de Petit Accesorios: una marca argentina de joyas personalizadas en acero quirúrgico con grabado láser." />
+        <meta property="og:url" content="https://petitaccesorios.com.ar/quienes-somos" />
+        <meta name="twitter:title" content="Quiénes Somos | Petit Accesorios" />
+        <meta name="twitter:description" content="Conocé la historia de Petit Accesorios." />
       </Helmet>
       <Header />
 

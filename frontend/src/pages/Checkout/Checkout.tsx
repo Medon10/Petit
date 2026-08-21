@@ -231,6 +231,7 @@ export default function CheckoutPage() {
       <Helmet>
         <title>Checkout | Petit Accesorios</title>
         <meta name="description" content="Confirmá tus datos y finalizá tu pedido en Petit Accesorios." />
+        <meta name="robots" content="noindex, follow" />
       </Helmet>
       <Header />
 

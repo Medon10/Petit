@@ -50,6 +50,7 @@ export default function OrderPage() {
       <Helmet>
         <title>Pedido confirmado | Petit Accesorios</title>
         <meta name="description" content="Tu pedido fue registrado correctamente. Comparti el comprobante por WhatsApp para validarlo." />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <Header />
 

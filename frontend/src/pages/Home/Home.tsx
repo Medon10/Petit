@@ -116,10 +116,45 @@ export default function HomePage() {
   return (
     <div className="petit-home">
       <Helmet>
-        <title>Petit Accesorios</title>
+        <title>Petit Accesorios — Joyería personalizada en acero quirúrgico</title>
         <meta name="description" content="Descubrí colecciones de accesorios personalizados en acero quirúrgico. Envíos a todo el país y atención por WhatsApp." />
+        <link rel="canonical" href="https://petitaccesorios.com.ar/" />
+        <meta property="og:title" content="Petit Accesorios — Joyería personalizada en acero quirúrgico" />
+        <meta property="og:description" content="Descubrí colecciones de accesorios personalizados en acero quirúrgico. Envíos a todo el país y atención por WhatsApp." />
+        <meta property="og:url" content="https://petitaccesorios.com.ar/" />
+        <meta name="twitter:title" content="Petit Accesorios — Joyería personalizada en acero quirúrgico" />
+        <meta name="twitter:description" content="Descubrí colecciones de accesorios personalizados en acero quirúrgico. Envíos a todo el país." />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "name": "Petit Accesorios",
+              "url": "https://petitaccesorios.com.ar",
+              "logo": "https://petitaccesorios.com.ar/PetitIcon.jpg",
+              "sameAs": ["https://www.instagram.com/petit.laser/"],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer service",
+                "availableLanguage": "es"
+              }
+            },
+            {
+              "@type": "WebSite",
+              "name": "Petit Accesorios",
+              "url": "https://petitaccesorios.com.ar",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://petitaccesorios.com.ar/buscar?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            }
+          ]
+        })}</script>
       </Helmet>
       <Header />
+
+      <h1 className="sr-only">Petit Accesorios — Joyería personalizada en acero quirúrgico</h1>
 
       <section className="ph-hero" aria-label="Banner principal">
         {heroImageLeftUrl && heroImageRightUrl ? (

@@ -72,6 +72,12 @@ export default function CategoriesPage() {
       <Helmet>
         <title>Categorías | Petit Accesorios</title>
         <meta name="description" content="Explorá todas las categorías de Petit Accesorios y encontrá tu próximo diseño personalizado." />
+        <link rel="canonical" href="https://petitaccesorios.com.ar/categorias" />
+        <meta property="og:title" content="Categorías | Petit Accesorios" />
+        <meta property="og:description" content="Explorá todas las categorías de Petit Accesorios y encontrá tu próximo diseño personalizado." />
+        <meta property="og:url" content="https://petitaccesorios.com.ar/categorias" />
+        <meta name="twitter:title" content="Categorías | Petit Accesorios" />
+        <meta name="twitter:description" content="Explorá todas las categorías de Petit Accesorios." />
       </Helmet>
       <Header />
 

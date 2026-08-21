@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import { getExtras, getProduct, toAbsoluteUrl, type ExtraDto, type ProductDetailDto } from '../../shared/api';
@@ -103,6 +104,11 @@ export default function CartPage() {
 
   return (
     <div className="petit-cart">
+      <Helmet>
+        <title>Carrito | Petit Accesorios</title>
+        <meta name="description" content="Revisá los productos en tu carrito de Petit Accesorios." />
+        <meta name="robots" content="noindex, follow" />
+      </Helmet>
       <Header />
 
       <section className="ph-section ph-sectionTight" aria-label="Carrito">

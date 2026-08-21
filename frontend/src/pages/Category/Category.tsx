@@ -92,6 +92,21 @@ export default function CategoryPage() {
       <Helmet>
         <title>{`${categoryName} | Petit Accesorios`}</title>
         <meta name="description" content={`Explorá ${categoryName} en Petit Accesorios. Diseños personalizados en acero quirúrgico.`} />
+        <link rel="canonical" href={`https://petitaccesorios.com.ar/categorias/${categoryId}`} />
+        <meta property="og:title" content={`${categoryName} | Petit Accesorios`} />
+        <meta property="og:description" content={`Explorá ${categoryName} en Petit Accesorios. Diseños personalizados en acero quirúrgico.`} />
+        <meta property="og:url" content={`https://petitaccesorios.com.ar/categorias/${categoryId}`} />
+        <meta name="twitter:title" content={`${categoryName} | Petit Accesorios`} />
+        <meta name="twitter:description" content={`Explorá ${categoryName} en Petit Accesorios.`} />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://petitaccesorios.com.ar/" },
+            { "@type": "ListItem", "position": 2, "name": "Categorías", "item": "https://petitaccesorios.com.ar/categorias" },
+            { "@type": "ListItem", "position": 3, "name": categoryName, "item": `https://petitaccesorios.com.ar/categorias/${categoryId}` }
+          ]
+        })}</script>
       </Helmet>
       <Header />
 

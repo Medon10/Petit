@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { clearAdminToken } from '../../shared/api';
 import './AdminLayout.css';
 
@@ -14,6 +15,9 @@ export default function AdminLayout({ children }: Props) {
 
   return (
     <div className="adm-layout">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <aside className="adm-sidebar">
         <div className="adm-sidebarBrand">
           <div className="adm-brandCopy">

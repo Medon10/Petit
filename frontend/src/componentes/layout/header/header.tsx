@@ -286,7 +286,7 @@ export default function Header() {
 
         <Link className="ph-logo" aria-label="Petit" to="/">
           <div className="ph-brandWrap">
-            <h1 className="ph-brand">Petit</h1>
+            <span className="ph-brand">Petit</span>
             <span className="ph-brandSub">accesorios</span>
           </div>
         </Link>

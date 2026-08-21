@@ -73,6 +73,9 @@ export default function SearchPage() {
       <Helmet>
         <title>{query ? `Buscar: ${query} | Petit Accesorios` : 'Búsqueda | Petit Accesorios'}</title>
         <meta name="description" content={query ? `Resultados de búsqueda para ${query} en Petit Accesorios.` : 'Buscá productos en Petit Accesorios.'} />
+        <meta name="robots" content="noindex, follow" />
+        <meta property="og:title" content={query ? `Buscar: ${query} | Petit Accesorios` : 'Búsqueda | Petit Accesorios'} />
+        <meta property="og:description" content={query ? `Resultados de búsqueda para ${query} en Petit Accesorios.` : 'Buscá productos en Petit Accesorios.'} />
       </Helmet>
 
       <Header />

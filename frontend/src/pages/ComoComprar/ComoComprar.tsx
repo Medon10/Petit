@@ -13,6 +13,12 @@ export default function ComoComprarPage() {
           name="description"
           content="Aprendé cómo comprar en Petit Accesorios: elegí tu producto, personalizalo, pagá y recibilo en tu casa o retiralo en sucursal."
         />
+        <link rel="canonical" href="https://petitaccesorios.com.ar/como-comprar" />
+        <meta property="og:title" content="Cómo Comprar | Petit Accesorios" />
+        <meta property="og:description" content="Aprendé cómo comprar en Petit Accesorios: elegí tu producto, personalizalo, pagá y recibilo en tu casa." />
+        <meta property="og:url" content="https://petitaccesorios.com.ar/como-comprar" />
+        <meta name="twitter:title" content="Cómo Comprar | Petit Accesorios" />
+        <meta name="twitter:description" content="Aprendé cómo comprar en Petit Accesorios." />
       </Helmet>
       <Header />
 

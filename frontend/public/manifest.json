@@ -1,0 +1,16 @@
+{
+  "name": "Petit Accesorios",
+  "short_name": "Petit",
+  "description": "Accesorios personalizados en acero quirúrgico con grabado láser",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#C76DA2",
+  "icons": [
+    {
+      "src": "/PetitIcon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    }
+  ]
+}

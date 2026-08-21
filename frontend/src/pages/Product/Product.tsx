@@ -258,6 +258,36 @@ export default function ProductPage() {
       <Helmet>
         <title>{product?.name ? `${product.name} | Petit Accesorios` : 'Producto | Petit Accesorios'}</title>
         <meta name="description" content={product?.description || 'Detalle de producto en Petit Accesorios.'} />
+        <link rel="canonical" href={`https://petitaccesorios.com.ar/productos/${productId}`} />
+        <meta property="og:title" content={product?.name ? `${product.name} | Petit Accesorios` : 'Producto | Petit Accesorios'} />
+        <meta property="og:description" content={product?.description || 'Detalle de producto en Petit Accesorios.'} />
+        <meta property="og:url" content={`https://petitaccesorios.com.ar/productos/${productId}`} />
+        {img ? <meta property="og:image" content={img} /> : null}
+        <meta name="twitter:title" content={product?.name || 'Producto | Petit Accesorios'} />
+        <meta name="twitter:description" content={product?.description || 'Detalle de producto en Petit Accesorios.'} />
+        {product ? (
+          <script type="application/ld+json">{JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product.name,
+            "description": product.description || undefined,
+            "image": img || undefined,
+            "url": `https://petitaccesorios.com.ar/productos/${productId}`,
+            "brand": { "@type": "Brand", "name": "Petit Accesorios" },
+            ...(selectedVariant?.price ? {
+              "offers": {
+                "@type": "Offer",
+                "price": parseFloat(String(selectedVariant.price)),
+                "priceCurrency": "ARS",
+                "availability": "https://schema.org/InStock",
+                "url": `https://petitaccesorios.com.ar/productos/${productId}`
+              }
+            } : {}),
+            ...(categoryName ? {
+              "category": categoryName
+            } : {})
+          })}</script>
+        ) : null}
       </Helmet>
       <Header />
 

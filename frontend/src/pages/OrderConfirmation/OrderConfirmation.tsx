@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import '../Home/Home.css';
@@ -10,6 +11,10 @@ export default function OrderConfirmationPage() {
 
   return (
     <div className="orderConfirmation-wrap">
+      <Helmet>
+        <title>Pedido Recibido | Petit Accesorios</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <Header />
       <main className="orderConfirmation-page" aria-label="Pedido confirmado">
         <section className="orderConfirmation-card">

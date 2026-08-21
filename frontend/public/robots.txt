@@ -2,5 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /login
+Disallow: /carrito
+Disallow: /checkout
+Disallow: /pedido/
 
-Sitemap: https://petit.onrender.com/sitemap.xml
+Sitemap: https://petitaccesorios.com.ar/sitemap.xml
