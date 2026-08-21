@@ -245,10 +245,10 @@ export default function HomePage() {
             {products.map((p) => {
               const responsive = toResponsiveImage(p.imageUrl);
               const img = responsive.src ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
-              const prices = (p.variants || [])
-                .map((v) => Number.parseFloat(String(v.price)))
-                .filter((n) => Number.isFinite(n));
-              const min = prices.length ? Math.min(...prices) : undefined;
+              const min = (p.variants || []).reduce<number | undefined>((acc, v) => {
+                const n = Number.parseFloat(String(v.price));
+                return Number.isFinite(n) ? (acc == null ? n : Math.min(acc, n)) : acc;
+              }, undefined);
               const priceLabel = min != null ? formatMoney(min) : undefined;
 
               return (
@@ -289,10 +289,10 @@ export default function HomePage() {
               {featured.map((p) => {
                 const responsive = toResponsiveImage(p.imageUrl);
                 const img = responsive.src ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
-                const prices = (p.variants || [])
-                  .map((v) => Number.parseFloat(String(v.price)))
-                  .filter((n) => Number.isFinite(n));
-                const min = prices.length ? Math.min(...prices) : undefined;
+                const min = (p.variants || []).reduce<number | undefined>((acc, v) => {
+                  const n = Number.parseFloat(String(v.price));
+                  return Number.isFinite(n) ? (acc == null ? n : Math.min(acc, n)) : acc;
+                }, undefined);
                 const priceLabel = min != null ? formatMoney(min) : undefined;
                 return (
                   <Link key={p.id} className="ph-productCard" to={`/productos/${p.id}`}>

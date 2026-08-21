@@ -251,7 +251,7 @@ export default function ProductPage() {
     return () => {
       cancelled = true;
     };
-  }, [productId, img, product?.variants, selectedVariantId]);
+  }, [productId, img, product?.galleryImages, product?.variants, selectedVariantId]);
 
   return (
     <div className="petit-product">

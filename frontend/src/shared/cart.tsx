@@ -80,9 +80,12 @@ function normalizeShipping(raw: any): CartShippingState {
 }
 
 function normalizeExtraIds(extraIds: number[]) {
-  return Array.from(new Set(extraIds.filter((n) => Number.isFinite(n))))
-    .map((n) => Number(n))
-    .sort((a, b) => a - b);
+  const unique = extraIds.reduce<number[]>((acc, n) => {
+    const num = Number(n);
+    if (Number.isFinite(num) && !acc.includes(num)) acc.push(num);
+    return acc;
+  }, []);
+  return unique.sort((a, b) => a - b);
 }
 
 function makeKey(productId: number, variantId: number | null, extraIds: number[]) {

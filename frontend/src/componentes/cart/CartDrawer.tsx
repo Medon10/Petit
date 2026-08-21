@@ -121,7 +121,12 @@ export default function CartDrawer() {
 
   return (
     <div className={cart.isOpen ? 'ph-cartDrawerRoot isOpen' : 'ph-cartDrawerRoot'} aria-hidden={!cart.isOpen}>
-      <div className="ph-cartDrawerOverlay" onClick={() => cart.closeCart()} />
+      <div
+        className="ph-cartDrawerOverlay"
+        role="presentation"
+        onClick={() => cart.closeCart()}
+        onKeyDown={(e) => { if (e.key === 'Escape') cart.closeCart(); }}
+      />
       <aside className="ph-cartDrawer" role="dialog" aria-modal="true" aria-label="Mi carrito" onClick={(e) => e.stopPropagation()}>
         <header className="ph-cartDrawerHeader">
           <h3 className="ph-cartDrawerTitle">Mi carrito</h3>

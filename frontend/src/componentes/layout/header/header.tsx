@@ -5,14 +5,41 @@ import { useCart } from '../../../shared/cart';
 // import AnnouncementBar from '../announcement-bar/AnnouncementBar';
 import './header.css';
 
-const RECENT_SEARCHES_KEY = 'petit_recent_searches';
+const RECENT_SEARCHES_KEY = 'petit_recent_searches:v1';
+const RECENT_SEARCHES_KEY_LEGACY = 'petit_recent_searches';
+
+/** Carga búsquedas recientes desde localStorage con migración segura desde la clave legada. */
+function loadRecentSearches(): string[] {
+  // Intentar leer de la clave v1 primero
+  for (const key of [RECENT_SEARCHES_KEY, RECENT_SEARCHES_KEY_LEGACY]) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) continue;
+      const searches = parsed.filter((x): x is string => typeof x === 'string').slice(0, 5);
+      if (key === RECENT_SEARCHES_KEY_LEGACY && searches.length > 0) {
+        // Migrar a clave v1 y limpiar la legada
+        try {
+          localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches));
+          localStorage.removeItem(RECENT_SEARCHES_KEY_LEGACY);
+        } catch {
+          // ignorar errores de escritura
+        }
+      }
+      return searches;
+    } catch {
+      // JSON inválido — descartar y continuar con la siguiente clave
+    }
+  }
+  return [];
+}
 
 function fromPrice(product: ProductDto) {
-  const prices = (product.variants || [])
-    .map((v) => Number.parseFloat(String(v.price)))
-    .filter((n) => Number.isFinite(n));
-  if (!prices.length) return null;
-  return Math.min(...prices);
+  return (product.variants || []).reduce<number | null>((acc, v) => {
+    const n = Number.parseFloat(String(v.price));
+    return Number.isFinite(n) ? (acc == null ? n : Math.min(acc, n)) : acc;
+  }, null);
 }
 
 function moneyAr(amount: number) {
@@ -68,15 +95,7 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed)) {
-        setRecentSearches(parsed.filter((x) => typeof x === 'string').slice(0, 5));
-      }
-    } catch {
-      setRecentSearches([]);
-    }
+    setRecentSearches(loadRecentSearches());
   }, []);
 
   useEffect(() => {

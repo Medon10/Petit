@@ -411,11 +411,11 @@ function ProductsTab() {
                   </td>
                   <td>
                     <div className="adm-actions">
-                      <button className="adm-btnSmall" title="Editar" onClick={() => openEdit(p)}>
-                        <span className="material-symbols-outlined">edit</span>
+                      <button className="adm-btnSmall" aria-label={`Editar ${p.name}`} title="Editar" onClick={() => openEdit(p)}>
+                        <span className="material-symbols-outlined" aria-hidden="true">edit</span>
                       </button>
-                      <button className="adm-btnSmall" title="Eliminar" onClick={() => onDelete(p)}>
-                        <span className="material-symbols-outlined">delete</span>
+                      <button className="adm-btnSmall" aria-label={`Eliminar ${p.name}`} title="Eliminar" onClick={() => onDelete(p)}>
+                        <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                       </button>
                     </div>
                   </td>
@@ -431,19 +431,19 @@ function ProductsTab() {
           <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
             <div className="adm-modalHeader">
               <h2 className="adm-modalTitle">{modal === 'edit' ? 'Editar producto' : 'Nuevo producto'}</h2>
-              <button className="adm-modalClose" onClick={() => setModal(null)}>
-                <span className="material-symbols-outlined">close</span>
+              <button className="adm-modalClose" aria-label="Cerrar modal" onClick={() => setModal(null)}>
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
             <div className="adm-modalBody">
               <div className="adm-form">
                 <div className="adm-field">
-                  <label className="adm-label">Nombre</label>
-                  <input className="adm-input" value={name} onChange={(e) => setName(e.target.value)} />
+                  <label className="adm-label" htmlFor="prod-name">Nombre</label>
+                  <input id="prod-name" className="adm-input" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
                 <div className="adm-field">
-                  <label className="adm-label">Categoría</label>
-                  <select className="adm-select" value={catId} onChange={(e) => setCatId(e.target.value)}>
+                  <label className="adm-label" htmlFor="prod-cat">Categoría</label>
+                  <select id="prod-cat" className="adm-select" value={catId} onChange={(e) => setCatId(e.target.value)}>
                     <option value="">Seleccionar</option>
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
@@ -451,8 +451,8 @@ function ProductsTab() {
                   </select>
                 </div>
                 <div className="adm-field">
-                  <label className="adm-label">Descripción</label>
-                  <textarea className="adm-textarea" value={desc} onChange={(e) => setDesc(e.target.value)} />
+                  <label className="adm-label" htmlFor="prod-desc">Descripción</label>
+                  <textarea id="prod-desc" className="adm-textarea" value={desc} onChange={(e) => setDesc(e.target.value)} />
                 </div>
                 <div className="adm-field">
                   <label className="adm-label">Imagen</label>
@@ -473,7 +473,7 @@ function ProductsTab() {
                       }}
                     />
                   </div>
-                  <input className="adm-input" placeholder="URL manual" value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} style={{ marginTop: 6 }} />
+                  <input id="prod-img-url" className="adm-input" placeholder="URL manual" value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} style={{ marginTop: 6 }} />
                 </div>
                 <div className="adm-field">
                   <label className="adm-label">Galería (URLs)</label>

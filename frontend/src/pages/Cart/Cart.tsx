@@ -131,8 +131,10 @@ export default function CartPage() {
                   const variant = product?.variants?.find((v) => v.id === it.variantId) ?? product?.variants?.[0];
                   const img = toAbsoluteUrl(product?.imageUrl) ?? toAbsoluteUrl(`/images/products/${it.productId}.jpg`);
                   const extrasNames = it.extraIds
-                    .map((id) => extrasById[id]?.name)
-                    .filter(Boolean)
+                    .flatMap((id) => {
+                      const name = extrasById[id]?.name;
+                      return name ? [name] : [];
+                    })
                     .join(' · ');
 
                   const lineVariantPrice = parsePrice(variant?.price);

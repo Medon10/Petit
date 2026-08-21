@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Cropper, { type Area } from 'react-easy-crop';
 import { getCroppedImage } from '../../shared/cropImage';
 
@@ -11,55 +11,39 @@ type ImageCropModalProps = {
   onConfirm: (file: File) => Promise<void> | void;
 };
 
-export default function ImageCropModal({
+// ─── Inner component ──────────────────────────────────────────────────────────
+// Recibe una `imageUrl` ya resuelta y una `file` garantizados como no-nulos.
+// Al montar siempre parte desde cero gracias a la `key` externa.
+function CropModalInner({
+  imageUrl,
   file,
-  open,
   title,
-  aspect = 1,
+  aspect,
   onClose,
   onConfirm,
-}: ImageCropModalProps) {
+}: {
+  imageUrl: string;
+  file: File;
+  title: string;
+  aspect: number;
+  onClose: () => void;
+  onConfirm: (file: File) => Promise<void> | void;
+}) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const imageUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file]);
-  const selectedFile = file;
-
-  useEffect(() => {
-    if (!open) {
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-      setCroppedAreaPixels(null);
-      setSaving(false);
-      setError('');
-    }
-  }, [open, file]);
-
-  useEffect(() => {
-    return () => {
-      if (imageUrl) {
-        URL.revokeObjectURL(imageUrl);
-      }
-    };
-  }, [imageUrl]);
-
-  if (!open || !selectedFile || !imageUrl) {
-    return null;
-  }
+  // FIX 2: "rerender-state-only-in-handlers"
+  // croppedAreaPixels no influye en el render; solo se lee en handleConfirm.
+  // Usar useRef evita re-renders innecesarios en cada movimiento del crop.
+  const croppedAreaPixelsRef = useRef<Area | null>(null);
 
   async function handleConfirm() {
-    const currentFile = file;
+    const croppedAreaPixels = croppedAreaPixelsRef.current;
 
     if (!croppedAreaPixels) {
       setError('Ajusta el recorte antes de continuar.');
-      return;
-    }
-
-    if (!currentFile) {
-      setError('No se encontró la imagen a recortar.');
       return;
     }
 
@@ -67,7 +51,7 @@ export default function ImageCropModal({
     setError('');
 
     try {
-      const croppedFile = await getCroppedImage(currentFile, croppedAreaPixels);
+      const croppedFile = await getCroppedImage(file, croppedAreaPixels);
       await onConfirm(croppedFile);
       onClose();
     } catch (e: any) {
@@ -99,7 +83,10 @@ export default function ImageCropModal({
               showGrid={false}
               onCropChange={setCrop}
               onZoomChange={setZoom}
-              onCropComplete={(_, croppedPixels) => setCroppedAreaPixels(croppedPixels)}
+              onCropComplete={(_: Area, croppedPixels: Area) => {
+                // FIX 2: actualizar ref, no state — sin re-render por cada pixel
+                croppedAreaPixelsRef.current = croppedPixels;
+              }}
             />
           </div>
 
@@ -128,5 +115,62 @@ export default function ImageCropModal({
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Wrapper público ──────────────────────────────────────────────────────────
+// FIX 1: "no-create-object-url-in-render" + "no-create-object-url-without-revoke"
+// La URL se crea y destruye EXCLUSIVAMENTE dentro de un useEffect, garantizando
+// que revokeObjectURL se llame siempre en el cleanup, sin fugas de memoria.
+//
+// FIX 3: "no-reset-all-state-on-prop-change"
+// En lugar de un useEffect que resetea estado interno al cambiar `file` o `open`,
+// se usa `key={keyValue}` en CropModalInner para que React desmonte/monte el
+// subcomponente limpio automáticamente — patrón idiomático recomendado por React.
+export default function ImageCropModal({
+  file,
+  open,
+  title,
+  aspect = 1,
+  onClose,
+  onConfirm,
+}: ImageCropModalProps) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  // FIX 1: crear y revocar la object URL en un único efecto controlado.
+  useEffect(() => {
+    if (!open || !file) {
+      setImageUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    setImageUrl(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+      setImageUrl(null);
+    };
+  }, [file, open]);
+
+  if (!open || !file || !imageUrl) {
+    return null;
+  }
+
+  // FIX 3: la key combina el nombre del archivo + tamaño para que, si el
+  // usuario elige un archivo diferente (aunque tenga el mismo nombre), el
+  // inner component se desmonte y monte limpio, sin useEffect de reset.
+  const keyValue = `${file.name}-${file.size}-${file.lastModified}`;
+
+  return (
+    <CropModalInner
+      key={keyValue}
+      imageUrl={imageUrl}
+      file={file}
+      title={title}
+      aspect={aspect}
+      onClose={onClose}
+      onConfirm={onConfirm}
+    />
   );
 }

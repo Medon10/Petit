@@ -122,14 +122,14 @@ async function apiRequestJson<T>(path: string, options: { method: string; body?:
     },
     body: options.body != null ? JSON.stringify(options.body) : undefined,
   });
-  const json = await res.json().catch(() => ({}));
   if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
     const msg = (json as any)?.message || `API ${res.status} ${res.statusText}`;
     const err = new Error(String(msg)) as Error & { code?: string };
     if (typeof (json as any)?.code === 'string') err.code = (json as any).code;
     throw err;
   }
-  return json as T;
+  return (await res.json()) as T;
 }
 
 function getAdminToken() {
@@ -155,14 +155,14 @@ async function adminRequestJson<T>(path: string, options: { method: string; body
     },
     body: options.body != null ? JSON.stringify(options.body) : undefined,
   });
-  const json = await res.json().catch(() => ({}));
   if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
     const msg = (json as any)?.message || (json as any)?.error || `API ${res.status} ${res.statusText}`;
     const err = new Error(String(msg)) as Error & { code?: string };
     if (typeof (json as any)?.code === 'string') err.code = (json as any).code;
     throw err;
   }
-  return json as T;
+  return (await res.json()) as T;
 }
 
 async function adminRequestForm<T>(path: string, form: FormData): Promise<T> {
@@ -175,12 +175,12 @@ async function adminRequestForm<T>(path: string, form: FormData): Promise<T> {
     },
     body: form,
   });
-  const json = await res.json().catch(() => ({}));
   if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
     const msg = (json as any)?.message || (json as any)?.error || `API ${res.status} ${res.statusText}`;
     throw new Error(String(msg));
   }
-  return json as T;
+  return (await res.json()) as T;
 }
 
 export async function getCategories(options?: { includeRepresentative?: boolean }) {
@@ -315,10 +315,6 @@ export async function adminGetProducts(opts?: { categoryId?: number }) {
   return Array.isArray((data as any)?.data) ? ((data as any).data as ProductDto[]) : [];
 }
 
-export async function adminGetProduct(id: number) {
-  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/products/${id}`, { method: 'GET' });
-  return (data as any)?.data as ProductDto | null;
-}
 
 export async function adminCreateProduct(input: {
   category_id: number;

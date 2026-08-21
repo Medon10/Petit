@@ -73,13 +73,13 @@ export default function AdminOrdersPage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
 
-  function onAuthErr(e: any) {
+  const onAuthErr = useCallback((e: any) => {
     const msg = String(e?.message ?? '');
     if (msg.includes('401') || msg.includes('token')) {
       clearAdminToken();
       nav('/admin/login');
     }
-  }
+  }, [nav]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 250);
@@ -219,8 +219,13 @@ export default function AdminOrdersPage() {
                   <td>${o.total}</td>
                   <td>{formatDate(o.createdAt)}</td>
                   <td>
-                    <button className="adm-btnSmall" title="Ver detalle" onClick={() => openDetail(o.id)}>
-                      <span className="material-symbols-outlined">visibility</span>
+                    <button
+                      className="adm-btnSmall"
+                      aria-label={`Ver detalle del pedido #${o.id}`}
+                      title="Ver detalle"
+                      onClick={() => openDetail(o.id)}
+                    >
+                      <span className="material-symbols-outlined" aria-hidden="true">visibility</span>
                     </button>
                   </td>
                 </tr>
@@ -232,14 +237,19 @@ export default function AdminOrdersPage() {
 
       {/* Detail modal */}
       {(detail || detailLoading) && (
-        <div className="adm-modalOverlay" onClick={() => { setDetail(null); setDetailLoading(false); }}>
+        <div
+          className="adm-modalOverlay"
+          onClick={() => { setDetail(null); setDetailLoading(false); }}
+          onKeyDown={(e) => { if (e.key === 'Escape') { setDetail(null); setDetailLoading(false); } }}
+          role="presentation"
+        >
           <div className="adm-modal" style={{ maxWidth: 600 }} onClick={(e) => e.stopPropagation()}>
             <div className="adm-modalHeader">
               <h2 className="adm-modalTitle">
                 {detailLoading ? 'Detalle de pedido' : `Pedido #${detail?.id}`}
               </h2>
-              <button className="adm-modalClose" onClick={() => { setDetail(null); setDetailLoading(false); }}>
-                <span className="material-symbols-outlined">close</span>
+              <button className="adm-modalClose" aria-label="Cerrar detalle del pedido" onClick={() => { setDetail(null); setDetailLoading(false); }}>
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
 
