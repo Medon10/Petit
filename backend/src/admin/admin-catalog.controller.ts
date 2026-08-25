@@ -28,6 +28,9 @@ import {
   listAdminOrders,
   getAdminOrder,
   setAdminOrderStatus,
+  listAdminReviews,
+  setAdminReviewStatus,
+  removeAdminReview,
 } from './admin-catalog.service.js';
 
 // ── Products ────────────────────────────────────────────────
@@ -361,5 +364,46 @@ export async function updateOrderStatus(req: Request, res: Response) {
     return res.status(200).json({ message: 'Pedido actualizado', data: item });
   } catch (error: any) {
     return res.status(400).json({ message: error?.message || 'Error al actualizar pedido' });
+  }
+}
+
+// ── Reviews ─────────────────────────────────────────────────
+
+export async function listReviews(req: Request, res: Response) {
+  try {
+    const result = await listAdminReviews({
+      limit: req.query.limit ?? req.query.take,
+      page: req.query.page,
+      status: req.query.status,
+      productId: req.query.product_id ?? req.query.productId,
+      q: req.query.q,
+    });
+    return res.json(result);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al obtener reseñas (admin)', error });
+  }
+}
+
+export async function updateReviewStatus(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const status = String((req.body as any)?.status ?? '').trim();
+    if (!status) return res.status(400).json({ message: 'status es requerido' });
+    const item = await setAdminReviewStatus(id, status);
+    if (!item) return res.status(404).json({ message: 'No encontrado' });
+    return res.status(200).json({ message: 'Reseña actualizada', data: item });
+  } catch (error: any) {
+    return res.status(400).json({ message: error?.message || 'Error al actualizar reseña' });
+  }
+}
+
+export async function deleteReview(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const item = await removeAdminReview(id);
+    if (!item) return res.status(404).json({ message: 'No encontrado' });
+    return res.status(200).json({ message: 'Reseña eliminada', data: item });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al eliminar reseña (admin)', error });
   }
 }

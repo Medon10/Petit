@@ -1,0 +1,301 @@
+/* ── Review Section ─────────────────────────────────────── */
+
+.pr-reviews {
+  padding: 48px 0 0;
+  border-top: 1px solid var(--ph-border);
+  margin-top: 40px;
+}
+
+.pr-reviewsHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.pr-reviewsTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.pr-summaryBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ph-text-subtle);
+}
+
+.pr-summaryStars {
+  display: inline-flex;
+  gap: 1px;
+  color: var(--ph-primary);
+  font-size: 16px;
+  letter-spacing: -1px;
+}
+
+.pr-summaryAvg {
+  font-weight: 800;
+  color: var(--ph-text-main);
+}
+
+.pr-summaryCount {
+  font-weight: 400;
+}
+
+/* ── Review list ───────────────────────────────────────── */
+
+.pr-reviewsList {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.pr-reviewCard {
+  border: 1px solid var(--ph-border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  background: #fff;
+}
+
+.pr-reviewTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pr-reviewAuthor {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.pr-reviewDate {
+  font-size: 11px;
+  color: var(--ph-text-subtle);
+}
+
+.pr-reviewStars {
+  display: inline-flex;
+  gap: 1px;
+  color: var(--ph-primary);
+  font-size: 15px;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+
+.pr-reviewComment {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ph-text-subtle);
+}
+
+.pr-emptyReviews {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--ph-text-subtle);
+  font-size: 13px;
+}
+
+.pr-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.pr-pageBtn {
+  height: 34px;
+  padding: 0 16px;
+  border: 1px solid var(--ph-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ph-text-main);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.pr-pageBtn:hover {
+  border-color: rgba(199, 109, 162, 0.4);
+}
+
+.pr-pageBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── Review form ───────────────────────────────────────── */
+
+.pr-formWrap {
+  border: 1px solid var(--ph-border);
+  border-radius: 14px;
+  padding: 22px 20px;
+  background: var(--ph-muted);
+}
+
+.pr-formTitle {
+  margin: 0 0 18px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.pr-formGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.pr-field {
+  display: grid;
+  gap: 6px;
+}
+
+.pr-fieldLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ph-text-main);
+}
+
+.pr-fieldInput {
+  width: 100%;
+  height: 42px;
+  border: 1px solid var(--ph-border);
+  border-radius: 12px;
+  padding: 0 14px;
+  background: #fff;
+  color: var(--ph-text-main);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.pr-fieldInput:focus {
+  border-color: rgba(199, 109, 162, 0.5);
+  box-shadow: 0 0 0 3px rgba(199, 109, 162, 0.10);
+}
+
+.pr-fieldTextarea {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid var(--ph-border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #fff;
+  color: var(--ph-text-main);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.pr-fieldTextarea:focus {
+  border-color: rgba(199, 109, 162, 0.5);
+  box-shadow: 0 0 0 3px rgba(199, 109, 162, 0.10);
+}
+
+.pr-charCount {
+  font-size: 11px;
+  color: var(--ph-text-subtle);
+  text-align: right;
+}
+
+/* ── Star picker ───────────────────────────────────────── */
+
+.pr-starPicker {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.pr-starBtn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 2px;
+  font-size: 24px;
+  color: var(--ph-border);
+  transition: color 120ms ease, transform 120ms ease;
+  line-height: 1;
+}
+
+.pr-starBtn:hover {
+  transform: scale(1.15);
+}
+
+.pr-starBtn.isActive {
+  color: var(--ph-primary);
+}
+
+.pr-starBtn.isHovered {
+  color: rgba(199, 109, 162, 0.6);
+}
+
+/* ── Submit ────────────────────────────────────────────── */
+
+.pr-submitBtn {
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--ph-primary);
+  background: var(--ph-primary);
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 12px;
+  cursor: pointer;
+  transition: filter 150ms ease, opacity 150ms ease;
+  width: 100%;
+  max-width: 260px;
+}
+
+.pr-submitBtn:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.pr-submitBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pr-formError {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pr-formSuccess {
+  border: 1px solid rgba(199, 109, 162, 0.3);
+  border-radius: 12px;
+  background: rgba(199, 109, 162, 0.06);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--ph-text-main);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Honeypot — visually hidden */
+.pr-hp {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 0;
+  width: 0;
+  z-index: -1;
+  overflow: hidden;
+}

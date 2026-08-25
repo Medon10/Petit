@@ -34,6 +34,9 @@ import {
   listOrders,
   getOrder,
   updateOrderStatus,
+  listReviews,
+  updateReviewStatus,
+  deleteReview,
 } from './admin-catalog.controller.js';
 import { uploadImage } from './admin-upload.controller.js';
 
@@ -91,6 +94,11 @@ adminCatalogRouter.delete('/extras/:id', deleteExtra);
 adminCatalogRouter.get('/orders', listOrders);
 adminCatalogRouter.get('/orders/:id', getOrder);
 adminCatalogRouter.patch('/orders/:id/status', updateOrderStatus);
+
+// ── Reviews ─────────────────────────────────────────────────
+adminCatalogRouter.get('/reviews', listReviews);
+adminCatalogRouter.patch('/reviews/:id/status', updateReviewStatus);
+adminCatalogRouter.delete('/reviews/:id', deleteReview);
 
 // ── Uploads ─────────────────────────────────────────────────
 adminCatalogRouter.post('/uploads', upload.single('image'), uploadImage);
