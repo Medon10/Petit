@@ -28,27 +28,52 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="page">
+    <main className="admin-login-page">
       <Helmet>
         <title>Admin Login | Petit</title>
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
-      <h1 className="title">Admin · Login</h1>
-      <form className="form" onSubmit={onSubmit}>
-        <label className="label">
-          Usuario
-          <input className="input" value={username} onChange={(e) => setUsername(e.target.value)} />
-        </label>
-        <label className="label">
-          Contraseña
-          <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </label>
-        {error ? <p className="error">{error}</p> : null}
-        <button className="button" type="submit" disabled={loading}>
-          {loading ? 'Ingresando...' : 'Ingresar'}
-        </button>
-      </form>
+      
+      <div className="admin-login-card">
+        <div className="admin-login-header">
+          <h1>Acceso Administrador</h1>
+          <p>Ingresa tus credenciales para gestionar el sitio</p>
+        </div>
+
+        <form className="admin-login-form" onSubmit={onSubmit}>
+          <div className="admin-login-field">
+            <label htmlFor="username">Usuario</label>
+            <input 
+              id="username"
+              type="text"
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)} 
+              placeholder="Ej. admin"
+              autoComplete="username"
+              required
+            />
+          </div>
+          
+          <div className="admin-login-field">
+            <label htmlFor="password">Contraseña</label>
+            <input 
+              id="password"
+              type="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+            />
+          </div>
+
+          {error && <div className="admin-login-error">{error}</div>}
+
+          <button className="admin-login-button" type="submit" disabled={loading}>
+            {loading ? 'Ingresando...' : 'Ingresar al Panel'}
+          </button>
+        </form>
+      </div>
     </main>
   );
 }
-

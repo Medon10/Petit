@@ -116,7 +116,7 @@ export default function HomePage() {
   return (
     <div className="petit-home">
       <Helmet>
-        <title>Petit Accesorios — Joyería personalizada en acero quirúrgico</title>
+        <title>Petit Accesorios | Grabados Personalizados</title>
         <meta name="description" content="Descubrí colecciones de accesorios personalizados en acero quirúrgico. Envíos a todo el país y atención por WhatsApp." />
         <link rel="canonical" href="https://petitaccesorios.com.ar/" />
         <meta property="og:title" content="Petit Accesorios — Joyería personalizada en acero quirúrgico" />
@@ -331,14 +331,14 @@ export default function HomePage() {
               <p className="ph-trustDesc">Recibí tu pedido en casa o retiralo en sucursal.</p>
             </div>
             <div className="ph-trustItem">
-              <span className="material-symbols-outlined ph-trustIcon">credit_card</span>
-              <h4 className="ph-trustTitle">Pagá como quieras</h4>
-              <p className="ph-trustDesc">3 cuotas sin interés o 10% OFF por transferencia.</p>
+              <span className="material-symbols-outlined ph-trustIcon">favorite</span>
+              <h4 className="ph-trustTitle">Hecho con amor</h4>
+              <p className="ph-trustDesc">Cada pieza está hecha con mucho amor y sabemos que te va a encantar..</p>
             </div>
             <div className="ph-trustItem">
               <span className="material-symbols-outlined ph-trustIcon">verified</span>
               <h4 className="ph-trustTitle">Calidad garantizada</h4>
-              <p className="ph-trustDesc">Acero quirúrgico hipoalergénico que no se oscurece.</p>
+              <p className="ph-trustDesc">Acero quirúrgico 304 y 316L.</p>
             </div>
             <div className="ph-trustItem">
               <span className="material-symbols-outlined ph-trustIcon">chat</span>

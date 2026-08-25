@@ -40,8 +40,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="ph-footerText">
-              Accesorios personalizados en acero quirúrgico. Diseñamos piezas que cuentan tu historia con
-              elegancia y durabilidad.
+              En Petit creemos que cada persona tiene una historia que merece ser contada. Por eso, creamos accesorios personalizados donde cada pieza refleja momentos, emociones y recuerdos únicos.
             </p>
             <div className="ph-social">
               <a className="ph-socialLink" href="https://www.instagram.com/petit.laser/" aria-label="Instagram">
@@ -93,11 +92,7 @@ export default function Footer() {
           <div className="ph-footerBottomLinks">
             <Link to="/terminos">Términos y Condiciones</Link>
             <Link to="/privacidad">Política de Privacidad</Link>
-            <Link to="/admin/login" className="ph-adminLink" aria-label="Acceso administrador">
-              <svg className="ph-adminLock" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z" />
-              </svg>
-            </Link>
+
           </div>
         </div>
       </div>

@@ -228,13 +228,16 @@ button.ph-iconLink {
 
 .ph-menuButton {
   display: inline-flex;
+  margin-left: 12px;
 }
 
 .ph-nav {
   display: none;
   align-items: center;
   justify-self: start;
-  gap: 24px; /* Reduced gap slightly to fit more items */
+  gap: 24px;
+  /* Reduced gap slightly to fit more items */
+  margin-left: 16px;
 }
 
 .ph-navLink,
@@ -519,9 +522,11 @@ button.ph-iconLink {
   .ph-nav {
     display: inline-flex;
   }
+
   .ph-menuButton {
     display: none;
   }
+
   .ph-mobileMenuRoot {
     display: none;
   }
