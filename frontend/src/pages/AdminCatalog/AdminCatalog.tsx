@@ -255,7 +255,9 @@ function ProductsTab() {
   const [catId, setCatId] = useState('');
   const [desc, setDesc] = useState('');
   const [imgUrl, setImgUrl] = useState('');
-  const [galleryText, setGalleryText] = useState('');
+  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const galleryFileRef = useRef<HTMLInputElement>(null);
   const [featured, setFeatured] = useState(false);
   const [rank, setRank] = useState('');
   const [active, setActive] = useState(true);
@@ -282,7 +284,7 @@ function ProductsTab() {
 
   function openCreate() {
     setEditItem(null);
-    setName(''); setCatId(''); setDesc(''); setImgUrl(''); setGalleryText(''); setFeatured(false); setRank(''); setActive(true);
+    setName(''); setCatId(''); setDesc(''); setImgUrl(''); setGalleryUrls([]); setFeatured(false); setRank(''); setActive(true);
     setError('');
     setModal('create');
   }
@@ -293,7 +295,7 @@ function ProductsTab() {
     setCatId(String(p.category?.id ?? ''));
     setDesc(p.description ?? '');
     setImgUrl(p.imageUrl ?? '');
-    setGalleryText((p.galleryImages || []).join('\n'));
+    setGalleryUrls(p.galleryImages || []);
     setFeatured(p.isFeatured ?? false);
     setRank(String(p.featuredRank ?? ''));
     setActive(p.isActive !== false);
@@ -321,6 +323,20 @@ function ProductsTab() {
     }
   }
 
+  async function onUploadGallery(file: File) {
+    setUploadingGallery(true);
+    try {
+      const res = await adminUploadImage(file);
+      const url = (res as any)?.data?.url || '';
+      if (url) setGalleryUrls((prev) => [...prev, url]);
+    } catch (e: any) {
+      setError(e?.message || 'Error al subir imagen de galería');
+      onAuthErr(e);
+    } finally {
+      setUploadingGallery(false);
+    }
+  }
+
   async function onSave() {
     if (!name.trim()) { setError('Nombre requerido'); return; }
     if (!catId) { setError('Categoría requerida'); return; }
@@ -332,10 +348,7 @@ function ProductsTab() {
         name: name.trim(),
         description: desc || undefined,
         image_url: imgUrl || undefined,
-        gallery_images: galleryText
-          .split(/\r?\n|,/)
-          .map((x) => x.trim())
-          .filter(Boolean),
+        gallery_images: galleryUrls,
         is_featured: featured,
         featured_rank: rank ? Number(rank) : undefined,
         is_active: active,
@@ -481,13 +494,53 @@ function ProductsTab() {
                   <input id="prod-img-url" className="adm-input" placeholder="URL manual" value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} style={{ marginTop: 6 }} />
                 </div>
                 <div className="adm-field">
-                  <label className="adm-label">Galería (URLs)</label>
-                  <textarea
-                    className="adm-textarea"
-                    placeholder="Una URL por línea"
-                    value={galleryText}
-                    onChange={(e) => setGalleryText(e.target.value)}
-                  />
+                  <label className="adm-label">Galería de imágenes</label>
+                  <div className="adm-galleryPanel">
+                    {galleryUrls.map((url, idx) => (
+                      <div key={url + idx} className="adm-galleryThumbWrap">
+                        <img
+                          className="adm-galleryThumb"
+                          src={toAbsoluteUrl(url)}
+                          alt={`Foto galería ${idx + 1}`}
+                        />
+                        <button
+                          type="button"
+                          className="adm-galleryRemove"
+                          aria-label="Quitar foto"
+                          onClick={() => setGalleryUrls((prev) => prev.filter((_, i) => i !== idx))}
+                        >
+                          <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="adm-galleryAddBtn"
+                      disabled={uploadingGallery}
+                      onClick={() => galleryFileRef.current?.click()}
+                    >
+                      {uploadingGallery ? (
+                        <span className="adm-gallerySpinner" />
+                      ) : (
+                        <span className="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span>
+                      )}
+                      <span>{uploadingGallery ? 'Subiendo...' : 'Agregar foto'}</span>
+                    </button>
+                    <input
+                      ref={galleryFileRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        e.target.value = '';
+                        if (f) onUploadGallery(f);
+                      }}
+                    />
+                  </div>
+                  {galleryUrls.length === 0 && (
+                    <p className="adm-galleryHint">Sin fotos adicionales. Hacé clic en "Agregar foto" para subir imágenes a la galería.</p>
+                  )}
                 </div>
                 <label className="adm-checkbox">
                   <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} />
