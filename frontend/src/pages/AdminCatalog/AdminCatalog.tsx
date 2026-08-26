@@ -40,6 +40,7 @@ import {
   type ReviewDto,
 } from '../../shared/api';
 import '../../componentes/admin/AdminLayout.css';
+import './AdminCatalog.css';
 
 type Tab = 'home' | 'products' | 'categories' | 'variants' | 'extras' | 'reviews';
 
@@ -1059,6 +1060,7 @@ function ReviewsTab() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const load = useCallback(async (p = 1) => {
     setLoading(true);
@@ -1092,18 +1094,28 @@ function ReviewsTab() {
     }
   }
 
-  async function handleDelete(id: number) {
-    if (!confirm('¿Eliminar esta reseña permanentemente?')) return;
+  async function confirmDelete() {
+    if (deleteId === null) return;
     try {
-      await adminDeleteReview(id);
+      await adminDeleteReview(deleteId);
       load(page);
     } catch (e: any) {
       onAuthErr(e);
+    } finally {
+      setDeleteId(null);
     }
   }
 
   function renderStars(n: number) {
-    return Array.from({ length: 5 }, (_, i) => (i < n ? '★' : '☆')).join('');
+    return (
+      <span className="adm-reviewStars">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <span key={i} className={i <= n ? 'adm-starFilled' : 'adm-starEmpty'}>
+            ★
+          </span>
+        ))}
+      </span>
+    );
   }
 
   const statusBadge = (s: string) => {
@@ -1197,7 +1209,7 @@ function ReviewsTab() {
                     >✗ Rechazar</button>
                   )}
                   <button
-                    onClick={() => handleDelete(r.id)}
+                    onClick={() => setDeleteId(r.id)}
                     style={{ fontSize: 12, padding: '4px 12px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f9fafb', color: '#6b7280', cursor: 'pointer', fontWeight: 700, marginLeft: 'auto' }}
                   >Eliminar</button>
                 </div>
@@ -1222,6 +1234,39 @@ function ReviewsTab() {
           >Siguiente →</button>
         </div>
       ) : null}
+
+      {deleteId !== null && (
+        <div className="adm-deleteModalOverlay" onClick={() => setDeleteId(null)}>
+          <div className="adm-deleteModal" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-deleteModalIcon">
+              <span className="material-symbols-outlined">delete</span>
+            </div>
+
+            <h3 className="adm-deleteModalTitle">¿Eliminar reseña?</h3>
+
+            <p className="adm-deleteModalText">
+              Esta acción no se puede deshacer. La reseña se eliminará permanentemente del catálogo.
+            </p>
+
+            <div className="adm-deleteModalActions">
+              <button
+                type="button"
+                className="adm-btnModalCancel"
+                onClick={() => setDeleteId(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="adm-btnConfirmDelete"
+                onClick={confirmDelete}
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

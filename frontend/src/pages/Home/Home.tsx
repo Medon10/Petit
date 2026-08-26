@@ -333,7 +333,7 @@ export default function HomePage() {
             <div className="ph-trustItem">
               <span className="material-symbols-outlined ph-trustIcon">favorite</span>
               <h4 className="ph-trustTitle">Hecho con amor</h4>
-              <p className="ph-trustDesc">Cada pieza está hecha con mucho amor y sabemos que te va a encantar..</p>
+              <p className="ph-trustDesc">Cada pieza está hecha con mucho amor y sabemos que te va a encantar.</p>
             </div>
             <div className="ph-trustItem">
               <span className="material-symbols-outlined ph-trustIcon">verified</span>

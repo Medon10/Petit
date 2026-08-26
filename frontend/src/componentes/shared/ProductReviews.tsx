@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   getProductReviews,
   getProductReviewSummary,
@@ -10,8 +10,16 @@ import './ProductReviews.css';
 
 // ── Helpers ─────────────────────────────────────────────────
 
-function renderStars(count: number) {
-  return Array.from({ length: 5 }, (_, i) => (i < count ? '★' : '☆')).join('');
+function StarRating({ count, className }: { count: number; className?: string }) {
+  return (
+    <span className={`pr-starRating ${className || ''}`} aria-hidden="true">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span key={i} className={`pr-starGlyph ${i <= count ? 'isFilled' : 'isEmpty'}`}>
+          ★
+        </span>
+      ))}
+    </span>
+  );
 }
 
 function formatDate(raw?: string) {
@@ -30,23 +38,32 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
   const [hovered, setHovered] = useState(0);
 
   return (
-    <div className="pr-starPicker" onMouseLeave={() => setHovered(0)}>
-      {[1, 2, 3, 4, 5].map((star) => {
-        const isActive = star <= value;
-        const isHovered = hovered > 0 && star <= hovered && star > value;
-        return (
-          <button
-            key={star}
-            type="button"
-            className={`pr-starBtn${isActive ? ' isActive' : ''}${isHovered ? ' isHovered' : ''}`}
-            onMouseEnter={() => setHovered(star)}
-            onClick={() => onChange(star)}
-            aria-label={`${star} estrella${star > 1 ? 's' : ''}`}
-          >
-            ★
-          </button>
-        );
-      })}
+    <div className="pr-starPickerWrap">
+      <div className="pr-starPicker" onMouseLeave={() => setHovered(0)}>
+        {[1, 2, 3, 4, 5].map((star) => {
+          const activeCount = hovered > 0 ? hovered : value;
+          const isActive = star <= activeCount;
+          return (
+            <button
+              key={star}
+              type="button"
+              className={`pr-starBtn${isActive ? ' isActive' : ' isInactive'}`}
+              onMouseEnter={() => setHovered(star)}
+              onClick={() => onChange(star)}
+              aria-label={`${star} estrella${star > 1 ? 's' : ''}`}
+            >
+              ★
+            </button>
+          );
+        })}
+      </div>
+      <span className="pr-starPickerLabel">
+        {hovered > 0
+          ? `${hovered} de 5 estrellas`
+          : value > 0
+          ? `${value} de 5 estrellas`
+          : 'Tocá para puntuar'}
+      </span>
     </div>
   );
 }
@@ -130,11 +147,6 @@ export default function ProductReviews({ productId }: { productId: number }) {
     }
   }
 
-  const summaryStars = useMemo(() => {
-    const rounded = Math.round(summary.averageRating);
-    return renderStars(rounded);
-  }, [summary.averageRating]);
-
   if (!Number.isFinite(productId)) return null;
 
   return (
@@ -144,7 +156,7 @@ export default function ProductReviews({ productId }: { productId: number }) {
         <h3 className="pr-reviewsTitle">Opiniones</h3>
         {summary.totalReviews > 0 ? (
           <span className="pr-summaryBadge">
-            <span className="pr-summaryStars" aria-hidden="true">{summaryStars}</span>
+            <StarRating count={Math.round(summary.averageRating)} className="pr-summaryStars" />
             <span className="pr-summaryAvg">{summary.averageRating.toFixed(1)}</span>
             <span className="pr-summaryCount">
               ({summary.totalReviews} {summary.totalReviews === 1 ? 'opinión' : 'opiniones'})
@@ -157,7 +169,7 @@ export default function ProductReviews({ productId }: { productId: number }) {
       {loading && reviews.length === 0 ? (
         <p className="pr-emptyReviews">Cargando opiniones...</p>
       ) : reviews.length === 0 ? (
-        <p className="pr-emptyReviews">Todavía no hay opiniones. ¡Sé el primero en compartir la tuya!</p>
+        <p className="pr-emptyReviews">¿Ya tuviste este producto? ¡Compartí tu opinión!</p>
       ) : (
         <>
           <div className="pr-reviewsList">
@@ -168,7 +180,7 @@ export default function ProductReviews({ productId }: { productId: number }) {
                   <span className="pr-reviewDate">{formatDate(r.createdAt)}</span>
                 </div>
                 <div className="pr-reviewStars" aria-label={`${r.rating} de 5 estrellas`}>
-                  {renderStars(r.rating)}
+                  <StarRating count={r.rating} />
                 </div>
                 {r.comment ? <p className="pr-reviewComment">{r.comment}</p> : null}
               </article>
