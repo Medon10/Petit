@@ -13,6 +13,7 @@ import { AdminUser } from '../../admin/admin-user.entity.js';
 import { Order } from '../../order/order.entity.js';
 import { OrderItem } from '../../order-item/order-item.entity.js';
 import { OrderItemExtra } from '../../order-item-extra/order-item-extra.entity.js';
+import { Review } from '../../review/review.entity.js';
 
 function buildClientUrlFromEnv() {
     // 1. Buscamos primero DATABASE_URL (Railway/Neon) o DB_URL
@@ -39,8 +40,8 @@ const dbSslEnabled = String(process.env.DB_SSL || '').toLowerCase() === 'true' |
 const dbSslRejectUnauthorized = String(process.env.DB_SSL_REJECT_UNAUTHORIZED || 'true').toLowerCase() !== 'false';
 
 export const orm = await MikroORM.init({
-    entities: [Category, Product, Variant, Extra, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra],
-    entitiesTs: [Category, Product, Variant, Extra, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra],
+    entities: [Category, Product, Variant, Extra, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review],
+    entitiesTs: [Category, Product, Variant, Extra, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review],
     driver: PostgreSqlDriver,
     clientUrl: buildClientUrlFromEnv(),
     driverOptions: dbSslEnabled

@@ -168,3 +168,23 @@ export async function getAdminOrder(id: number) {
 export async function setAdminOrderStatus(id: number, status: string) {
   return await updateOrderStatus(id, status);
 }
+
+// ── Reviews (admin) ─────────────────────────────────────────
+
+import {
+  listAllReviews,
+  setReviewStatus,
+  deleteReview as deleteReviewSvc,
+} from '../review/review.service.js';
+
+export async function listAdminReviews(params: { status?: unknown; productId?: unknown; page?: unknown; limit?: unknown; q?: unknown }) {
+  return await listAllReviews(params);
+}
+
+export async function setAdminReviewStatus(id: number, status: string) {
+  return await setReviewStatus(id, status);
+}
+
+export async function removeAdminReview(id: number) {
+  return await deleteReviewSvc(id);
+}

@@ -485,3 +485,78 @@ export async function adminGetOrder(id: number) {
 export async function adminUpdateOrderStatus(id: number, status: string) {
   return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/orders/${id}/status`, { method: 'PATCH', body: { status } });
 }
+
+// ── Reviews ─────────────────────────────────────────────────
+
+export type ReviewDto = {
+  id: number;
+  productId: number;
+  productName?: string;
+  customerName: string;
+  rating: number;
+  comment?: string;
+  status: string;
+  createdAt?: string;
+};
+
+export type ReviewSummaryDto = {
+  averageRating: number;
+  totalReviews: number;
+};
+
+export type ReviewsPageDto = {
+  data: ReviewDto[];
+  total: number;
+  page: number;
+  totalPages: number;
+};
+
+// ── Public Reviews ──────────────────────────────────────────
+
+export async function getProductReviews(productId: number, options?: { page?: number; limit?: number }) {
+  const qs = buildQuery({ page: options?.page, limit: options?.limit });
+  const data = await apiGetJson<any>(`/reviews/product/${productId}${qs}`);
+  const rows = Array.isArray((data as any)?.data) ? ((data as any).data as ReviewDto[]) : [];
+  const total = Number((data as any)?.total ?? rows.length);
+  const page = Number((data as any)?.page ?? (options?.page ?? 1));
+  const totalPages = Number((data as any)?.totalPages ?? 1);
+  return { data: rows, total, page, totalPages } as ReviewsPageDto;
+}
+
+export async function getProductReviewSummary(productId: number) {
+  const data = await apiGetJson<{ data?: unknown }>(`/reviews/product/${productId}/summary`);
+  const item = (data as any)?.data;
+  return item && typeof item === 'object'
+    ? (item as ReviewSummaryDto)
+    : { averageRating: 0, totalReviews: 0 };
+}
+
+export async function submitReview(input: { product_id: number; customer_name: string; rating: number; comment?: string; website?: string }) {
+  return await apiRequestJson<{ data?: ReviewDto }>(`/reviews`, { method: 'POST', body: input });
+}
+
+// ── Admin Reviews ───────────────────────────────────────────
+
+export async function adminGetReviews(options?: { status?: string; productId?: number; q?: string; page?: number; limit?: number }) {
+  const qs = buildQuery({
+    status: options?.status,
+    product_id: options?.productId,
+    q: options?.q,
+    page: options?.page,
+    limit: options?.limit,
+  });
+  const data = await adminRequestJson<any>(`/admin/catalog/reviews${qs}`, { method: 'GET' });
+  const rows = Array.isArray((data as any)?.data) ? ((data as any).data as ReviewDto[]) : [];
+  const total = Number((data as any)?.total ?? rows.length);
+  const page = Number((data as any)?.page ?? (options?.page ?? 1));
+  const totalPages = Number((data as any)?.totalPages ?? 1);
+  return { data: rows, total, page, totalPages } as ReviewsPageDto;
+}
+
+export async function adminUpdateReviewStatus(id: number, status: string) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/reviews/${id}/status`, { method: 'PATCH', body: { status } });
+}
+
+export async function adminDeleteReview(id: number) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/reviews/${id}`, { method: 'DELETE' });
+}

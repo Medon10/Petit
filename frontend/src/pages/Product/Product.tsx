@@ -4,7 +4,8 @@ import { Helmet } from 'react-helmet-async';
 import Header from '../../componentes/layout/header/header';
 import Footer from '../../componentes/layout/footer/footer';
 import Skeleton from '../../componentes/shared/Skeleton';
-import { getExtras, getProduct, toAbsoluteUrl, toResponsiveImage, type ExtraDto, type ProductDetailDto, type VariantDto } from '../../shared/api';
+import ProductReviews from '../../componentes/shared/ProductReviews';
+import { getExtras, getProduct, getProductReviewSummary, toAbsoluteUrl, toResponsiveImage, type ExtraDto, type ProductDetailDto, type ReviewSummaryDto, type VariantDto } from '../../shared/api';
 import { useCart } from '../../shared/cart';
 import '../Home/Home.css';
 import './Product.css';
@@ -40,6 +41,7 @@ export default function ProductPage() {
   const [extrasOpen, setExtrasOpen] = useState(false);
   const extrasRef = useRef<HTMLDivElement | null>(null);
   const [addedToast, setAddedToast] = useState(false);
+  const [reviewSummary, setReviewSummary] = useState<ReviewSummaryDto>({ averageRating: 0, totalReviews: 0 });
 
   useEffect(() => {
     let cancelled = false;
@@ -48,14 +50,16 @@ export default function ProductPage() {
       if (!Number.isFinite(productId)) return;
       setLoading(true);
       try {
-        const [item, extrasRes] = await Promise.all([
+        const [item, extrasRes, summaryRes] = await Promise.all([
           getProduct(productId),
           // Por ahora traemos todos; más adelante podemos filtrar por category_type o por producto.
           getExtras(),
+          getProductReviewSummary(productId),
         ]);
         if (cancelled) return;
         setProduct(item);
         setExtras(extrasRes);
+        setReviewSummary(summaryRes);
         const firstVariantId = (item?.variants || [])[0]?.id;
         setSelectedVariantId(firstVariantId ?? null);
       } catch {
@@ -285,6 +289,13 @@ export default function ProductPage() {
             } : {}),
             ...(categoryName ? {
               "category": categoryName
+            } : {}),
+            ...(reviewSummary.totalReviews > 0 ? {
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": String(reviewSummary.averageRating),
+                "reviewCount": String(reviewSummary.totalReviews)
+              }
             } : {})
           })}</script>
         ) : null}
@@ -470,6 +481,14 @@ export default function ProductPage() {
           )}
         </div>
       </section>
+
+      {product && Number.isFinite(productId) ? (
+        <section className="ph-section" aria-label="Opiniones del producto">
+          <div className="ph-container">
+            <ProductReviews productId={productId} />
+          </div>
+        </section>
+      ) : null}
 
       {product && Number.isFinite(productId) ? (
         <div className="ph-mobileStickyCta" aria-label="Acción rápida de compra">
