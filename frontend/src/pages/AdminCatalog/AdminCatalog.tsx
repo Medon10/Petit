@@ -267,6 +267,8 @@ function ProductsTab() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropOpen, setCropOpen] = useState(false);
+  const [cropGalleryFile, setCropGalleryFile] = useState<File | null>(null);
+  const [cropGalleryOpen, setCropGalleryOpen] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -307,6 +309,12 @@ function ProductsTab() {
     if (!file) return;
     setCropFile(file);
     setCropOpen(true);
+  }
+
+  function onPickGalleryImage(file?: File | null) {
+    if (!file) return;
+    setCropGalleryFile(file);
+    setCropGalleryOpen(true);
   }
 
   async function onUpload(file: File) {
@@ -534,7 +542,7 @@ function ProductsTab() {
                       onChange={(e) => {
                         const f = e.target.files?.[0];
                         e.target.value = '';
-                        if (f) onUploadGallery(f);
+                        if (f) onPickGalleryImage(f);
                       }}
                     />
                   </div>
@@ -580,6 +588,19 @@ function ProductsTab() {
         onConfirm={async (croppedFile) => {
           await onUpload(croppedFile);
           setCropFile(null);
+        }}
+      />
+      <ImageCropModal
+        file={cropGalleryFile}
+        open={cropGalleryOpen}
+        title="Recortar foto de galería"
+        onClose={() => {
+          setCropGalleryOpen(false);
+          setCropGalleryFile(null);
+        }}
+        onConfirm={async (croppedFile) => {
+          await onUploadGallery(croppedFile);
+          setCropGalleryFile(null);
         }}
       />
     </>

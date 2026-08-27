@@ -335,13 +335,14 @@ export default function ProductPage() {
             <div className="ph-productLayout">
               <div className="ph-productLeft">
                 <div className="ph-productHero">
-                  {selectedImage ? (
+                  {(selectedImage || img) ? (
                     <img
                       className="ph-productHeroImg"
-                      src={selectedImageSource.src ?? selectedImage}
+                      src={selectedImageSource.src ?? selectedImage ?? img}
                       srcSet={selectedImageSource.srcSet}
                       sizes="(min-width: 1024px) 45vw, 100vw"
                       alt={product.name}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                     />
                   ) : null}
                 </div>
