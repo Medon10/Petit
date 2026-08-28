@@ -24,7 +24,7 @@ export default function CategoryPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const [sortBy, setSortBy] = useState<'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'>('name_asc');
+
 
   useEffect(() => {
     let cancelled = false;
@@ -67,25 +67,6 @@ export default function CategoryPage() {
     const found = categories.find((c) => c.id === categoryId);
     return found?.name ?? (Number.isFinite(categoryId) ? `Categoría #${categoryId}` : 'Categoría');
   }, [categories, categoryId]);
-
-  const sortedProducts = useMemo(() => {
-    const minPrice = (p: ProductDto) => {
-      const values = (p.variants || [])
-        .map((v) => Number.parseFloat(String(v.price)))
-        .filter((n) => Number.isFinite(n));
-      return values.length ? Math.min(...values) : Number.POSITIVE_INFINITY;
-    };
-
-    const list = [...products];
-    list.sort((a, b) => {
-      if (sortBy === 'name_asc') return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
-      if (sortBy === 'name_desc') return b.name.localeCompare(a.name, 'es', { sensitivity: 'base' });
-      if (sortBy === 'price_asc') return minPrice(a) - minPrice(b);
-      return minPrice(b) - minPrice(a);
-    });
-
-    return list;
-  }, [products, sortBy]);
 
   return (
     <div className="petit-category">
@@ -140,7 +121,7 @@ export default function CategoryPage() {
               </div>
 
               <div className="ph-gridProducts">
-                {sortedProducts.map((p) => {
+                {products.map((p) => {
                 const responsive = toResponsiveImage(p.imageUrl);
                 const img = responsive.src ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
                 const min = (p.variants || []).reduce<number | undefined>((acc, v) => {
