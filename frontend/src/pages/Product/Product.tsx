@@ -90,13 +90,18 @@ export default function ProductPage() {
     return Number.isFinite(n) ? formatMoney(n) : undefined;
   }, [selectedVariant]);
 
+  // Imagen principal del producto — solo de la DB, sin fallback a archivos por convención.
+  // toAbsoluteUrl devuelve undefined si no hay imageUrl en la DB. Evitamos fabricar
+  // URLs a archivos que probablemente no existen y que aparecerían como una imagen blanca.
   const img = useMemo(() => {
     if (!Number.isFinite(productId)) return undefined;
-    const fromDb = toAbsoluteUrl(product?.imageUrl);
-    return fromDb ?? toAbsoluteUrl(`/images/products/${productId}.jpg`);
+    return toAbsoluteUrl(product?.imageUrl) ?? undefined;
   }, [productId, product]);
 
-  const selectedImageSource = useMemo(() => toResponsiveImage(selectedImage), [selectedImage]);
+  // heroSrc es la URL efectiva que se muestra en la imagen grande.
+  // Si el usuario hizo clic en un thumbnail, es selectedImage; si no, es la primera de la galería, o img.
+  const heroSrc = selectedImage ?? galleryImages[0] ?? img ?? undefined;
+  const heroResponsive = useMemo(() => toResponsiveImage(heroSrc), [heroSrc]);
 
   const categoryId = product?.category?.id;
   const categoryName = product?.category?.name;
@@ -191,11 +196,15 @@ export default function ProductPage() {
         }
       }
 
-      const extensions = ['jpg', 'jpeg', 'png'];
-      for (let i = 2; i <= 6; i += 1) {
-        for (const ext of extensions) {
-          const url = toAbsoluteUrl(`/images/products/${productId}-${i}.${ext}`);
-          if (url) candidates.push(url);
+      // Solo probar convenciones de archivo legacy si no hay galería desde la DB
+      const hasDbGallery = (product?.galleryImages || []).length > 0;
+      if (!hasDbGallery) {
+        const extensions = ['jpg', 'jpeg', 'png'];
+        for (let i = 2; i <= 6; i += 1) {
+          for (const ext of extensions) {
+            const url = toAbsoluteUrl(`/images/products/${productId}-${i}.${ext}`);
+            if (url) candidates.push(url);
+          }
         }
       }
 
@@ -203,6 +212,7 @@ export default function ProductPage() {
       const unique = Array.from(new Set(candidates));
       if (unique.length === 0) return;
 
+      // Verificar cuáles realmente cargan — filtrar las que dan 404/error
       const loadedResults = await Promise.all(
         unique.map(
           (u) =>
@@ -216,6 +226,7 @@ export default function ProductPage() {
       );
       const loaded = loadedResults.filter((u): u is string => u !== null);
 
+      const extensions = ['jpg', 'jpeg', 'png'];
       for (const variant of product?.variants || []) {
         if (byVariant[variant.id]) continue;
         const slug = slugifyVariantName(String(variant.name || ''));
@@ -239,8 +250,10 @@ export default function ProductPage() {
       }
 
       if (cancelled) return;
+
+      // Combinar loaded + variantes, deduplicar. Solo URLs que realmente cargaron.
       const withVariantImages = [...loaded, ...Object.values(byVariant)];
-      const finalList = withVariantImages.length ? Array.from(new Set(withVariantImages)) : (img ? [img] : []);
+      const finalList = Array.from(new Set(withVariantImages)).filter(Boolean);
       setGalleryImages(finalList);
       setVariantImageById(byVariant);
       setSelectedImage((prev) => {
@@ -335,14 +348,14 @@ export default function ProductPage() {
             <div className="ph-productLayout">
               <div className="ph-productLeft">
                 <div className="ph-productHero">
-                  {(selectedImage || img) ? (
+                  {heroSrc ? (
                     <img
+                      key={heroSrc}
                       className="ph-productHeroImg"
-                      src={selectedImageSource.src ?? selectedImage ?? img}
-                      srcSet={selectedImageSource.srcSet}
+                      src={heroResponsive.src ?? heroSrc}
+                      srcSet={heroResponsive.srcSet}
                       sizes="(min-width: 1024px) 45vw, 100vw"
                       alt={product.name}
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                     />
                   ) : null}
                 </div>
@@ -353,7 +366,7 @@ export default function ProductPage() {
                       <button
                         key={u}
                         type="button"
-                        className={u === selectedImage ? 'ph-thumb isActive' : 'ph-thumb'}
+                        className={u === heroSrc ? 'ph-thumb isActive' : 'ph-thumb'}
                         onClick={() => setSelectedImage(u)}
                         aria-label="Ver imagen"
                       >
@@ -368,7 +381,6 @@ export default function ProductPage() {
                 <h2 className="ph-h2 ph-productTitle">{product.name}</h2>
                 {priceLabel ? <p className="ph-productPrice">{priceLabel}</p> : null}
 
-                {product.description ? <p className="ph-productDesc">{product.description}</p> : null}
 
                 {product.variants?.length ? (
                   <div className="ph-field">

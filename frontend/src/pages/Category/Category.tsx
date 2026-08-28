@@ -137,18 +137,6 @@ export default function CategoryPage() {
             <>
               <div className="ph-categoryToolbar">
                 <span className="ph-categoryCount">{total} resultado(s)</span>
-                <label className="ph-categorySortLabel" htmlFor="category-sort">Ordenar por</label>
-                <select
-                  id="category-sort"
-                  className="ph-categorySort"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                >
-                  <option value="price_asc">Menor precio</option>
-                  <option value="price_desc">Mayor precio</option>
-                  <option value="name_asc">Nombre A-Z</option>
-                  <option value="name_desc">Nombre Z-A</option>
-                </select>
               </div>
 
               <div className="ph-gridProducts">
