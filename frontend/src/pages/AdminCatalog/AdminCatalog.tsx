@@ -1003,7 +1003,6 @@ function VariantsTab() {
 /* ================================================================
    EXTRAS TAB
    ================================================================ */
-const EXTRA_TYPES = ['general', 'dije', 'cadena', 'servicio'] as const;
 
 function ExtrasTab() {
   const onAuthErr = useAuthRedirect();
@@ -1015,7 +1014,6 @@ function ExtrasTab() {
   const [editItem, setEditItem] = useState<ExtraDto | null>(null);
   const [eName, setEName] = useState('');
   const [ePrice, setEPrice] = useState('');
-  const [eCatType, setECatType] = useState('general');
   const [eActive, setEActive] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -1045,8 +1043,8 @@ function ExtrasTab() {
 
   useEffect(() => { load(); }, [load]);
 
-  function openCreate() { setEditItem(null); setEName(''); setEPrice(''); setECatType('general'); setEActive(true); setError(''); setModal('create'); }
-  function openEdit(x: ExtraDto) { setEditItem(x); setEName(x.name); setEPrice(x.price); setECatType(x.categoryType ?? 'general'); setEActive(x.isActive !== false); setError(''); setModal('edit'); }
+  function openCreate() { setEditItem(null); setEName(''); setEPrice(''); setEActive(true); setError(''); setModal('create'); }
+  function openEdit(x: ExtraDto) { setEditItem(x); setEName(x.name); setEPrice(x.price); setEActive(x.isActive !== false); setError(''); setModal('edit'); }
 
   async function openScopes(x: ExtraDto) {
     setScopeItem(x);
@@ -1071,7 +1069,7 @@ function ExtrasTab() {
     if (!ePrice) { setError('Precio requerido'); return; }
     setSaving(true); setError('');
     try {
-      const payload = { name: eName.trim(), price: ePrice, category_type: eCatType, is_active: eActive };
+      const payload = { name: eName.trim(), price: ePrice, is_active: eActive };
       if (modal === 'edit' && editItem) { await adminUpdateExtra(editItem.id, payload); }
       else { await adminCreateExtra(payload); }
       setModal(null); await load();
@@ -1128,27 +1126,16 @@ function ExtrasTab() {
       ) : (
         <div className="adm-card" style={{ padding: 0, overflow: 'hidden' }}>
           <table className="adm-table">
-            <thead><tr><th>Nombre</th><th>Precio</th><th>Tipo</th><th>Aplica a</th><th>Activo</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Nombre</th><th>Precio</th><th>Activo</th><th>Acciones</th></tr></thead>
             <tbody>
               {items.map((x) => (
                 <tr key={x.id}>
                   <td style={{ fontWeight: 700 }}>{x.name}</td>
                   <td>${x.price}</td>
-                  <td><span className="adm-badge gray">{x.categoryType ?? 'general'}</span></td>
-                  <td>
-                    <button
-                      className="adm-btnSmall"
-                      title="Configurar dónde aplica"
-                      onClick={() => openScopes(x)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>tune</span>
-                      Asignar
-                    </button>
-                  </td>
                   <td><button className={`adm-toggle ${x.isActive !== false ? 'on' : 'off'}`} onClick={() => onToggle(x)} /></td>
                   <td>
                     <div className="adm-actions">
+                      <button className="adm-btnSmall" title="Configurar dónde aplica" onClick={() => openScopes(x)}><span className="material-symbols-outlined">tune</span></button>
                       <button className="adm-btnSmall" title="Editar" onClick={() => openEdit(x)}><span className="material-symbols-outlined">edit</span></button>
                       <button className="adm-btnSmall" title="Eliminar" onClick={() => onDelete(x)}><span className="material-symbols-outlined">delete</span></button>
                     </div>
@@ -1177,12 +1164,6 @@ function ExtrasTab() {
                 <div className="adm-field">
                   <label className="adm-label">Precio</label>
                   <input className="adm-input" type="number" step="0.01" value={ePrice} onChange={(e) => setEPrice(e.target.value)} />
-                </div>
-                <div className="adm-field">
-                  <label className="adm-label">Tipo</label>
-                  <select className="adm-select" value={eCatType} onChange={(e) => setECatType(e.target.value)}>
-                    {EXTRA_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
                 </div>
                 <label className="adm-checkbox">
                   <input type="checkbox" checked={eActive} onChange={(e) => setEActive(e.target.checked)} /> Activo
