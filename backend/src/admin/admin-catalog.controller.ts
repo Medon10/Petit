@@ -25,6 +25,8 @@ import {
   updateAdminExtra,
   removeAdminExtra,
   setAdminExtraActive,
+  getAdminExtraScopes,
+  setAdminExtraScopes,
   listAdminOrders,
   getAdminOrder,
   setAdminOrderStatus,
@@ -324,6 +326,30 @@ export async function setExtraActive(req: Request, res: Response) {
     return res.status(200).json({ message: 'Extra actualizado', data: item });
   } catch (error) {
     return res.status(500).json({ message: 'Error al actualizar extra (admin)', error });
+  }
+}
+
+export async function getExtraScopes(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const result = await getAdminExtraScopes(id);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al obtener scopes del extra (admin)', error });
+  }
+}
+
+export async function setExtraScopes(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const body = req.body as any;
+    const productIds = Array.isArray(body.product_ids) ? body.product_ids.map(Number) : [];
+    const categoryIds = Array.isArray(body.category_ids) ? body.category_ids.map(Number) : [];
+    const result = await setAdminExtraScopes(id, { product_ids: productIds, category_ids: categoryIds });
+    if (!result) return res.status(404).json({ message: 'Extra no encontrado' });
+    return res.status(200).json({ message: 'Scopes actualizados', ...result });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al actualizar scopes del extra (admin)', error });
   }
 }
 

@@ -1,4 +1,5 @@
-import { Entity, Property, Enum } from '@mikro-orm/core';
+import { Entity, Property, Enum, OneToMany, Collection } from '@mikro-orm/core';
+import type { ExtraScope } from './extra-scope.entity.js';
 import { BaseEntity } from '../shared/bdd/BaseEntity.js';
 
 export enum ExtraCategoryType {
@@ -21,4 +22,9 @@ export class Extra extends BaseEntity {
 
   @Property({ fieldName: 'is_active', default: true })
   isActive: boolean = true;
+
+  /** Asignaciones de productos/categorías donde aplica este extra.
+   * Si está vacío → aplica a TODOS los productos (global). */
+  @OneToMany('ExtraScope', 'extra')
+  scopes = new Collection<ExtraScope>(this);
 }

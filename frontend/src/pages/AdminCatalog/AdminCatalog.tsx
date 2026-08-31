@@ -25,6 +25,8 @@ import {
   adminUpdateExtra,
   adminDeleteExtra,
   adminSetExtraActive,
+  adminGetExtraScopes,
+  adminSetExtraScopes,
   adminGetHomeSettings,
   adminUpdateHomeSettings,
   adminUploadImage,
@@ -1006,8 +1008,10 @@ const EXTRA_TYPES = ['general', 'dije', 'cadena', 'servicio'] as const;
 function ExtrasTab() {
   const onAuthErr = useAuthRedirect();
   const [items, setItems] = useState<ExtraDto[]>([]);
+  const [products, setProducts] = useState<ProductDto[]>([]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState<'create' | 'edit' | null>(null);
+  const [modal, setModal] = useState<'create' | 'edit' | 'scopes' | null>(null);
   const [editItem, setEditItem] = useState<ExtraDto | null>(null);
   const [eName, setEName] = useState('');
   const [ePrice, setEPrice] = useState('');
@@ -1016,8 +1020,26 @@ function ExtrasTab() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  // State para el modal de scopes
+  const [scopeItem, setScopeItem] = useState<ExtraDto | null>(null);
+  const [scopeProductIds, setScopeProductIds] = useState<number[]>([]);
+  const [scopeCategoryIds, setScopeCategoryIds] = useState<number[]>([]);
+  const [loadingScopes, setLoadingScopes] = useState(false);
+  const [savingScopes, setSavingScopes] = useState(false);
+  const [scopeError, setScopeError] = useState('');
+  const [scopeSearch, setScopeSearch] = useState('');
+
   const load = useCallback(async () => {
-    try { setItems(await adminGetExtras()); } catch (e: any) { onAuthErr(e); }
+    try {
+      const [extrasData, productsData, categoriesData] = await Promise.all([
+        adminGetExtras(),
+        adminGetProducts({}).catch(() => [] as ProductDto[]),
+        adminGetCategories().catch(() => [] as CategoryDto[]),
+      ]);
+      setItems(extrasData);
+      setProducts(productsData as ProductDto[]);
+      setCategories(categoriesData as CategoryDto[]);
+    } catch (e: any) { onAuthErr(e); }
     finally { setLoading(false); }
   }, [onAuthErr]);
 
@@ -1025,6 +1047,24 @@ function ExtrasTab() {
 
   function openCreate() { setEditItem(null); setEName(''); setEPrice(''); setECatType('general'); setEActive(true); setError(''); setModal('create'); }
   function openEdit(x: ExtraDto) { setEditItem(x); setEName(x.name); setEPrice(x.price); setECatType(x.categoryType ?? 'general'); setEActive(x.isActive !== false); setError(''); setModal('edit'); }
+
+  async function openScopes(x: ExtraDto) {
+    setScopeItem(x);
+    setScopeError('');
+    setScopeSearch('');
+    setLoadingScopes(true);
+    setModal('scopes');
+    try {
+      const scopes = await adminGetExtraScopes(x.id);
+      setScopeProductIds(scopes.productIds);
+      setScopeCategoryIds(scopes.categoryIds);
+    } catch (e: any) {
+      setScopeError('Error al cargar asignaciones');
+      onAuthErr(e);
+    } finally {
+      setLoadingScopes(false);
+    }
+  }
 
   async function onSave() {
     if (!eName.trim()) { setError('Nombre requerido'); return; }
@@ -1039,6 +1079,26 @@ function ExtrasTab() {
     finally { setSaving(false); }
   }
 
+  async function onSaveScopes() {
+    if (!scopeItem) return;
+    setSavingScopes(true); setScopeError('');
+    try {
+      await adminSetExtraScopes(scopeItem.id, {
+        product_ids: scopeProductIds,
+        category_ids: scopeCategoryIds,
+      });
+      setModal(null);
+    } catch (e: any) { setScopeError(e?.message || 'Error al guardar'); onAuthErr(e); }
+    finally { setSavingScopes(false); }
+  }
+
+  function toggleProductId(id: number) {
+    setScopeProductIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  }
+  function toggleCategoryId(id: number) {
+    setScopeCategoryIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  }
+
   async function onToggle(x: ExtraDto) {
     try { await adminSetExtraActive(x.id, !x.isActive); await load(); } catch (e: any) { onAuthErr(e); }
   }
@@ -1046,6 +1106,12 @@ function ExtrasTab() {
     if (!confirm(`¿Eliminar extra "${x.name}"?`)) return;
     try { await adminDeleteExtra(x.id); await load(); } catch (e: any) { onAuthErr(e); }
   }
+
+  const filteredProducts = products.filter(p =>
+    !scopeSearch || p.name.toLowerCase().includes(scopeSearch.toLowerCase())
+  );
+
+  const isGlobal = scopeProductIds.length === 0 && scopeCategoryIds.length === 0;
 
   if (loading) return <div className="adm-card" style={{ display: 'grid', gap: 10 }}><Skeleton variant="text" /><Skeleton variant="text" /><Skeleton variant="text" /></div>;
 
@@ -1062,13 +1128,24 @@ function ExtrasTab() {
       ) : (
         <div className="adm-card" style={{ padding: 0, overflow: 'hidden' }}>
           <table className="adm-table">
-            <thead><tr><th>Nombre</th><th>Precio</th><th>Tipo</th><th>Activo</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Nombre</th><th>Precio</th><th>Tipo</th><th>Aplica a</th><th>Activo</th><th>Acciones</th></tr></thead>
             <tbody>
               {items.map((x) => (
                 <tr key={x.id}>
                   <td style={{ fontWeight: 700 }}>{x.name}</td>
                   <td>${x.price}</td>
                   <td><span className="adm-badge gray">{x.categoryType ?? 'general'}</span></td>
+                  <td>
+                    <button
+                      className="adm-btnSmall"
+                      title="Configurar dónde aplica"
+                      onClick={() => openScopes(x)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>tune</span>
+                      Asignar
+                    </button>
+                  </td>
                   <td><button className={`adm-toggle ${x.isActive !== false ? 'on' : 'off'}`} onClick={() => onToggle(x)} /></td>
                   <td>
                     <div className="adm-actions">
@@ -1082,7 +1159,9 @@ function ExtrasTab() {
           </table>
         </div>
       )}
-      {modal && (
+
+      {/* Modal crear/editar extra */}
+      {(modal === 'create' || modal === 'edit') && (
         <div className="adm-modalOverlay" onClick={() => setModal(null)}>
           <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
             <div className="adm-modalHeader">
@@ -1114,6 +1193,113 @@ function ExtrasTab() {
             <div className="adm-modalFooter">
               <button className="adm-btnCancel" onClick={() => setModal(null)}>Cancelar</button>
               <button className="adm-btnPrimary" disabled={saving} onClick={onSave}>{saving ? 'Guardando...' : 'Guardar'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de asignación de scopes */}
+      {modal === 'scopes' && scopeItem && (
+        <div className="adm-modalOverlay" onClick={() => setModal(null)}>
+          <div className="adm-modal" style={{ maxWidth: 560, maxHeight: '80vh', display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modalHeader">
+              <h2 className="adm-modalTitle">¿Dónde aplica <em>{scopeItem.name}</em>?</h2>
+              <button className="adm-modalClose" onClick={() => setModal(null)}><span className="material-symbols-outlined">close</span></button>
+            </div>
+            <div className="adm-modalBody" style={{ overflowY: 'auto', flex: 1 }}>
+              {loadingScopes ? (
+                <div style={{ display: 'grid', gap: 8 }}><Skeleton variant="text" /><Skeleton variant="text" /><Skeleton variant="text" /></div>
+              ) : (
+                <div className="adm-form">
+                  {/* Indicador de modo */}
+                  <div style={{ padding: '10px 14px', borderRadius: 8, marginBottom: 12, fontSize: 13,
+                    background: isGlobal ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)',
+                    border: `1px solid ${isGlobal ? 'rgba(34,197,94,0.3)' : 'rgba(245,158,11,0.3)'}`,
+                    color: isGlobal ? '#16a34a' : '#b45309' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 6 }}>
+                      {isGlobal ? 'public' : 'filter_alt'}
+                    </span>
+                    {isGlobal
+                      ? 'Este extra aparece en todos los productos (global).'
+                      : `Este extra solo aparece en los productos/categorías seleccionados.`
+                    }
+                  </div>
+
+                  {/* Categorías */}
+                  {categories.length > 0 && (
+                    <div className="adm-field">
+                      <label className="adm-label" style={{ marginBottom: 8 }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 4 }}>category</span>
+                        Categorías
+                      </label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 140, overflowY: 'auto', padding: '4px 2px' }}>
+                        {categories.map(cat => (
+                          <label key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
+                            <input
+                              type="checkbox"
+                              checked={scopeCategoryIds.includes(cat.id)}
+                              onChange={() => toggleCategoryId(cat.id)}
+                            />
+                            {cat.name}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Productos */}
+                  {products.length > 0 && (
+                    <div className="adm-field">
+                      <label className="adm-label" style={{ marginBottom: 8 }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 4 }}>inventory_2</span>
+                        Productos específicos
+                      </label>
+                      <input
+                        className="adm-input"
+                        placeholder="Buscar producto..."
+                        value={scopeSearch}
+                        onChange={e => setScopeSearch(e.target.value)}
+                        style={{ marginBottom: 8 }}
+                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto', padding: '4px 2px' }}>
+                        {filteredProducts.map(prod => (
+                          <label key={prod.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
+                            <input
+                              type="checkbox"
+                              checked={scopeProductIds.includes(prod.id)}
+                              onChange={() => toggleProductId(prod.id)}
+                            />
+                            {prod.name}
+                            {prod.category ? <span style={{ opacity: 0.5, fontSize: 11 }}>— {(prod.category as any).name}</span> : null}
+                          </label>
+                        ))}
+                        {filteredProducts.length === 0 && <span style={{ opacity: 0.5, fontSize: 13 }}>Sin resultados.</span>}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Botón limpiar */}
+                  {!isGlobal && (
+                    <button
+                      type="button"
+                      className="adm-btnCancel"
+                      style={{ marginTop: 4, fontSize: 12 }}
+                      onClick={() => { setScopeProductIds([]); setScopeCategoryIds([]); }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 4 }}>public</span>
+                      Restablecer a global (todos los productos)
+                    </button>
+                  )}
+
+                  {scopeError && <p className="adm-error">{scopeError}</p>}
+                </div>
+              )}
+            </div>
+            <div className="adm-modalFooter">
+              <button className="adm-btnCancel" onClick={() => setModal(null)}>Cancelar</button>
+              <button className="adm-btnPrimary" disabled={savingScopes || loadingScopes} onClick={onSaveScopes}>
+                {savingScopes ? 'Guardando...' : 'Guardar asignación'}
+              </button>
             </div>
           </div>
         </div>

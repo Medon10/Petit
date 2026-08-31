@@ -21,6 +21,8 @@ export type ExtraDto = {
   price: string;
   isActive?: boolean;
   categoryType?: 'general' | 'dije' | 'cadena' | 'servicio' | string;
+  /** Scopes de este extra: si está vacío aplica a todos los productos */
+  scopes?: { productIds: number[]; categoryIds: number[] };
 };
 
 export type ProductDto = {
@@ -236,8 +238,12 @@ export async function searchProducts(term: string) {
   return result.data;
 }
 
-export async function getExtras(options?: { categoryType?: string }) {
-  const qs = buildQuery({ category_type: options?.categoryType });
+export async function getExtras(options?: { categoryType?: string; productId?: number; categoryId?: number }) {
+  const qs = buildQuery({
+    category_type: options?.categoryType,
+    product_id: options?.productId,
+    category_id: options?.categoryId,
+  });
   const data = await apiGetJson<{ data?: unknown }>(`/extras${qs}`);
   return Array.isArray((data as any)?.data) ? ((data as any).data as ExtraDto[]) : [];
 }
@@ -418,6 +424,16 @@ export async function adminDeleteExtra(id: number) {
 
 export async function adminSetExtraActive(id: number, isActive: boolean) {
   return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/extras/${id}/active`, { method: 'PATCH', body: { is_active: isActive } });
+}
+
+export async function adminGetExtraScopes(id: number): Promise<{ productIds: number[]; categoryIds: number[] }> {
+  const data = await adminRequestJson<{ data?: unknown }>(`/admin/catalog/extras/${id}/scopes`, { method: 'GET' });
+  const d = (data as any)?.data ?? data as any;
+  return { productIds: Array.isArray(d?.productIds) ? d.productIds : [], categoryIds: Array.isArray(d?.categoryIds) ? d.categoryIds : [] };
+}
+
+export async function adminSetExtraScopes(id: number, input: { product_ids: number[]; category_ids: number[] }) {
+  return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/extras/${id}/scopes`, { method: 'PUT', body: input });
 }
 
 // ── Admin Orders ────────────────────────────────────────────

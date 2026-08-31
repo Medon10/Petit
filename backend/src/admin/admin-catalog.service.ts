@@ -9,6 +9,7 @@ import {
 } from '../variant/variant.service.js';
 import {
   findAllExtras, findOneExtra, createExtra, updateExtra, removeExtra, setExtraActive,
+  getExtraScopes, setExtraScopes,
 } from '../extra/extra.service.js';
 import {
   listOrders as listOrdersSvc, getOrderById, updateOrderStatus,
@@ -153,6 +154,14 @@ export async function removeAdminExtra(id: number) {
 
 export async function setAdminExtraActive(id: number, isActive: boolean) {
   return await setExtraActive(id, isActive);
+}
+
+export async function getAdminExtraScopes(id: number) {
+  return await getExtraScopes(id);
+}
+
+export async function setAdminExtraScopes(id: number, input: { product_ids?: number[]; category_ids?: number[] }) {
+  return await setExtraScopes(id, input);
 }
 
 // ── Orders (admin) ──────────────────────────────────────────

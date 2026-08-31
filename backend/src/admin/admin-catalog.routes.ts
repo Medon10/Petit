@@ -31,6 +31,8 @@ import {
   updateExtra,
   deleteExtra,
   setExtraActive,
+  getExtraScopes,
+  setExtraScopes,
   listOrders,
   getOrder,
   updateOrderStatus,
@@ -89,6 +91,8 @@ adminCatalogRouter.put('/extras/:id', sanitizeExtraInput, updateExtra);
 adminCatalogRouter.patch('/extras/:id', sanitizeExtraInput, updateExtra);
 adminCatalogRouter.patch('/extras/:id/active', setExtraActive);
 adminCatalogRouter.delete('/extras/:id', deleteExtra);
+adminCatalogRouter.get('/extras/:id/scopes', getExtraScopes);
+adminCatalogRouter.put('/extras/:id/scopes', setExtraScopes);
 
 // ── Orders ──────────────────────────────────────────────────
 adminCatalogRouter.get('/orders', listOrders);

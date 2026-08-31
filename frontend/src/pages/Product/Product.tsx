@@ -42,10 +42,10 @@ export default function ProductPage() {
       if (!Number.isFinite(productId)) return;
       setLoading(true);
       try {
-        const [item, extrasRes, summaryRes] = await Promise.all([
-          getProduct(productId),
-          // Por ahora traemos todos; más adelante podemos filtrar por category_type o por producto.
-          getExtras(),
+        const item = await getProduct(productId);
+        const [extrasRes, summaryRes] = await Promise.all([
+          // Filtramos extras por producto y categoría: solo se muestran los que aplican a este producto.
+          getExtras({ productId, categoryId: item?.category?.id }),
           getProductReviewSummary(productId),
         ]);
         if (cancelled) return;
