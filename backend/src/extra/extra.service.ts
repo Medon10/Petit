@@ -2,6 +2,8 @@ import { orm } from '../shared/bdd/orm.js';
 import { Extra } from './extra.entity.js';
 import { ExtraScope } from './extra-scope.entity.js';
 import { ExtraRepository } from './extra.repository.js';
+import { Product } from '../product/product.entity.js';
+import { Category } from '../category/category.entity.js';
 
 export type ExtraFilters = {
   categoryType?: unknown;
@@ -184,8 +186,8 @@ export async function setExtraScopes(extraId: number, input: ExtraScopeInput) {
   // Crear los nuevos scopes de productos
   for (const productId of input.product_ids ?? []) {
     const scope = em.create(ExtraScope as any, {
-      extra: { id: extraId },
-      product: { id: productId },
+      extra,
+      product: em.getReference(Product as any, productId),
       category: null,
     });
     em.persist(scope);
@@ -194,9 +196,9 @@ export async function setExtraScopes(extraId: number, input: ExtraScopeInput) {
   // Crear los nuevos scopes de categorías
   for (const categoryId of input.category_ids ?? []) {
     const scope = em.create(ExtraScope as any, {
-      extra: { id: extraId },
+      extra,
       product: null,
-      category: { id: categoryId },
+      category: em.getReference(Category as any, categoryId),
     });
     em.persist(scope);
   }

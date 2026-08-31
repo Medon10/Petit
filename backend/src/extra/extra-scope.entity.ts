@@ -1,6 +1,8 @@
 import { Entity, ManyToOne, type Rel } from '@mikro-orm/core';
 import { BaseEntity } from '../shared/bdd/BaseEntity.js';
 import { Extra } from './extra.entity.js';
+import { Product } from '../product/product.entity.js';
+import { Category } from '../category/category.entity.js';
 
 /**
  * Tabla de asociación: determina en qué productos o categorías aplica un extra.
@@ -15,10 +17,10 @@ export class ExtraScope extends BaseEntity {
   extra!: Rel<Extra>;
 
   /** ID del producto al que aplica este extra (null si es por categoría). */
-  @ManyToOne('Product', { fieldName: 'product_id', nullable: true })
-  product?: Rel<any> | null;
+  @ManyToOne(() => Product, { fieldName: 'product_id', nullable: true })
+  product?: Rel<Product> | null;
 
   /** ID de la categoría a la que aplica este extra (null si es por producto). */
-  @ManyToOne('Category', { fieldName: 'category_id', nullable: true })
-  category?: Rel<any> | null;
+  @ManyToOne(() => Category, { fieldName: 'category_id', nullable: true })
+  category?: Rel<Category> | null;
 }
