@@ -1,6 +1,8 @@
-﻿# Petit (backend)
+# Petit (backend)
 
-Backend para el catálogo de joyería Petit.
+Backend API para el catálogo y gestión de pedidos de joyería y accesorios Petit.
+
+Para ver la documentación completa de todo el proyecto, arquitectura y despliegue, consulta el [README principal del repositorio](../README.md).
 
 ## Quick start
 - Configurar `backend/.env` (PostgreSQL local `petit`)
