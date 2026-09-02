@@ -32,12 +32,15 @@ export default function QuienesSomosPage() {
           <div className="qs-body">
             <section className="qs-section">
               <p>
-                En Petit creemos que cada persona tiene una historia que merece ser contada.
-                Por eso, creamos accesorios personalizados donde cada pieza refleja momentos, emociones y recuerdos únicos.
-                Nuestros grabados no son solo accesorios: son una forma de llevar contigo lo que más te representa y hace especial cada día.
-                Y como queremos que te acompañen siempre, trabajamos en acero quirúrgico 304 y 316L,
-                un material hipoalergénico, resistente y duradero, ideal para el uso diario y perfecto para todo tipo de piel.
-                Cada detalle está pensado para reflejar lo que te hace único, porque en Petit, la magia está en los pequeños detalles.
+                Petit nació en octubre de 2025, de una manera completamente inesperada. Todo comenzó cuando mi máquina láser se rompió y me puse a investigar que otra cosa podía hacer además de trabajos en madera, ahí fue donde descubrí el mundo de los accesorios personalizados.
+
+                Siempre me gustaron los accesorios, pero nunca imagine que además iba a poder personalizarlos y transformarlos en un accesorio único. Así que no dudé ni un minuto en investigar, aprender y lanzarme a este nuevo mundo. Estaba tan segura de que quería intentar con este nuevo rubro que decidí apostar de lleno desde el principio, realizando directamente mi primera compra mayorista.
+
+                A la hora de elegir un nombre, buscaba algo simple, pequeño, pero con un gran significado. Así nació Petit, que significa pequeño y representa exactamente lo que quiero transmitir con cada creación: la magia está en los pequeños detalles.
+
+                Cada pieza de Petit es diseñada, grabada y preparada por mí, con mucho amor y dedicación. Mi intención siempre fue crear algo más que un accesorio: quiero que, desde el momento en que abrís el paquete, vivas una experiencia única y especial.
+
+                Gracias por acompañarme, por valorar lo hecho con amor y por permitirme seguir creciendo y haciendo realidad este emprendimiento que nació de manera inesperada, pero que hoy significa mucho para mí.
               </p>
             </section>
 

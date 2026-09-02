@@ -1,10 +1,17 @@
 import { Request, Response } from 'express';
 import { createOrder as createOrderService, getOrderById, listOrders as listOrdersService } from './order.service.js';
+import { sendNewOrderNotification } from '../shared/mail/new-order.mail.js';
 
 async function createOrder(req: Request, res: Response) {
   try {
     const input = (req.body as any).sanitizedInput || req.body;
     const populated = await createOrderService(input);
+
+    // Fire-and-forget: send email notification without blocking the response
+    sendNewOrderNotification(populated as any).catch((err) =>
+      console.error('[mail] Error sending new order notification:', err)
+    );
+
     return res.status(201).json({ message: 'Pedido creado', data: populated });
   } catch (error: any) {
     return res.status(400).json({
