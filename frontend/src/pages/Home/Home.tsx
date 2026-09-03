@@ -59,6 +59,7 @@ function CategoryCoverImage({
 export default function HomePage() {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<ProductDto[]>([]);
+  const [featured, setFeatured] = useState<ProductDto[]>([]);
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
   const [heroImageLeftUrl, setHeroImageLeftUrl] = useState<string | null>(null);
   const [heroImageRightUrl, setHeroImageRightUrl] = useState<string | null>(null);
@@ -69,15 +70,17 @@ export default function HomePage() {
 
     async function load() {
       try {
-        const [cats, prods, homeSettings] = await Promise.all([
+        const [cats, prods, featuredProds, homeSettings] = await Promise.all([
           getCategories({ includeRepresentative: true }),
           getProducts({ limit: 8 }),
+          getProducts({ featured: true, limit: 20 }),
           getHomeSettings(),
         ]);
 
         if (cancelled) return;
         setCategories(cats);
         setProducts(prods);
+        setFeatured(featuredProds);
         setHeroImageUrl(homeSettings.heroImageUrl ?? null);
         setHeroImageLeftUrl(homeSettings.heroImageLeftUrl ?? null);
         setHeroImageRightUrl(homeSettings.heroImageRightUrl ?? null);
@@ -85,6 +88,7 @@ export default function HomePage() {
         if (cancelled) return;
         setCategories([]);
         setProducts([]);
+        setFeatured([]);
         setHeroImageUrl(null);
         setHeroImageLeftUrl(null);
         setHeroImageRightUrl(null);
@@ -108,10 +112,6 @@ export default function HomePage() {
       };
     });
   }, [categories]);
-
-  const featured = useMemo(() => {
-    return products.filter((p) => p.isFeatured);
-  }, [products]);
 
   return (
     <div className="petit-home">

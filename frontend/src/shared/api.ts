@@ -191,19 +191,21 @@ export async function getCategories(options?: { includeRepresentative?: boolean 
   return Array.isArray((data as any)?.data) ? ((data as any).data as CategoryDto[]) : [];
 }
 
-export async function getProducts(options?: { limit?: number; categoryId?: number }) {
+export async function getProducts(options?: { limit?: number; categoryId?: number; featured?: boolean }) {
   const result = await getProductsPage({
     limit: options?.limit,
     categoryId: options?.categoryId,
+    featured: options?.featured,
     page: 1,
   });
   return result.data;
 }
 
-export async function getProductsPage(options?: { limit?: number; categoryId?: number; page?: number }) {
+export async function getProductsPage(options?: { limit?: number; categoryId?: number; featured?: boolean; page?: number }) {
   const qs = buildQuery({
     limit: options?.limit,
     category_id: options?.categoryId,
+    featured: options?.featured,
     page: options?.page,
   });
   const data = await apiGetJson<Partial<ProductsPageDto> & { data?: unknown }>(`/products${qs}`);
