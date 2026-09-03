@@ -24,6 +24,9 @@ import { reviewRouter } from './review/review.routes.js';
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 
+// Trust first proxy (Railway, Vercel, Docker reverse proxies)
+app.set('trust proxy', 1);
+
 app.disable('x-powered-by');
 
 app.use(cookieParser());

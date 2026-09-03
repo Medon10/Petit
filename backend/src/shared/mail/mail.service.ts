@@ -76,8 +76,10 @@ export async function sendMail(options: SendMailOptions): Promise<void> {
       console.log(`[mail] Sending via Resend API to ${recipient}...`);
       const resend = new Resend(cfg.resendApiKey);
 
-      // Use MAIL_FROM if set, otherwise use Resend's free test sender
-      const sender = cfg.from || 'Petit Tienda <onboarding@resend.dev>';
+      // Resend does NOT allow sending from @gmail.com or other public domains without DNS verification.
+      // Use custom domain only if configured and not a generic email provider, otherwise use Resend's test sender:
+      const isCustomDomain = cfg.from && !cfg.from.includes('@gmail.com') && !cfg.from.includes('@hotmail.') && !cfg.from.includes('@yahoo.');
+      const sender = isCustomDomain ? cfg.from : 'Petit Tienda <onboarding@resend.dev>';
 
       const { error } = await resend.emails.send({
         from: sender,
