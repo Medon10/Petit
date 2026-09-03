@@ -101,16 +101,7 @@ export default function ProductPage() {
     return 'Medalla de acero quirúrgico brillo espejo en ambas caras, 1,5 x 2,2cm de diámetro y 1.5mm de espesor. Ideal para un diseño delicado y minimalista. viene con cadena serpentina premium de 45cm o 50cm según stock.';
   }, [product]);
 
-  const fallbackExtras: ExtraDto[] = useMemo(() => {
-    // Fallback si todavía no cargaste extras en la DB.
-    return [
-      { id: -1, name: 'Grabado extra (reverso)', price: '3000.00', categoryType: 'servicio' },
-      { id: -2, name: 'Dijes adicionales (con grabado)', price: '3600.00', categoryType: 'dije' },
-    ];
-  }, []);
-
   const visibleExtras = useMemo(() => {
-    const list = extras.length ? extras : fallbackExtras;
     // Orden: primero servicios, luego dijes, luego el resto.
     const score = (e: ExtraDto) => {
       const t = String((e as any).categoryType ?? '').toLowerCase();
@@ -118,8 +109,8 @@ export default function ProductPage() {
       if (t === 'dije') return 1;
       return 2;
     };
-    return [...list].sort((a, b) => score(a) - score(b) || a.name.localeCompare(b.name));
-  }, [extras, fallbackExtras]);
+    return [...extras].sort((a, b) => score(a) - score(b) || a.name.localeCompare(b.name));
+  }, [extras]);
 
   const extrasTotal = useMemo(() => {
     let total = 0;
@@ -423,58 +414,60 @@ export default function ProductPage() {
                   Algunas elecciones de grabado o diseño final las podés coordinar por WhatsApp al enviar el comprobante.
                 </p>
 
-                <div className="ph-extras" aria-label="Extras">
-                  <h3 className="ph-extrasTitle">Extras</h3>
-                  <div className="ph-extrasDropdown" ref={extrasRef}>
-                    <button
-                      type="button"
-                      className="ph-extrasTrigger"
-                      aria-haspopup="menu"
-                      aria-expanded={extrasOpen}
-                      onClick={() => setExtrasOpen((v) => !v)}
-                    >
-                      {selectedExtraIds.size ? `Extras seleccionados: ${selectedExtraIds.size}` : 'Seleccionar extras'}
-                      <span className="ph-extrasTriggerMeta">
-                        {extrasTotal > 0 ? `+ $${extrasTotal.toLocaleString('es-AR')}` : ''}
-                      </span>
-                      <span className="material-symbols-outlined ph-extrasChevron" aria-hidden="true">
-                        expand_more
-                      </span>
-                    </button>
+                {visibleExtras.length > 0 ? (
+                  <div className="ph-extras" aria-label="Extras">
+                    <h3 className="ph-extrasTitle">Extras</h3>
+                    <div className="ph-extrasDropdown" ref={extrasRef}>
+                      <button
+                        type="button"
+                        className="ph-extrasTrigger"
+                        aria-haspopup="menu"
+                        aria-expanded={extrasOpen}
+                        onClick={() => setExtrasOpen((v) => !v)}
+                      >
+                        {selectedExtraIds.size ? `Extras seleccionados: ${selectedExtraIds.size}` : 'Seleccionar extras'}
+                        <span className="ph-extrasTriggerMeta">
+                          {extrasTotal > 0 ? `+ $${extrasTotal.toLocaleString('es-AR')}` : ''}
+                        </span>
+                        <span className="material-symbols-outlined ph-extrasChevron" aria-hidden="true">
+                          expand_more
+                        </span>
+                      </button>
 
-                    <div className={extrasOpen ? 'ph-extrasMenu isOpen' : 'ph-extrasMenu'} role="menu">
-                      <div className="ph-extrasList" role="presentation">
-                        {visibleExtras.map((e) => {
-                          const checked = selectedExtraIds.has(e.id);
-                          const n = Number.parseFloat(String(e.price));
-                          const labelPrice = Number.isFinite(n) ? `$${n.toLocaleString('es-AR')}` : String(e.price);
-                          return (
-                            <label key={e.id} className="ph-extraItem" role="menuitemcheckbox" aria-checked={checked}>
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={() => {
-                                  setSelectedExtraIds((prev) => {
-                                    const next = new Set(prev);
-                                    if (next.has(e.id)) next.delete(e.id);
-                                    else next.add(e.id);
-                                    return next;
-                                  });
-                                }}
-                              />
-                              <span className="ph-extraName">{e.name}</span>
-                              <span className="ph-extraPrice">{labelPrice}</span>
-                            </label>
-                          );
-                        })}
+                      <div className={extrasOpen ? 'ph-extrasMenu isOpen' : 'ph-extrasMenu'} role="menu">
+                        <div className="ph-extrasList" role="presentation">
+                          {visibleExtras.map((e) => {
+                            const checked = selectedExtraIds.has(e.id);
+                            const n = Number.parseFloat(String(e.price));
+                            const labelPrice = Number.isFinite(n) ? `$${n.toLocaleString('es-AR')}` : String(e.price);
+                            return (
+                              <label key={e.id} className="ph-extraItem" role="menuitemcheckbox" aria-checked={checked}>
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => {
+                                    setSelectedExtraIds((prev) => {
+                                      const next = new Set(prev);
+                                      if (next.has(e.id)) next.delete(e.id);
+                                      else next.add(e.id);
+                                      return next;
+                                    });
+                                  }}
+                                />
+                                <span className="ph-extraName">{e.name}</span>
+                                <span className="ph-extraPrice">{labelPrice}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {extrasTotal > 0 ? (
-                    <p className="ph-extrasSummary">Extras seleccionados: ${extrasTotal.toLocaleString('es-AR')}</p>
-                  ) : null}
-                </div>
+                    {extrasTotal > 0 ? (
+                      <p className="ph-extrasSummary">Extras seleccionados: ${extrasTotal.toLocaleString('es-AR')}</p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </div>
           )}

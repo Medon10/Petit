@@ -33,13 +33,21 @@ export default function QuienesSomosPage() {
             <section className="qs-section">
               <p>
                 Petit nació en octubre de 2025, de una manera completamente inesperada. Todo comenzó cuando mi máquina láser se rompió y me puse a investigar que otra cosa podía hacer además de trabajos en madera, ahí fue donde descubrí el mundo de los accesorios personalizados.
+              </p>
 
+              <p>
                 Siempre me gustaron los accesorios, pero nunca imagine que además iba a poder personalizarlos y transformarlos en un accesorio único. Así que no dudé ni un minuto en investigar, aprender y lanzarme a este nuevo mundo. Estaba tan segura de que quería intentar con este nuevo rubro que decidí apostar de lleno desde el principio, realizando directamente mi primera compra mayorista.
+              </p>
 
+              <p>
                 A la hora de elegir un nombre, buscaba algo simple, pequeño, pero con un gran significado. Así nació Petit, que significa pequeño y representa exactamente lo que quiero transmitir con cada creación: la magia está en los pequeños detalles.
+              </p>
 
+              <p>
                 Cada pieza de Petit es diseñada, grabada y preparada por mí, con mucho amor y dedicación. Mi intención siempre fue crear algo más que un accesorio: quiero que, desde el momento en que abrís el paquete, vivas una experiencia única y especial.
+              </p>
 
+              <p>
                 Gracias por acompañarme, por valorar lo hecho con amor y por permitirme seguir creciendo y haciendo realidad este emprendimiento que nació de manera inesperada, pero que hoy significa mucho para mí.
               </p>
             </section>
