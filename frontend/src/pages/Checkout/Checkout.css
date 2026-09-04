@@ -412,6 +412,8 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
+  overflow: hidden;
+  border-radius: 6px;
   background: linear-gradient(160deg, #f2d5d8, #eadfd4);
   color: #7a2e3e;
   font-family: 'Noto Serif', serif;

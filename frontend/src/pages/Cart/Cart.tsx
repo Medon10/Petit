@@ -129,7 +129,7 @@ export default function CartPage() {
                 {cart.items.map((it) => {
                   const product = productsById[it.productId];
                   const variant = product?.variants?.find((v) => v.id === it.variantId) ?? product?.variants?.[0];
-                  const img = toAbsoluteUrl(product?.imageUrl) ?? toAbsoluteUrl(`/images/products/${it.productId}.jpg`);
+                  const img = toAbsoluteUrl(variant?.imageUrl ?? product?.imageUrl) ?? toAbsoluteUrl(`/images/products/${it.productId}.jpg`);
                   const extrasNames = it.extraIds
                     .flatMap((id) => {
                       const name = extrasById[id]?.name;

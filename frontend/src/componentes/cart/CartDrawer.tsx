@@ -149,7 +149,7 @@ export default function CartDrawer() {
                 {cart.items.map((it) => {
                   const product = productsById[it.productId];
                   const variant = product?.variants?.find((v) => v.id === it.variantId) ?? product?.variants?.[0];
-                  const img = toAbsoluteUrl(product?.imageUrl) ?? toAbsoluteUrl(`/images/products/${it.productId}.jpg`);
+                  const img = toAbsoluteUrl(variant?.imageUrl ?? product?.imageUrl) ?? toAbsoluteUrl(`/images/products/${it.productId}.jpg`);
 
                   const lineVariantPrice = parsePrice(variant?.price);
                   const lineExtrasPrice = it.extraIds.reduce((sum, id) => sum + parsePrice(extrasById[id]?.price), 0);
