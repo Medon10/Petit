@@ -36,8 +36,8 @@ export default function OrderPage() {
   const shippingMethod = state?.shippingMethod ?? 'pickup';
   const items = Array.isArray(state?.items) ? state.items : [];
 
-  const bankAlias = (import.meta as any).env?.VITE_BANK_ALIAS || 'ALIAS.NO.CONFIGURADO';
-  const bankHolder = (import.meta as any).env?.VITE_BANK_HOLDER || 'Petit Accesorios';
+  const bankAlias = 'Pinocho.petitmp';
+  const bankHolder = 'Julieta Medon';
   const whatsappNumber = String((import.meta as any).env?.VITE_WHATSAPP_NUMBER || '5491100000000').replace(/\D/g, '');
 
   const whatsappText = encodeURIComponent(
@@ -89,12 +89,12 @@ export default function OrderPage() {
                 <div className="order-shippingNotice">
                   <span aria-hidden="true">📦</span>
                   <p>
-                    <strong>Envío a domicilio.</strong><br />
+                    <strong>Envío a domicilio (fuera de Colón).</strong><br />
                     Te contactamos por WhatsApp para coordinar la entrega.
                   </p>
                 </div>
               ) : (
-                <p>Retiro seleccionado. Te escribimos para coordinar dirección y horario.</p>
+                <p>Retiro en domicilio (Colón). Te contactamos por WhatsApp para enviarte la dirección y horario a retirar.</p>
               )}
 
               <a className="order-whatsappBtn" href={whatsappHref} target="_blank" rel="noopener noreferrer">
@@ -137,7 +137,7 @@ export default function OrderPage() {
                     <span>
                       {shippingMethod === 'delivery'
                         ? <em style={{ color: '#a14659', fontStyle: 'normal', fontWeight: 700, fontSize: '0.85em' }}>A coordinar por WhatsApp</em>
-                        : 'Retiro'}
+                        : 'Retiro en domicilio'}
                     </span>
                   </div>
                   <div className="is-total">
@@ -154,7 +154,7 @@ export default function OrderPage() {
 
         <div className="order-footNote" aria-hidden="true">
           <span>Autenticidad</span>
-          <span>{shippingMethod === 'delivery' ? 'Envío coordinado por WhatsApp' : 'Retiro coordinado'}</span>
+          <span>{shippingMethod === 'delivery' ? 'Envío coordinado (fuera de Colón)' : 'Retiro en domicilio (Colón)'}</span>
           <span>Compra segura</span>
         </div>
       </main>

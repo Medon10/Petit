@@ -70,11 +70,11 @@ export async function updateCategory(id: number, input: CategoryInput) {
   const em = orm.em.fork();
   const item = await CategoryRepository.findOnePlain(em, id);
   if (!item) return null;
-  em.assign(item, {
-    name: input.name,
-    imageUrl: input.image_url,
-    isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
-  } as any);
+  const dataToAssign: Record<string, any> = {};
+  if (input.name !== undefined) dataToAssign.name = input.name;
+  if (input.image_url !== undefined) dataToAssign.imageUrl = input.image_url;
+  if (input.is_active !== undefined) dataToAssign.isActive = Boolean(input.is_active);
+  em.assign(item, dataToAssign as any);
   await em.flush();
   return item;
 }

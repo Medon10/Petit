@@ -189,7 +189,7 @@ export default function CartPage() {
                           checked={shippingMethod === 'pickup'}
                           onChange={() => cart.setShippingMethod('pickup')}
                         />
-                        Retiro coordinado
+                        Retiro en domicilio (Colón)
                       </label>
                       <label className="ph-cartShipOption">
                         <input
@@ -198,16 +198,16 @@ export default function CartPage() {
                           checked={shippingMethod === 'delivery'}
                           onChange={() => cart.setShippingMethod('delivery')}
                         />
-                        Envio a domicilio
+                        Envío a domicilio (sólo fuera de Colón)
                       </label>
                     </div>
 
                     {shippingMethod === 'delivery' ? (
                       <div className="ph-cartShipFields">
-                        <p className="ph-cartShipMeta">El envío se coordina por WhatsApp al finalizar la compra.</p>
+                        <p className="ph-cartShipMeta">Sólo para envíos fuera de Colón. El costo se coordina por WhatsApp al finalizar la compra.</p>
                       </div>
                     ) : (
-                      <p className="ph-cartShipMeta">Retiro sin costo. También podés coordinar envío por WhatsApp en checkout.</p>
+                      <p className="ph-cartShipMeta">En Colón sólo se retira en domicilio (sin costo).</p>
                     )}
                   </div>
 
@@ -218,7 +218,7 @@ export default function CartPage() {
 
                   <div className="ph-cartSummaryRow">
                     <span>Envio</span>
-                    <strong>{shippingMethod === 'delivery' ? 'A coordinar por WhatsApp' : 'Retiro'}</strong>
+                    <strong>{shippingMethod === 'delivery' ? 'A coordinar por WhatsApp' : 'Retiro en domicilio'}</strong>
                   </div>
 
                   <div className="ph-cartSummaryRow isTotal">

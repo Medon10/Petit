@@ -55,7 +55,7 @@ function formatDate(date?: Date | string): string {
 }
 
 function shippingLabel(method: string): string {
-  return method === 'delivery' ? '🚚 Envío a domicilio' : '🏪 Retiro en local';
+  return method === 'delivery' ? '🚚 Envío a domicilio (fuera de Colón)' : '🏪 Retiro en domicilio (Colón)';
 }
 
 function getItemsArray(order: PopulatedOrder): PopulatedOrderItem[] {

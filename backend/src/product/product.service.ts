@@ -121,15 +121,18 @@ export async function updateProduct(id: number, input: ProductInput) {
     (item as any).category = category;
   }
 
-  em.assign(item, {
-    name: input.name,
-    description: input.description,
-    imageUrl: input.image_url,
-    galleryImages: Array.isArray(input.gallery_images) ? input.gallery_images : undefined,
-    isFeatured: input.is_featured != null ? Boolean(input.is_featured) : undefined,
-    featuredRank: input.featured_rank != null && !Number.isNaN(Number(input.featured_rank)) ? Number(input.featured_rank) : undefined,
-    isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
-  } as any, { mergeObjects: true } as any);
+  const dataToAssign: Record<string, any> = {};
+  if (input.name !== undefined) dataToAssign.name = input.name;
+  if (input.description !== undefined) dataToAssign.description = input.description;
+  if (input.image_url !== undefined) dataToAssign.imageUrl = input.image_url;
+  if (input.gallery_images !== undefined && Array.isArray(input.gallery_images)) dataToAssign.galleryImages = input.gallery_images;
+  if (input.is_featured !== undefined) dataToAssign.isFeatured = Boolean(input.is_featured);
+  if (input.featured_rank !== undefined && !Number.isNaN(Number(input.featured_rank))) {
+    dataToAssign.featuredRank = Number(input.featured_rank);
+  }
+  if (input.is_active !== undefined) dataToAssign.isActive = Boolean(input.is_active);
+
+  em.assign(item, dataToAssign as any, { mergeObjects: true } as any);
 
   await em.flush();
   return item;

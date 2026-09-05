@@ -83,12 +83,13 @@ export async function updateVariant(id: number, input: VariantInput) {
     (item as any).product = product;
   }
 
-  em.assign(item, {
-    name: input.name,
-    price: input.price,
-    imageUrl: input.image_url,
-    isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
-  } as any, { mergeObjects: true } as any);
+  const dataToAssign: Record<string, any> = {};
+  if (input.name !== undefined) dataToAssign.name = input.name;
+  if (input.price !== undefined) dataToAssign.price = input.price;
+  if (input.image_url !== undefined) dataToAssign.imageUrl = input.image_url;
+  if (input.is_active !== undefined) dataToAssign.isActive = Boolean(input.is_active);
+
+  em.assign(item, dataToAssign as any, { mergeObjects: true } as any);
 
   await em.flush();
   return item;

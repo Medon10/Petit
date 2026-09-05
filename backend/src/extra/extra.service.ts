@@ -1,5 +1,5 @@
 import { orm } from '../shared/bdd/orm.js';
-import { Extra } from './extra.entity.js';
+import { Extra, ExtraCategoryType } from './extra.entity.js';
 import { ExtraScope } from './extra-scope.entity.js';
 import { ExtraRepository } from './extra.repository.js';
 import { Product } from '../product/product.entity.js';
@@ -105,11 +105,15 @@ export async function findOneExtra(id: number, options?: { includeInactive?: boo
 
 export async function createExtra(input: ExtraInput) {
   const em = orm.em.fork();
+  const categoryType = (input.category_type && Object.values(ExtraCategoryType).includes(input.category_type as ExtraCategoryType))
+    ? (input.category_type as ExtraCategoryType)
+    : ExtraCategoryType.GENERAL;
+
   const nuevo = em.create(Extra as any, {
     name: input.name,
     price: input.price,
-    categoryType: input.category_type,
-    isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
+    categoryType,
+    isActive: input.is_active != null ? Boolean(input.is_active) : true,
   });
   await em.flush();
   return nuevo;
@@ -120,12 +124,19 @@ export async function updateExtra(id: number, input: ExtraInput) {
   const item = await ExtraRepository.findOne(em, id);
   if (!item) return null;
 
-  em.assign(item, {
-    name: input.name,
-    price: input.price,
-    categoryType: input.category_type,
-    isActive: input.is_active != null ? Boolean(input.is_active) : undefined,
-  } as any, { mergeObjects: true } as any);
+  const dataToAssign: Record<string, any> = {};
+  if (input.name !== undefined) dataToAssign.name = input.name;
+  if (input.price !== undefined) dataToAssign.price = input.price;
+  if (input.category_type !== undefined) {
+    if (Object.values(ExtraCategoryType).includes(input.category_type as ExtraCategoryType)) {
+      dataToAssign.categoryType = input.category_type;
+    } else {
+      dataToAssign.categoryType = ExtraCategoryType.GENERAL;
+    }
+  }
+  if (input.is_active !== undefined) dataToAssign.isActive = Boolean(input.is_active);
+
+  em.assign(item, dataToAssign as any, { mergeObjects: true } as any);
 
   await em.flush();
   return item;

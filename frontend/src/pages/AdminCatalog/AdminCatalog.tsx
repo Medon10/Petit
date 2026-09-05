@@ -1014,6 +1014,7 @@ function ExtrasTab() {
   const [editItem, setEditItem] = useState<ExtraDto | null>(null);
   const [eName, setEName] = useState('');
   const [ePrice, setEPrice] = useState('');
+  const [eCategoryType, setECategoryType] = useState<string>('general');
   const [eActive, setEActive] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -1043,8 +1044,8 @@ function ExtrasTab() {
 
   useEffect(() => { load(); }, [load]);
 
-  function openCreate() { setEditItem(null); setEName(''); setEPrice(''); setEActive(true); setError(''); setModal('create'); }
-  function openEdit(x: ExtraDto) { setEditItem(x); setEName(x.name); setEPrice(x.price); setEActive(x.isActive !== false); setError(''); setModal('edit'); }
+  function openCreate() { setEditItem(null); setEName(''); setEPrice(''); setECategoryType('general'); setEActive(true); setError(''); setModal('create'); }
+  function openEdit(x: ExtraDto) { setEditItem(x); setEName(x.name); setEPrice(x.price); setECategoryType(x.categoryType || 'general'); setEActive(x.isActive !== false); setError(''); setModal('edit'); }
 
   async function openScopes(x: ExtraDto) {
     setScopeItem(x);
@@ -1069,7 +1070,7 @@ function ExtrasTab() {
     if (!ePrice) { setError('Precio requerido'); return; }
     setSaving(true); setError('');
     try {
-      const payload = { name: eName.trim(), price: ePrice, is_active: eActive };
+      const payload = { name: eName.trim(), price: ePrice, category_type: eCategoryType, is_active: eActive };
       if (modal === 'edit' && editItem) { await adminUpdateExtra(editItem.id, payload); }
       else { await adminCreateExtra(payload); }
       setModal(null); await load();
@@ -1126,11 +1127,20 @@ function ExtrasTab() {
       ) : (
         <div className="adm-card" style={{ padding: 0, overflow: 'hidden' }}>
           <table className="adm-table">
-            <thead><tr><th>Nombre</th><th>Precio</th><th>Activo</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Activo</th><th>Acciones</th></tr></thead>
             <tbody>
               {items.map((x) => (
                 <tr key={x.id}>
                   <td style={{ fontWeight: 700 }}>{x.name}</td>
+                  <td>
+                    <span className={`adm-badge ${
+                      x.categoryType === 'servicio' ? 'purple' :
+                      x.categoryType === 'dije' ? 'teal' :
+                      x.categoryType === 'cadena' ? 'blue' : 'gray'
+                    }`}>
+                      {x.categoryType || 'general'}
+                    </span>
+                  </td>
                   <td>${x.price}</td>
                   <td><button className={`adm-toggle ${x.isActive !== false ? 'on' : 'off'}`} onClick={() => onToggle(x)} /></td>
                   <td>
@@ -1160,6 +1170,15 @@ function ExtrasTab() {
                 <div className="adm-field">
                   <label className="adm-label">Nombre</label>
                   <input className="adm-input" value={eName} onChange={(e) => setEName(e.target.value)} />
+                </div>
+                <div className="adm-field">
+                  <label className="adm-label">Tipo</label>
+                  <select className="adm-input" value={eCategoryType} onChange={(e) => setECategoryType(e.target.value)}>
+                    <option value="general">General</option>
+                    <option value="dije">Dije</option>
+                    <option value="cadena">Cadena</option>
+                    <option value="servicio">Servicio</option>
+                  </select>
                 </div>
                 <div className="adm-field">
                   <label className="adm-label">Precio</label>

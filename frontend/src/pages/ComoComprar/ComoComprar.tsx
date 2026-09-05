@@ -95,9 +95,9 @@ export default function ComoComprarPage() {
                 <div className="cc-stepContent">
                   <h2 className="cc-stepTitle">Envío y retiro</h2>
                   <p>
-                    Enviamos a todo el país por correo argentino. También podés
-                    coordinar el retiro en persona si estás en la zona. Los tiempos de entrega
-                    varían según el destino y la disponibilidad de stock.
+                    El envío a domicilio se realiza por Correo Argentino a todo el país únicamente para destinos fuera de Colón.
+                    Si estás en Colón, el retiro es exclusivamente en domicilio. Los tiempos de entrega
+                    varían entre 3 a 5 días.
                   </p>
                   <p>
                     Una vez despachado tu pedido, te enviamos el número de seguimiento para que

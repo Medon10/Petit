@@ -171,6 +171,11 @@ export default function CheckoutPage() {
         setError('Completá dirección, código postal, localidad y provincia para continuar con el envío.');
         return;
       }
+      const cityLower = shippingCity.trim().toLowerCase();
+      if (cityLower === 'colón' || cityLower === 'colon') {
+        setError('El envío a domicilio es sólo para destinos fuera de Colón. En Colón únicamente se retira en domicilio.');
+        return;
+      }
     }
 
     const name = customerName.trim();
@@ -289,7 +294,7 @@ export default function CheckoutPage() {
                         checked={shippingMethod === 'pickup'}
                         onChange={() => cart.setShippingMethod('pickup')}
                       />
-                      Retirar en domicilio
+                      Retirar en punto de entrega (Colón)
                     </label>
 
                     <label className="checkout-deliveryOption">
@@ -299,7 +304,7 @@ export default function CheckoutPage() {
                         checked={shippingMethod === 'delivery'}
                         onChange={() => cart.setShippingMethod('delivery')}
                       />
-                      Envio a domicilio
+                      Envío a domicilio (sólo fuera de Colón)
                     </label>
                   </div>
 
@@ -308,9 +313,9 @@ export default function CheckoutPage() {
                       <div className="checkout-shippingNotice">
                         <span className="checkout-shippingNoticeIcon" aria-hidden="true">📦</span>
                         <div>
-                          <strong>El costo de envío se coordina por WhatsApp</strong>
+                          <strong>Envío sólo para destinos fuera de Colón</strong>
                           <p>
-                            Una vez que confirmes tu pedido, contactanos por WhatsApp para coordinar el envío y detalles del pedido.
+                            Esta opción es válida únicamente para localidades fuera de Colón (en Colón sólo se retira en domicilio). El costo de envío se coordina por WhatsApp una vez confirmado el pedido.
                           </p>
                         </div>
                       </div>
@@ -363,7 +368,7 @@ export default function CheckoutPage() {
                     </div>
                   ) : (
                     <p className="checkout-deliveryHint">
-                      Retiro por coordinacion. Te contactamos por WhatsApp para definir direccion y horario.
+                      En Colón sólo se retira en domicilio. Te contactamos por WhatsApp para enviarte la dirección y horario a retirar.
                     </p>
                   )}
                 </section>
@@ -442,7 +447,7 @@ export default function CheckoutPage() {
                     <strong>
                       {shippingMethod === 'delivery'
                         ? <span className="checkout-shippingPending">A coordinar por WhatsApp</span>
-                        : 'Retiro'}
+                        : 'Retiro en domicilio (Colón)'}
                     </strong>
                   </div>
                   <div className="checkout-summaryRow is-total">
