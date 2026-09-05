@@ -9,7 +9,6 @@ import {
   getExtras,
   getProduct,
   toAbsoluteUrl,
-  toResponsiveImage,
   type ExtraDto,
   type ProductDetailDto,
 } from '../../shared/api';
@@ -41,6 +40,25 @@ function parsePrice(p: unknown) {
 function moneyAr(amount: number) {
   if (!Number.isFinite(amount)) return '$0';
   return `$${Math.round(amount).toLocaleString('es-AR')}`;
+}
+
+function CheckoutThumb({ src, fallbackText }: { src?: string; fallbackText: string }) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const hasError = Boolean(src && failedSrc === src);
+
+  if (!src || hasError) {
+    return <span>{fallbackText}</span>;
+  }
+
+  return (
+    <img
+      className="checkout-thumbImg"
+      src={src}
+      alt=""
+      loading="lazy"
+      onError={() => setFailedSrc(src)}
+    />
+  );
 }
 
 export default function CheckoutPage() {
@@ -445,30 +463,18 @@ export default function CheckoutPage() {
                       .filter(Boolean)
                       .join(' · ');
                     const title = `${product?.name ?? `Producto sin nombre`}${variant?.name ? ` (${variant.name})` : ''}`;
-                    const thumbUrl = variant?.imageUrl ?? product?.imageUrl;
-                    const fallbackUrl = toAbsoluteUrl(`/images/products/${it.productId}.jpg`);
-                    const img = thumbUrl ? toResponsiveImage(thumbUrl) : { src: fallbackUrl, srcSet: undefined };
+                    const thumbSrc =
+                      toAbsoluteUrl(variant?.imageUrl) ??
+                      toAbsoluteUrl(product?.imageUrl) ??
+                      toAbsoluteUrl(product?.galleryImages?.[0]);
 
                     return (
                       <article key={it.key} className="checkout-item">
                         <div className="checkout-thumb" aria-hidden="true">
-                          {img.src ? (
-                            <img
-                              src={img.src}
-                              srcSet={img.srcSet}
-                              alt=""
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                if (e.currentTarget.nextElementSibling) {
-                                  (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
-                                }
-                              }}
-                            />
-                          ) : null}
-                          <span style={{ display: img.src ? 'none' : 'block' }}>
-                            {(product?.name ?? 'P').slice(0, 1).toUpperCase()}
-                          </span>
+                          <CheckoutThumb
+                            src={thumbSrc}
+                            fallbackText={(product?.name ?? 'P').slice(0, 1).toUpperCase()}
+                          />
                         </div>
                         <div className="checkout-itemContent">
                           <h4>{title}</h4>

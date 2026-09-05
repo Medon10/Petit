@@ -421,6 +421,13 @@
   border: 1px solid var(--checkout-border);
 }
 
+.checkout-thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .checkout-itemContent {
   width: 100%;
   min-width: 0;
