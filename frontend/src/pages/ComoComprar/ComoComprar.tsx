@@ -48,10 +48,10 @@ export default function ComoComprarPage() {
                 <div className="cc-stepContent">
                   <h2 className="cc-stepTitle">Personalizalo</h2>
                   <p>
-                    Muchos de nuestros productos pueden grabarse con un texto a elección: nombres,
-                    fechas, frases o firmas. En la página del producto vas a encontrar el campo para
-                    ingresar la personalización. Si tenés alguna duda sobre qué podés grabar, escribinos
-                    por WhatsApp antes de hacer el pedido.
+                    Nuestros productos se graban con un texto a elección: nombres,
+                    fechas, frases o firmas. Al finalizar el pedido vas a encontrar
+                    una sección que dice "Notas Adicionales" donde debes ingresar
+                    la personalización de todos tus accesorios.
                   </p>
                 </div>
               </div>
@@ -61,8 +61,8 @@ export default function ComoComprarPage() {
                 <div className="cc-stepContent">
                   <h2 className="cc-stepTitle">Agregalo al carrito</h2>
                   <p>
-                    Seleccioná la variante que quieras (por ejemplo, el material o el tamaño si
-                    corresponde) y hacé clic en "Agregar al carrito". Podés seguir comprando y
+                    Seleccioná el producto que quieras y elegí la variante (por ejemplo, el tamaño o el modelo).
+                    Además en algunos podrás agregar extras. Luego hacé clic en "Agregar al carrito". Podés seguir comprando y
                     agregar más productos antes de finalizar.
                   </p>
                 </div>
@@ -73,8 +73,8 @@ export default function ComoComprarPage() {
                 <div className="cc-stepContent">
                   <h2 className="cc-stepTitle">Completá el checkout</h2>
                   <p>
-                    Cuando estés listo, ingresá tu nombre, correo electrónico y la dirección de
-                    envío. Revisá el resumen de tu pedido y confirmá.
+                    Cuando estés listo, ingresá tu nombre, correo electrónico y número de telefono.
+                    Revisá el resumen de tu pedido y confirmá.
                   </p>
                 </div>
               </div>

@@ -184,7 +184,51 @@ export default function HomePage() {
         )}
       </section>
 
-      <section className="ph-section" aria-label="Colecciones">
+      {/* Featured products — Los Más Elegidos */}
+      {featured.length > 0 && (
+        <section className="ph-section" aria-label="Los Más Elegidos">
+          <div className="ph-container">
+            <div className="ph-sectionTitle">
+              <h2 className="ph-h2">Los Más Elegidos 💖</h2>
+              <div className="ph-divider" />
+            </div>
+            <div className="ph-gridProducts">
+              {featured.map((p) => {
+                const responsive = toResponsiveImage(p.imageUrl);
+                const img = responsive.src ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
+                const min = (p.variants || []).reduce<number | undefined>((acc, v) => {
+                  const n = Number.parseFloat(String(v.price));
+                  return Number.isFinite(n) ? (acc == null ? n : Math.min(acc, n)) : acc;
+                }, undefined);
+                const priceLabel = min != null ? formatMoney(min) : undefined;
+                return (
+                  <Link key={p.id} className="ph-productCard" to={`/productos/${p.id}`}>
+                    <div className="ph-productMedia">
+                      <img
+                        className="ph-productImg"
+                        src={img}
+                        srcSet={responsive.srcSet}
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                        alt={p.name}
+                        loading="lazy"
+                      />
+                      <div className="ph-productCTA" aria-hidden="true">
+                        <span className="material-symbols-outlined">shopping_bag</span>
+                      </div>
+                    </div>
+                    <div className="ph-productText">
+                      <h3 className="ph-productName">{p.name}</h3>
+                      {priceLabel ? <p className="ph-price">{priceLabel}</p> : null}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="ph-section ph-sectionTopBorder" aria-label="Colecciones">
         <div className="ph-container">
           <div className="ph-sectionTitle">
             <h2 className="ph-h2">Colecciones</h2>
@@ -276,50 +320,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Featured products */}
-      {featured.length > 0 && (
-        <section className="ph-section ph-sectionTopBorder" aria-label="Los Más Elegidos">
-          <div className="ph-container">
-            <div className="ph-sectionTitle">
-              <h2 className="ph-h2">Los Más Elegidos 💖</h2>
-              <div className="ph-divider" />
-            </div>
-            <div className="ph-gridProducts">
-              {featured.map((p) => {
-                const responsive = toResponsiveImage(p.imageUrl);
-                const img = responsive.src ?? toAbsoluteUrl(`/images/products/${p.id}.jpg`);
-                const min = (p.variants || []).reduce<number | undefined>((acc, v) => {
-                  const n = Number.parseFloat(String(v.price));
-                  return Number.isFinite(n) ? (acc == null ? n : Math.min(acc, n)) : acc;
-                }, undefined);
-                const priceLabel = min != null ? formatMoney(min) : undefined;
-                return (
-                  <Link key={p.id} className="ph-productCard" to={`/productos/${p.id}`}>
-                    <div className="ph-productMedia">
-                      <img
-                        className="ph-productImg"
-                        src={img}
-                        srcSet={responsive.srcSet}
-                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                        alt={p.name}
-                        loading="lazy"
-                      />
-                      <div className="ph-productCTA" aria-hidden="true">
-                        <span className="material-symbols-outlined">shopping_bag</span>
-                      </div>
-                    </div>
-                    <div className="ph-productText">
-                      <h3 className="ph-productName">{p.name}</h3>
-                      {priceLabel ? <p className="ph-price">{priceLabel}</p> : null}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Trust badges */}
       <section className="ph-trustSection" aria-label="Beneficios">
