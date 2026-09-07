@@ -25,21 +25,45 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
     rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Alkalami&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
     rel="stylesheet" />
 </head>
 
 <body style="background:#fff;margin:0">
-  <div id="root" style="opacity:0;transition:opacity .15s ease"></div>
+  <div id="root" style="opacity:0;transition:opacity .2s ease"></div>
   <script type="module" src="/src/main.tsx"></script>
   <script>
-    // Reveal the app once React has rendered (prevents flash of unstyled content)
-    new MutationObserver(function(m,o){
-      var r=document.getElementById('root');
-      if(r&&r.children.length){r.style.opacity='1';o.disconnect()}
-    }).observe(document.getElementById('root'),{childList:true});
-    // Fallback: reveal after 1.5s even if mutation observer fails
-    setTimeout(function(){var r=document.getElementById('root');if(r)r.style.opacity='1'},1500);
+    // Reveal the app once React has rendered AND fonts are loaded
+    // (prevents flash of icon text like "shopping_bag", "menu", etc.)
+    (function(){
+      var revealed=false;
+      function reveal(){
+        if(revealed)return;
+        revealed=true;
+        var r=document.getElementById('root');
+        if(r)r.style.opacity='1';
+      }
+      var rendered=false;
+      new MutationObserver(function(m,o){
+        var r=document.getElementById('root');
+        if(r&&r.children.length){
+          rendered=true;
+          o.disconnect();
+          // Wait for fonts (especially Material Symbols) before showing
+          if(document.fonts&&document.fonts.ready){
+            document.fonts.ready.then(reveal);
+          }else{
+            reveal();
+          }
+        }
+      }).observe(document.getElementById('root'),{childList:true});
+      // Also listen for fonts ready in case they load after render
+      if(document.fonts&&document.fonts.ready){
+        document.fonts.ready.then(function(){if(rendered)reveal()});
+      }
+      // Fallback: reveal after 3s no matter what
+      setTimeout(reveal,3000);
+    })();
   </script>
 </body>
 

@@ -49,7 +49,7 @@ export default function ComoComprarPage() {
                   <h2 className="cc-stepTitle">Personalizalo</h2>
                   <p>
                     Nuestros productos se graban con un texto a elección: nombres,
-                    fechas, frases o firmas. Al finalizar el pedido vas a encontrar
+                    fechas, frases, firmas, etc. Al finalizar el pedido vas a encontrar
                     una sección que dice "Notas Adicionales" donde debes ingresar
                     la personalización de todos tus accesorios.
                   </p>

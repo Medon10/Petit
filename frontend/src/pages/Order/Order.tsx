@@ -38,7 +38,7 @@ export default function OrderPage() {
 
   const bankAlias = 'Pinocho.petitmp';
   const bankHolder = 'Julieta Medon';
-  const whatsappNumber = String((import.meta as any).env?.VITE_WHATSAPP_NUMBER || '5491100000000').replace(/\D/g, '');
+  const whatsappNumber = String((import.meta as any).env?.VITE_WHATSAPP_NUMBER || '5492473417518').replace(/\D/g, '');
 
   const whatsappText = encodeURIComponent(
     `Hola! Acabo de realizar un pedido por la página, coordinamos por acá los detalles de grabado y diseño?.`
