@@ -2,6 +2,15 @@
 <html lang="es">
 
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NK3E0WTPE6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-NK3E0WTPE6');
+  </script>
   <meta charset="UTF-8" />
   <link rel="icon" href="/PetitIcon.jpg" />
   <link rel="apple-touch-icon" href="/PetitIcon.jpg" />
@@ -14,7 +23,7 @@
   <meta property="og:site_name" content="Petit Accesorios" />
   <meta property="og:locale" content="es_AR" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://petitaccesorios.com.ar/PetitIcon.jpg" />
+  <meta property="og:image" content="https://www.petitaccesorios.com.ar/PetitIcon.jpg" />
 
   <!-- Default Twitter Card -->
   <meta name="twitter:card" content="summary" />
@@ -35,34 +44,34 @@
   <script>
     // Reveal the app once React has rendered AND fonts are loaded
     // (prevents flash of icon text like "shopping_bag", "menu", etc.)
-    (function(){
-      var revealed=false;
-      function reveal(){
-        if(revealed)return;
-        revealed=true;
-        var r=document.getElementById('root');
-        if(r)r.style.opacity='1';
+    (function () {
+      var revealed = false;
+      function reveal() {
+        if (revealed) return;
+        revealed = true;
+        var r = document.getElementById('root');
+        if (r) r.style.opacity = '1';
       }
-      var rendered=false;
-      new MutationObserver(function(m,o){
-        var r=document.getElementById('root');
-        if(r&&r.children.length){
-          rendered=true;
+      var rendered = false;
+      new MutationObserver(function (m, o) {
+        var r = document.getElementById('root');
+        if (r && r.children.length) {
+          rendered = true;
           o.disconnect();
           // Wait for fonts (especially Material Symbols) before showing
-          if(document.fonts&&document.fonts.ready){
+          if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(reveal);
-          }else{
+          } else {
             reveal();
           }
         }
-      }).observe(document.getElementById('root'),{childList:true});
+      }).observe(document.getElementById('root'), { childList: true });
       // Also listen for fonts ready in case they load after render
-      if(document.fonts&&document.fonts.ready){
-        document.fonts.ready.then(function(){if(rendered)reveal()});
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () { if (rendered) reveal() });
       }
       // Fallback: reveal after 3s no matter what
-      setTimeout(reveal,3000);
+      setTimeout(reveal, 3000);
     })();
   </script>
 </body>
