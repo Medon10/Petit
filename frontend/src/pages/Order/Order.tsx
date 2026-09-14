@@ -41,7 +41,7 @@ export default function OrderPage() {
   const whatsappNumber = String((import.meta as any).env?.VITE_WHATSAPP_NUMBER || '5492473417518').replace(/\D/g, '');
 
   const whatsappText = encodeURIComponent(
-    `Hola! Acabo de realizar un pedido por la página, coordinamos por acá los detalles de grabado y diseño?.`
+    `Hola! Acabo de realizar un pedido por la página`
   );
   const whatsappHref = `https://wa.me/${whatsappNumber}?text=${whatsappText}`;
 
