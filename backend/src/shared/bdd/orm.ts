@@ -15,6 +15,9 @@ import { Order } from '../../order/order.entity.js';
 import { OrderItem } from '../../order-item/order-item.entity.js';
 import { OrderItemExtra } from '../../order-item-extra/order-item-extra.entity.js';
 import { Review } from '../../review/review.entity.js';
+import { Supplier } from '../../supplier/supplier.entity.js';
+import { Expense } from '../../expense/expense.entity.js';
+import { ExpenseItem } from '../../expense/expense-item.entity.js';
 
 function buildClientUrlFromEnv() {
     // 1. Buscamos primero DATABASE_URL (Railway/Neon) o DB_URL
@@ -41,8 +44,8 @@ const dbSslEnabled = String(process.env.DB_SSL || '').toLowerCase() === 'true' |
 const dbSslRejectUnauthorized = String(process.env.DB_SSL_REJECT_UNAUTHORIZED || 'true').toLowerCase() !== 'false';
 
 export const orm = await MikroORM.init({
-    entities: [Category, Product, Variant, Extra, ExtraScope, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review],
-    entitiesTs: [Category, Product, Variant, Extra, ExtraScope, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review],
+    entities: [Category, Product, Variant, Extra, ExtraScope, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review, Supplier, Expense, ExpenseItem],
+    entitiesTs: [Category, Product, Variant, Extra, ExtraScope, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review, Supplier, Expense, ExpenseItem],
     driver: PostgreSqlDriver,
     clientUrl: buildClientUrlFromEnv(),
     driverOptions: dbSslEnabled

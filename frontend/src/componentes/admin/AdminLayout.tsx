@@ -27,6 +27,10 @@ export default function AdminLayout({ children }: Props) {
         </div>
 
         <nav className="adm-nav">
+          <NavLink className={({ isActive }) => `adm-navLink${isActive ? ' active' : ''}`} to="/admin/estadisticas">
+            <span className="material-symbols-outlined" aria-hidden="true">insights</span>
+            Estadísticas
+          </NavLink>
           <NavLink className={({ isActive }) => `adm-navLink${isActive ? ' active' : ''}`} to="/admin/catalogo" end>
             <span className="material-symbols-outlined" aria-hidden="true">inventory_2</span>
             Catálogo
@@ -34,6 +38,10 @@ export default function AdminLayout({ children }: Props) {
           <NavLink className={({ isActive }) => `adm-navLink${isActive ? ' active' : ''}`} to="/admin/pedidos">
             <span className="material-symbols-outlined" aria-hidden="true">receipt_long</span>
             Pedidos
+          </NavLink>
+          <NavLink className={({ isActive }) => `adm-navLink${isActive ? ' active' : ''}`} to="/admin/gastos">
+            <span className="material-symbols-outlined" aria-hidden="true">payments</span>
+            Gastos
           </NavLink>
         </nav>
 

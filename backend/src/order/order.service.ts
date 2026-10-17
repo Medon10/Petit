@@ -245,7 +245,20 @@ export async function updateOrderStatus(id: number, status: string) {
   const em = orm.em.fork();
   const order = await em.findOne(Order as any, { id });
   if (!order) return null;
-  (order as any).status = status;
+  const o = order as any;
+  o.status = status;
+
+  // Fecha de ingreso (paid_at): primera vez que el pedido pasa a processing/completed.
+  const now = new Date();
+  if ((status === 'processing' || status === 'completed') && !o.paidAt) o.paidAt = now;
+  if (status === 'pending') o.paidAt = null;
+  // Fecha de finalización.
+  if (status === 'completed') {
+    if (!o.completedAt) o.completedAt = now;
+  } else {
+    o.completedAt = null;
+  }
+
   await em.flush();
   return await OrderRepository.populateOrder(em, id);
 }

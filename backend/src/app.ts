@@ -20,6 +20,8 @@ import { orderRouter } from './order/order.routes.js';
 import { orderItemRouter } from './order-item/order-item.routes.js';
 import { orderItemExtraRouter } from './order-item-extra/order-item-extra.routes.js';
 import { reviewRouter } from './review/review.routes.js';
+import { expenseRouter, supplierRouter } from './expense/expense.routes.js';
+import { statsRouter } from './stats/stats.routes.js';
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -103,6 +105,9 @@ app.use((req, res, next) => {
 
 app.use('/admin/auth', adminAuthRouter);
 app.use('/admin/catalog', adminCatalogRouter);
+app.use('/admin/expenses', expenseRouter);
+app.use('/admin/suppliers', supplierRouter);
+app.use('/admin/stats', statsRouter);
 app.use('/categories', categoryRouter);
 app.use('/products', productRouter);
 app.use('/variants', variantRouter);

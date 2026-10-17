@@ -96,7 +96,7 @@ export function toResponsiveImage(pathOrUrl?: string | null) {
   };
 }
 
-function buildQuery(params: Record<string, string | number | boolean | undefined | null>) {
+export function buildQuery(params: Record<string, string | number | boolean | undefined | null>) {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null) continue;
@@ -146,7 +146,7 @@ export function clearAdminToken() {
   localStorage.removeItem(ADMIN_TOKEN_KEY);
 }
 
-async function adminRequestJson<T>(path: string, options: { method: string; body?: unknown }): Promise<T> {
+export async function adminRequestJson<T>(path: string, options: { method: string; body?: unknown }): Promise<T> {
   const base = apiBase().replace(/\/$/, '');
   const token = getAdminToken();
   const res = await fetch(`${base}${path}`, {

@@ -64,6 +64,14 @@ export class Order extends BaseEntity {
   @Property({ fieldName: 'updated_at', type: 'datetime', nullable: true, onUpdate: () => new Date() })
   updatedAt?: Date;
 
+  /** Fecha de ingreso: primera vez que el pedido pasó a `processing` o `completed`. */
+  @Property({ fieldName: 'paid_at', type: 'datetime', nullable: true })
+  paidAt?: Date | null;
+
+  /** Fecha en que el pedido pasó a `completed`. */
+  @Property({ fieldName: 'completed_at', type: 'datetime', nullable: true })
+  completedAt?: Date | null;
+
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: [Cascade.ALL] })
   items = new Collection<OrderItem>(this);
 }

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import CategoriesPage from './pages/Categories/Categories'
@@ -8,9 +9,12 @@ import HomePage from './pages/Home/Home'
 import OrderPage from './pages/Order/Order'
 import ProductPage from './pages/Product/Product'
 import CartDrawer from './componentes/cart/CartDrawer'
-import AdminLoginPage from './pages/AdminLogin/AdminLogin'
-import AdminCatalogPage from './pages/AdminCatalog/AdminCatalog'
-import AdminOrdersPage from './pages/AdminOrders/AdminOrders'
+// Panel admin: se carga bajo demanda para no sumar peso a la tienda pública.
+const AdminLoginPage = lazy(() => import('./pages/AdminLogin/AdminLogin'))
+const AdminCatalogPage = lazy(() => import('./pages/AdminCatalog/AdminCatalog'))
+const AdminOrdersPage = lazy(() => import('./pages/AdminOrders/AdminOrders'))
+const AdminStatsPage = lazy(() => import('./pages/AdminStats/AdminStats'))
+const AdminExpensesPage = lazy(() => import('./pages/AdminExpenses/AdminExpenses'))
 import ProtectedAdminRoute from './shared/ProtectedAdminRoute'
 import WhatsAppButton from './componentes/WhatsAppButton/WhatsAppButton'
 import QuienesSomosPage from './pages/QuienesSomos/QuienesSomos'
@@ -23,6 +27,7 @@ function App() {
     <BrowserRouter>
       <CartDrawer />
       <WhatsAppButton />
+      <Suspense fallback={null}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/categorias" element={<CategoriesPage />} />
@@ -39,8 +44,11 @@ function App() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/catalogo" element={<ProtectedAdminRoute><AdminCatalogPage /></ProtectedAdminRoute>} />
         <Route path="/admin/pedidos" element={<ProtectedAdminRoute><AdminOrdersPage /></ProtectedAdminRoute>} />
+        <Route path="/admin/estadisticas" element={<ProtectedAdminRoute><AdminStatsPage /></ProtectedAdminRoute>} />
+        <Route path="/admin/gastos" element={<ProtectedAdminRoute><AdminExpensesPage /></ProtectedAdminRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }

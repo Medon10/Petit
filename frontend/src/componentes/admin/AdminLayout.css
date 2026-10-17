@@ -231,6 +231,12 @@
   background: #fafafa;
 }
 
+.adm-table .adm-num,
+.adm-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
 .adm-badge {
   display: inline-flex;
   padding: 3px 10px;
