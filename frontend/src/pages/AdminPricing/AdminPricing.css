@@ -1,0 +1,553 @@
+/* ── Admin Precios y Márgenes ────────────────────────────── */
+
+.adm-prHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.adm-prTitle h1 {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.adm-prTitle p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* KPIs Header Cards */
+.adm-prKpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.adm-prKpiCard {
+  background: #ffffff;
+  border: 1px solid #f0e6ec;
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.adm-prKpiLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.adm-prKpiValue {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #111827;
+}
+
+.adm-prKpiSub {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.adm-prKpiCard.healthy .adm-prKpiValue {
+  color: #059669;
+}
+
+.adm-prKpiCard.warning .adm-prKpiValue {
+  color: #d97706;
+}
+
+.adm-prKpiCard.critical .adm-prKpiValue {
+  color: #dc2626;
+}
+
+/* Filter Toolbar */
+.adm-prToolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.adm-prSearchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.adm-prSearchBox {
+  flex: 1;
+  min-width: 260px;
+  max-width: 440px;
+  position: relative;
+}
+
+.adm-prFilterPillsGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.adm-prPillLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  margin-right: 4px;
+}
+
+.adm-prPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 140ms ease;
+  user-select: none;
+}
+
+.adm-prPill:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.adm-prPill.active {
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
+}
+
+.adm-prPill.active .adm-prPillCount {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.adm-prPillCount {
+  display: inline-block;
+  padding: 1px 6px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+/* Clean Table */
+.adm-prTableWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+}
+
+.adm-prTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: #374151;
+}
+
+.adm-prTable th {
+  background: #fafaf9;
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  text-align: left;
+  border-bottom: 1px solid #f0e6ec;
+  white-space: nowrap;
+}
+
+.adm-prTable td {
+  padding: 14px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.adm-prTable tr:hover td {
+  background: #fafafa;
+}
+
+/* Product Info Cell */
+.adm-prProdCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.adm-prProdThumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #e5e7eb;
+}
+
+.adm-prProdFallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #fdf2f8;
+  color: #db2777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  border: 1px solid #fbcfe8;
+}
+
+.adm-prProdMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.adm-prProdName {
+  font-weight: 700;
+  color: #111827;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.adm-prVariantName {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.adm-prBadgesRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.adm-prCatBadge {
+  display: inline-block;
+  padding: 1px 7px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.adm-prSupplyBadge {
+  display: inline-block;
+  padding: 1px 7px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+/* Cost Breakdown Cell */
+.adm-prCostTotal {
+  font-size: 14px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 3px;
+}
+
+.adm-prCostChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 6px;
+  font-size: 10.5px;
+  color: #71717a;
+}
+
+.adm-prCostChip {
+  white-space: nowrap;
+}
+
+/* Price Cell */
+.adm-prPrice {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+}
+
+/* Suggested Prices Cell */
+.adm-prSuggested {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11.5px;
+}
+
+.adm-prSuggRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #4b5563;
+}
+
+.adm-prSuggRow strong {
+  color: #111827;
+}
+
+/* Margin and Status Badge */
+.adm-prProfit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.adm-prProfitNum {
+  font-size: 14px;
+  font-weight: 800;
+  color: #059669;
+}
+
+.adm-prMarginBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.adm-prMarginBadge.healthy {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.adm-prMarginBadge.warning {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.adm-prMarginBadge.critical {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Modal styling */
+.adm-prModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.adm-prModal {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: admModalFadeIn 180ms ease-out;
+}
+
+@keyframes admModalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.adm-prModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #f0e6ec;
+}
+
+.adm-prModalHeader h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.adm-prModalBody {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.adm-prModalBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  border-radius: 10px;
+}
+
+.adm-prModalBannerMeta h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: #831843;
+}
+
+.adm-prModalBannerMeta span {
+  font-size: 12px;
+  color: #9d174d;
+}
+
+.adm-prCostGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.adm-prField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.adm-prField label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4b5563;
+}
+
+.adm-prField input,
+.adm-prField select,
+.adm-prField textarea {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #111827;
+  background: #ffffff;
+  transition: border-color 150ms;
+}
+
+.adm-prField textarea {
+  height: 60px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.adm-prField input:focus,
+.adm-prField select:focus,
+.adm-prField textarea:focus {
+  outline: none;
+  border-color: #db2777;
+  box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.12);
+}
+
+/* Simulator Live Card */
+.adm-prSimulator {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adm-prSimTitle {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #64748b;
+}
+
+.adm-prSimMetrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.adm-prSimItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.adm-prSimItemLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.adm-prSimItemValue {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.adm-prModalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 14px 24px;
+  border-top: 1px solid #f0e6ec;
+  background: #fafaf9;
+  border-radius: 0 0 16px 16px;
+}
+
+/* Tablet adjustments */
+@media (max-width: 900px) {
+  .adm-prTable th,
+  .adm-prTable td {
+    padding: 10px 12px;
+  }
+
+  .adm-prProdCell {
+    min-width: 180px;
+  }
+}
