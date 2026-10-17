@@ -4,6 +4,8 @@ import { Order, ShippingMethod } from './order.entity.js';
 import { OrderItem } from '../order-item/order-item.entity.js';
 import { OrderItemExtra } from '../order-item-extra/order-item-extra.entity.js';
 import { OrderRepository } from './order.repository.js';
+import { VariantComponent } from '../supply/variant-component.entity.js';
+import { StockMovement, StockMovementType } from '../supply/stock-movement.entity.js';
 
 export type OrderItemExtraInput = {
   extra_id?: number;
@@ -243,7 +245,7 @@ export async function updateOrderStatus(id: number, status: string) {
     throw new Error(`Estado inválido: ${status}. Valores válidos: ${VALID_STATUSES.join(', ')}`);
   }
   const em = orm.em.fork();
-  const order = await em.findOne(Order as any, { id });
+  const order = await em.findOne(Order as any, { id }, { populate: ['items', 'items.variant'] as any } as any);
   if (!order) return null;
   const o = order as any;
   o.status = status;
@@ -257,6 +259,55 @@ export async function updateOrderStatus(id: number, status: string) {
     if (!o.completedAt) o.completedAt = now;
   } else {
     o.completedAt = null;
+  }
+
+  // Descuento / Reversión de Stock:
+  // Se descuenta cuando entra a 'processing' (o 'completed' directo) si no fue aplicado antes.
+  if ((status === 'processing' || status === 'completed') && !o.stockAppliedAt) {
+    const items = o.items?.getItems?.() || [];
+    for (const item of items) {
+      if (!item.variant?.id) continue;
+      const component = (await em.findOne(
+        VariantComponent as any,
+        { variant: item.variant.id },
+        { populate: ['supply'] as any } as any
+      )) as any;
+      if (component && component.supply) {
+        const supply = component.supply;
+        const qtyToDeduct = (Number(component.quantity) || 1) * (Number(item.quantity) || 1);
+        supply.stock = Number(supply.stock) - qtyToDeduct;
+        em.create(StockMovement as any, {
+          supply,
+          delta: -qtyToDeduct,
+          type: StockMovementType.SALE,
+          order: o,
+          note: `Pedido #${o.id} (${item.productName} - ${item.variantName || 'Estándar'} x${item.quantity})`,
+        });
+      }
+    }
+    o.stockAppliedAt = now;
+  } else if (status === 'cancelled' && o.stockAppliedAt) {
+    // Si se cancela y se había descontado el stock, revertir exactamente los movimientos de venta de esta orden:
+    const prevSales = await em.find(
+      StockMovement as any,
+      { order: o.id, type: StockMovementType.SALE },
+      { populate: ['supply'] as any } as any
+    );
+    for (const mov of prevSales) {
+      if ((mov as any).supply) {
+        const supply = (mov as any).supply;
+        const qtyToRestore = Math.abs(Number((mov as any).delta));
+        supply.stock = Number(supply.stock) + qtyToRestore;
+        em.create(StockMovement as any, {
+          supply,
+          delta: qtyToRestore,
+          type: StockMovementType.SALE_REVERSAL,
+          order: o,
+          note: `Cancelación de Pedido #${o.id}`,
+        });
+      }
+    }
+    o.stockAppliedAt = null;
   }
 
   await em.flush();

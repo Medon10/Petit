@@ -22,6 +22,7 @@ import { orderItemExtraRouter } from './order-item-extra/order-item-extra.routes
 import { reviewRouter } from './review/review.routes.js';
 import { expenseRouter, supplierRouter } from './expense/expense.routes.js';
 import { statsRouter } from './stats/stats.routes.js';
+import { supplyRouter, variantComponentRouter } from './supply/supply.routes.js';
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -108,6 +109,8 @@ app.use('/admin/catalog', adminCatalogRouter);
 app.use('/admin/expenses', expenseRouter);
 app.use('/admin/suppliers', supplierRouter);
 app.use('/admin/stats', statsRouter);
+app.use('/admin/supplies', supplyRouter);
+app.use('/admin/variants-components', variantComponentRouter);
 app.use('/categories', categoryRouter);
 app.use('/products', productRouter);
 app.use('/variants', variantRouter);

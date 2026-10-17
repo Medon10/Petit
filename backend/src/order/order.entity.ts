@@ -72,6 +72,10 @@ export class Order extends BaseEntity {
   @Property({ fieldName: 'completed_at', type: 'datetime', nullable: true })
   completedAt?: Date | null;
 
+  /** Fecha en que se aplicó el descuento de stock (processing/completed). */
+  @Property({ fieldName: 'stock_applied_at', type: 'datetime', nullable: true })
+  stockAppliedAt?: Date | null;
+
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: [Cascade.ALL] })
   items = new Collection<OrderItem>(this);
 }

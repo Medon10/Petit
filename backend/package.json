@@ -11,6 +11,7 @@
     "db:schema:dump": "npm run build && node ./dist/scripts/schema-diff.js --dump",
     "db:schema:sync": "npm run build && node ./dist/scripts/schema-diff.js --run",
     "db:seed:expenses": "npm run build && node ./dist/scripts/seed-expenses-2026.js",
+    "db:seed:supplies": "npm run build && node ./dist/scripts/seed-supplies.js",
     "images:migrate:dry": "npm run build && node ./dist/scripts/migrate-uploads-to-webp.js",
     "images:migrate": "npm run build && node ./dist/scripts/migrate-uploads-to-webp.js --apply-db"
   },

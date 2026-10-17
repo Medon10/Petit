@@ -41,6 +41,12 @@ import {
   type ExtraDto,
   type ReviewDto,
 } from '../../shared/api';
+import {
+  fetchSupplies,
+  fetchAllVariantComponents,
+  setVariantComponent,
+  type SupplyDto,
+} from '../../shared/adminInventoryApi';
 import '../../componentes/admin/AdminLayout.css';
 import './AdminCatalog.css';
 
@@ -787,6 +793,10 @@ function VariantsTab() {
   const onAuthErr = useAuthRedirect();
   const [products, setProducts] = useState<ProductDto[]>([]);
   const [items, setItems] = useState<VariantDto[]>([]);
+  const [supplies, setSupplies] = useState<SupplyDto[]>([]);
+  const [mappings, setMappings] = useState<
+    Record<number, { supplyId: number; supplyCode: string; supplyName: string; quantity: number }>
+  >({});
   const [selectedProduct, setSelectedProduct] = useState('');
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<'create' | 'edit' | null>(null);
@@ -795,6 +805,8 @@ function VariantsTab() {
   const [vPrice, setVPrice] = useState('');
   const [vImageUrl, setVImageUrl] = useState('');
   const [vProduct, setVProduct] = useState('');
+  const [vSupplyId, setVSupplyId] = useState('');
+  const [vSupplyQty, setVSupplyQty] = useState('1');
   const [vActive, setVActive] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -807,6 +819,23 @@ function VariantsTab() {
     try { setProducts(await adminGetProducts()); } catch (e: any) { onAuthErr(e); }
   }, [onAuthErr]);
 
+  const loadSuppliesAndMappings = useCallback(async () => {
+    try {
+      const [suppliesRes, mapRes] = await Promise.all([
+        fetchSupplies({ limit: 500 }),
+        fetchAllVariantComponents(),
+      ]);
+      setSupplies(suppliesRes.data);
+      const mapDict: Record<number, { supplyId: number; supplyCode: string; supplyName: string; quantity: number }> = {};
+      for (const m of mapRes.data) {
+        mapDict[m.variantId] = m;
+      }
+      setMappings(mapDict);
+    } catch (e: any) {
+      onAuthErr(e);
+    }
+  }, [onAuthErr]);
+
   const loadVariants = useCallback(async () => {
     try {
       const pid = selectedProduct ? Number(selectedProduct) : undefined;
@@ -815,14 +844,38 @@ function VariantsTab() {
     finally { setLoading(false); }
   }, [selectedProduct, onAuthErr]);
 
-  useEffect(() => { loadProducts(); }, [loadProducts]);
+  useEffect(() => {
+    loadProducts();
+    loadSuppliesAndMappings();
+  }, [loadProducts, loadSuppliesAndMappings]);
+
   useEffect(() => { setLoading(true); loadVariants(); }, [loadVariants]);
 
   function openCreate() {
-    setEditItem(null); setVName(''); setVPrice(''); setVImageUrl(''); setVProduct(selectedProduct); setVActive(true); setError(''); setModal('create');
+    setEditItem(null);
+    setVName('');
+    setVPrice('');
+    setVImageUrl('');
+    setVProduct(selectedProduct);
+    setVSupplyId('');
+    setVSupplyQty('1');
+    setVActive(true);
+    setError('');
+    setModal('create');
   }
+
   function openEdit(v: VariantDto) {
-    setEditItem(v); setVName(v.name); setVPrice(v.price); setVImageUrl(v.imageUrl ?? ''); setVProduct(String(v.product?.id ?? '')); setVActive(v.isActive !== false); setError(''); setModal('edit');
+    setEditItem(v);
+    setVName(v.name);
+    setVPrice(v.price);
+    setVImageUrl(v.imageUrl ?? '');
+    setVProduct(String(v.product?.id ?? ''));
+    const m = mappings[v.id];
+    setVSupplyId(m?.supplyId ? String(m.supplyId) : '');
+    setVSupplyQty(String(m?.quantity || 1));
+    setVActive(v.isActive !== false);
+    setError('');
+    setModal('edit');
   }
 
   function onPickImage(file?: File | null) {
@@ -851,12 +904,25 @@ function VariantsTab() {
     if (!vProduct) { setError('Producto requerido'); return; }
     setSaving(true); setError('');
     try {
+      let variantId = editItem?.id;
       if (modal === 'edit' && editItem) {
         await adminUpdateVariant(editItem.id, { product_id: Number(vProduct), name: vName.trim(), price: vPrice, image_url: vImageUrl || undefined, is_active: vActive });
       } else {
-        await adminCreateVariant({ product_id: Number(vProduct), name: vName.trim(), price: vPrice, image_url: vImageUrl || undefined, is_active: vActive });
+        const res = await adminCreateVariant({ product_id: Number(vProduct), name: vName.trim(), price: vPrice, image_url: vImageUrl || undefined, is_active: vActive });
+        variantId = (res as any)?.data?.id ?? (res as any)?.id;
       }
-      setModal(null); await loadVariants();
+
+      if (variantId) {
+        await setVariantComponent(
+          variantId,
+          vSupplyId ? Number(vSupplyId) : null,
+          Number(vSupplyQty) || 1
+        );
+      }
+
+      setModal(null);
+      await loadVariants();
+      await loadSuppliesAndMappings();
     } catch (e: any) { setError(e?.message || 'Error'); onAuthErr(e); }
     finally { setSaving(false); }
   }
@@ -867,7 +933,7 @@ function VariantsTab() {
 
   async function onDelete(v: VariantDto) {
     if (!confirm(`¿Eliminar variante "${v.name}"?`)) return;
-    try { await adminDeleteVariant(v.id); await loadVariants(); } catch (e: any) { onAuthErr(e); }
+    try { await adminDeleteVariant(v.id); await loadVariants(); await loadSuppliesAndMappings(); } catch (e: any) { onAuthErr(e); }
   }
 
   return (
@@ -896,29 +962,45 @@ function VariantsTab() {
       ) : (
         <div className="adm-card" style={{ padding: 0, overflowX: 'auto' }}>
           <table className="adm-table">
-            <thead><tr><th>Imagen</th><th>Nombre</th><th>Precio</th><th>Producto</th><th>Activa</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Imagen</th><th>Nombre</th><th>Precio</th><th>Producto</th><th>Pieza de Stock</th><th>Activa</th><th>Acciones</th></tr></thead>
             <tbody>
-              {items.map((v) => (
-                <tr key={v.id}>
-                  <td>
-                    {v.imageUrl ? (
-                      <img className="adm-imgThumb" src={toAbsoluteUrl(v.imageUrl)} alt="" />
-                    ) : (
-                      <div className="adm-imgThumb" />
-                    )}
-                  </td>
-                  <td style={{ fontWeight: 700 }}>{v.name}</td>
-                  <td>${v.price}</td>
-                  <td>{v.product?.name ?? '—'}</td>
-                  <td><button className={`adm-toggle ${v.isActive !== false ? 'on' : 'off'}`} onClick={() => onToggle(v)} /></td>
-                  <td>
-                    <div className="adm-actions">
-                      <button className="adm-btnSmall" title="Editar" onClick={() => openEdit(v)}><span className="material-symbols-outlined">edit</span></button>
-                      <button className="adm-btnSmall" title="Eliminar" onClick={() => onDelete(v)}><span className="material-symbols-outlined">delete</span></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {items.map((v) => {
+                const mapInfo = mappings[v.id];
+                return (
+                  <tr key={v.id}>
+                    <td>
+                      {v.imageUrl ? (
+                        <img className="adm-imgThumb" src={toAbsoluteUrl(v.imageUrl)} alt="" />
+                      ) : (
+                        <div className="adm-imgThumb" />
+                      )}
+                    </td>
+                    <td style={{ fontWeight: 700 }}>{v.name}</td>
+                    <td>${v.price}</td>
+                    <td>{v.product?.name ?? '—'}</td>
+                    <td>
+                      {mapInfo ? (
+                        <span
+                          className="adm-codeBadge"
+                          title={`${mapInfo.supplyName} (consume ${mapInfo.quantity} u.)`}
+                        >
+                          {mapInfo.supplyCode}
+                          {mapInfo.quantity > 1 ? ` x${mapInfo.quantity}` : ''}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#9ca3af', fontSize: 12 }}>—</span>
+                      )}
+                    </td>
+                    <td><button className={`adm-toggle ${v.isActive !== false ? 'on' : 'off'}`} onClick={() => onToggle(v)} /></td>
+                    <td>
+                      <div className="adm-actions">
+                        <button className="adm-btnSmall" title="Editar" onClick={() => openEdit(v)}><span className="material-symbols-outlined">edit</span></button>
+                        <button className="adm-btnSmall" title="Eliminar" onClick={() => onDelete(v)}><span className="material-symbols-outlined">delete</span></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -948,6 +1030,44 @@ function VariantsTab() {
                   <label className="adm-label">Precio</label>
                   <input className="adm-input" type="number" step="0.01" value={vPrice} onChange={(e) => setVPrice(e.target.value)} />
                 </div>
+
+                <div className="adm-field" style={{ padding: '12px', background: '#faf5f8', borderRadius: 10, border: '1px solid #f3d8e5' }}>
+                  <label className="adm-label" style={{ color: '#831843', fontWeight: 700 }}>
+                    Pieza de stock vinculada (opcional)
+                  </label>
+                  <select
+                    className="adm-select"
+                    value={vSupplyId}
+                    onChange={(e) => setVSupplyId(e.target.value)}
+                  >
+                    <option value="">Sin control de stock (no descuenta piezas)</option>
+                    {supplies.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.code} - {s.name} (Stock: {s.stock} u.)
+                      </option>
+                    ))}
+                  </select>
+                  <small style={{ color: '#701a75', fontSize: 11, display: 'block', marginTop: 4 }}>
+                    Al pasar un pedido con esta variante a &quot;En preparación&quot;, se descontará automáticamente el stock de esta pieza.
+                  </small>
+
+                  {vSupplyId && (
+                    <div style={{ marginTop: 10 }}>
+                      <label className="adm-label" style={{ fontSize: 12 }}>
+                        Unidades consumidas por cada producto vendido:
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        className="adm-input"
+                        value={vSupplyQty}
+                        onChange={(e) => setVSupplyQty(e.target.value)}
+                        style={{ maxWidth: 120, background: '#fff' }}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <div className="adm-field">
                   <label className="adm-label">Imagen de variante</label>
                   <div className="adm-uploadArea">
