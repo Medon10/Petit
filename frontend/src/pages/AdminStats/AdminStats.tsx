@@ -162,7 +162,7 @@ export default function AdminStatsPage() {
           <strong className="adm-statValue">{formatMoney(cur?.inversion ?? 0)}</strong>
           <Delta cur={cur?.inversion ?? 0} prev={prev?.inversion ?? 0} inverse />
         </div>
-        <div className="adm-card adm-statCard adm-statCardMain">
+        <div className="adm-card adm-statCard">
           <span className="adm-statLabel">Ganancia neta</span>
           <strong className={`adm-statValue ${(cur?.gananciaNeta ?? 0) < 0 ? 'neg' : ''}`}>{formatMoney(cur?.gananciaNeta ?? 0)}</strong>
           <Delta cur={cur?.gananciaNeta ?? 0} prev={prev?.gananciaNeta ?? 0} />
@@ -189,6 +189,9 @@ export default function AdminStatsPage() {
 
       <div className="adm-card">
         <h2 className="adm-cardTitle">Ingresos vs gastos · {year}</h2>
+        <p style={{ margin: '-10px 0 16px', fontSize: '13px', color: '#71717a' }}>
+          Verde: cobros por pedidos · Rosa: compras e insumos · Línea negra: resultado neto mensual.
+        </p>
         <div className="adm-statChart">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>

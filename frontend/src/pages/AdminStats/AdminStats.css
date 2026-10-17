@@ -32,16 +32,6 @@
   margin-bottom: 0;
 }
 
-.adm-statCardMain {
-  background: linear-gradient(135deg, #111 0%, #2a1020 100%);
-  border-color: #111;
-  color: #fff;
-}
-
-.adm-statCardMain .adm-statLabel {
-  color: rgba(255, 255, 255, 0.6);
-}
-
 .adm-statLabel {
   font-size: 11px;
   font-weight: 800;
@@ -77,14 +67,6 @@
 .adm-statDelta.neutral {
   color: #a1a1aa;
   font-weight: 600;
-}
-
-.adm-statCardMain .adm-statDelta.good {
-  color: #4ade80;
-}
-
-.adm-statCardMain .adm-statDelta.bad {
-  color: #fca5a5;
 }
 
 .adm-statMini {
