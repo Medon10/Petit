@@ -317,7 +317,7 @@ export default function AdminInventoryPage() {
               checked={lowStockOnly}
               onChange={(e) => setLowStockOnly(e.target.checked)}
             />
-            Solo stock bajo / alerta
+            Solo stock bajo
           </label>
         </div>
         {(search || lowStockOnly) && (
@@ -356,7 +356,6 @@ export default function AdminInventoryPage() {
                 <th style={{ width: 90 }}>Código</th>
                 <th>Pieza</th>
                 <th style={{ width: 140 }}>Stock Actual</th>
-                <th style={{ width: 100 }}>Punto Pedido</th>
                 <th>Variantes vinculadas</th>
                 <th style={{ width: 90 }}>Estado</th>
                 <th style={{ width: 140, textAlign: 'right' }}>Acciones</th>
@@ -383,7 +382,7 @@ export default function AdminInventoryPage() {
                           isCritical
                             ? 'Stock en cero o negativo (demanda sin reposición)'
                             : isLow
-                              ? 'Stock por debajo del umbral mínimo'
+                              ? `Stock bajo (umbral: ${item.lowStockThreshold} u.)`
                               : 'Stock saludable'
                         }
                       >
@@ -392,9 +391,6 @@ export default function AdminInventoryPage() {
                         </span>
                         {item.stock} u.
                       </span>
-                    </td>
-                    <td style={{ color: '#6b7280', fontSize: 13 }}>
-                      ≤ {item.lowStockThreshold} u.
                     </td>
                     <td>
                       {item.linkedVariants.length > 0 ? (

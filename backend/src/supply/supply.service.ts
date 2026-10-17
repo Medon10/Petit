@@ -31,40 +31,30 @@ export type StockAdjustInput = {
 
 export async function listSupplies(params: { q?: unknown; low_stock_only?: unknown; lowStockOnly?: unknown; page?: unknown; limit?: unknown }) {
   const em = orm.em.fork();
-  const where: any = {};
-  const and: any[] = [];
+  const qb = em.createQueryBuilder(Supply as any, 's');
 
   const q = String(params.q ?? '').trim();
   if (q) {
-    and.push({
-      $or: [
-        { code: { $ilike: `%${q}%` } },
-        { name: { $ilike: `%${q}%` } },
-      ],
-    });
+    qb.andWhere('(s.code ILIKE ? OR s.name ILIKE ?)', [`%${q}%`, `%${q}%`]);
   }
 
   const lowStock = String(params.low_stock_only ?? params.lowStockOnly ?? '').toLowerCase();
   if (lowStock === 'true' || lowStock === '1') {
-    // stock <= lowStockThreshold
-    and.push({
-      $expr: { $lte: ['$stock', '$low_stock_threshold'] } as any,
-    });
+    qb.andWhere('s.stock <= s.low_stock_threshold');
   }
-
-  if (and.length) where.$and = and;
 
   const limitNum = Number(params.limit);
   const limit = Number.isFinite(limitNum) && limitNum > 0 ? Math.min(limitNum, 500) : 100;
   const pageNum = Number(params.page);
   const page = Number.isFinite(pageNum) && pageNum > 0 ? Math.floor(pageNum) : 1;
 
-  const [rows, total] = await em.findAndCount(Supply as any, where, {
-    populate: ['variantComponents', 'variantComponents.variant', 'variantComponents.variant.product'] as any,
-    orderBy: { code: 'ASC' } as any,
-    limit,
-    offset: (page - 1) * limit,
-  } as any);
+  qb.orderBy({ 's.code': 'ASC' });
+  qb.limit(limit).offset((page - 1) * limit);
+
+  const [rows, total] = await qb.getResultAndCount();
+  if (rows.length > 0) {
+    await em.populate(rows, ['variantComponents', 'variantComponents.variant', 'variantComponents.variant.product'] as any);
+  }
 
   const data = rows.map((s: any) => ({
     id: s.id,
