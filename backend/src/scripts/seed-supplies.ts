@@ -64,21 +64,27 @@ async function main() {
     const em = orm.em.fork();
     let createdCount = 0;
 
+    const startAtZero = process.env.INITIAL_STOCK_ZERO === 'true' || process.env.ZERO_STOCK === 'true';
+    if (startAtZero) {
+      console.log('Modo inicialización en cero activo: todas las piezas comenzarán con stock 0.');
+    }
+
     for (const item of SUPPLIES_DATA) {
       const existing = await em.findOne(Supply as any, { code: item.code });
       if (!existing) {
+        const initialStock = startAtZero ? 0 : item.stock;
         const s = em.create(Supply as any, {
           code: item.code,
           name: item.name,
-          stock: item.stock,
+          stock: initialStock,
           lowStockThreshold: 5,
           isActive: true,
         }) as any;
 
-        if (item.stock > 0) {
+        if (initialStock > 0) {
           em.create(StockMovement as any, {
             supply: s,
-            delta: item.stock,
+            delta: initialStock,
             type: StockMovementType.INITIAL,
             note: 'Stock inicial importado del Excel de control de inventario',
           });

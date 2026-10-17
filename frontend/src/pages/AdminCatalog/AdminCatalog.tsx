@@ -1043,7 +1043,7 @@ function VariantsTab() {
                     <option value="">Sin control de stock (no descuenta piezas)</option>
                     {supplies.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.code} - {s.name} (Stock: {s.stock} u.)
+                        {s.code} - {s.name}
                       </option>
                     ))}
                   </select>

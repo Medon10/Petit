@@ -4,6 +4,7 @@ import { VariantComponent } from './variant-component.entity.js';
 import { StockMovement, StockMovementType } from './stock-movement.entity.js';
 import { Variant } from '../variant/variant.entity.js';
 import { Product } from '../product/product.entity.js';
+import { sendLowStockNotification } from '../shared/mail/low-stock.mail.js';
 
 function inputError(message: string) {
   const err = new Error(message) as Error & { status?: number };
@@ -229,6 +230,20 @@ export async function adjustSupplyStock(id: number, input: StockAdjustInput) {
   });
 
   await em.flush();
+
+  if (s.stock <= s.lowStockThreshold && currentStock > s.lowStockThreshold) {
+    sendLowStockNotification({
+      pieces: [
+        {
+          code: s.code,
+          name: s.name,
+          currentStock: s.stock,
+          threshold: s.lowStockThreshold,
+        },
+      ],
+    }).catch((err) => console.error('[mail] Error enviando alerta stock bajo:', err));
+  }
+
   return await getSupply(id);
 }
 

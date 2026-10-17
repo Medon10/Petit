@@ -64,9 +64,7 @@ export default function AdminInventoryPage() {
   // Modal Ajustar Stock
   const [adjustModalOpen, setAdjustModalOpen] = useState(false);
   const [adjustItem, setAdjustItem] = useState<SupplyDto | null>(null);
-  const [adjustMode, setAdjustMode] = useState<'delta' | 'direct'>('delta');
-  const [deltaValue, setDeltaValue] = useState('');
-  const [directValue, setDirectValue] = useState('');
+  const [targetStock, setTargetStock] = useState('0');
   const [adjustNote, setAdjustNote] = useState('');
   const [adjusting, setAdjusting] = useState(false);
   const [adjustError, setAdjustError] = useState('');
@@ -192,12 +190,17 @@ export default function AdminInventoryPage() {
   // Abrir modal ajuste
   function openAdjustModal(item: SupplyDto) {
     setAdjustItem(item);
-    setAdjustMode('delta');
-    setDeltaValue('');
-    setDirectValue(String(item.stock));
+    setTargetStock(String(item.stock));
     setAdjustNote('');
     setAdjustError('');
     setAdjustModalOpen(true);
+  }
+
+  // Modificar stock con botones +/- del stepper o píldoras rápidas
+  function handleStepChange(step: number) {
+    const current = Number(targetStock);
+    const validCurrent = Number.isInteger(current) ? current : (adjustItem?.stock || 0);
+    setTargetStock(String(validCurrent + step));
   }
 
   // Guardar ajuste
@@ -206,29 +209,24 @@ export default function AdminInventoryPage() {
     if (!adjustItem) return;
     setAdjustError('');
 
-    let payload: { delta?: number; new_stock?: number; note?: string } = {};
-
-    if (adjustMode === 'delta') {
-      const d = Number(deltaValue);
-      if (!deltaValue.trim() || !Number.isInteger(d) || d === 0) {
-        setAdjustError('Ingrese una cantidad válida (+ o -) distinta de cero');
-        return;
-      }
-      payload.delta = d;
-    } else {
-      const ns = Number(directValue);
-      if (!directValue.trim() || !Number.isInteger(ns)) {
-        setAdjustError('Ingrese un número entero para el nuevo conteo de stock');
-        return;
-      }
-      payload.new_stock = ns;
+    const ns = Number(targetStock);
+    if (!targetStock.trim() || !Number.isInteger(ns)) {
+      setAdjustError('Ingrese un número entero válido para el stock');
+      return;
     }
 
-    payload.note = adjustNote.trim() || (adjustMode === 'delta' ? 'Ajuste manual (+/-)' : 'Recuento físico directo');
+    const delta = ns - adjustItem.stock;
+    if (delta === 0) {
+      setAdjustModalOpen(false);
+      return;
+    }
+
+    const defaultNote = delta > 0 ? `Ingreso de stock (+${delta})` : `Ajuste / Salida (${delta})`;
+    const note = adjustNote.trim() || defaultNote;
 
     setAdjusting(true);
     try {
-      await adjustSupplyStock(adjustItem.id, payload);
+      await adjustSupplyStock(adjustItem.id, { new_stock: ns, note });
       setAdjustModalOpen(false);
       await loadData();
     } catch (err: any) {
@@ -255,16 +253,10 @@ export default function AdminInventoryPage() {
     }
   }
 
-  // Cálculo preview en modal ajuste
-  const previewStock = useMemo(() => {
-    if (!adjustItem) return 0;
-    if (adjustMode === 'direct') {
-      const n = Number(directValue);
-      return Number.isInteger(n) ? n : adjustItem.stock;
-    }
-    const d = Number(deltaValue);
-    return Number.isInteger(d) ? adjustItem.stock + d : adjustItem.stock;
-  }, [adjustItem, adjustMode, deltaValue, directValue]);
+  // Diferencia calculada en tiempo real
+  const targetStockNum = Number(targetStock);
+  const isValidStockNum = targetStock.trim() !== '' && Number.isInteger(targetStockNum);
+  const deltaCalc = adjustItem && isValidStockNum ? targetStockNum - adjustItem.stock : 0;
 
   return (
     <AdminLayout>
@@ -364,7 +356,7 @@ export default function AdminInventoryPage() {
                 <th style={{ width: 90 }}>Código</th>
                 <th>Pieza</th>
                 <th style={{ width: 140 }}>Stock Actual</th>
-                <th style={{ width: 100 }}>Umbral</th>
+                <th style={{ width: 100 }}>Punto Pedido</th>
                 <th>Variantes vinculadas</th>
                 <th style={{ width: 90 }}>Estado</th>
                 <th style={{ width: 140, textAlign: 'right' }}>Acciones</th>
@@ -385,15 +377,14 @@ export default function AdminInventoryPage() {
                     </td>
                     <td>
                       <span
-                        className={`adm-stockNumber ${
-                          isCritical ? 'critical' : isLow ? 'low' : 'good'
-                        }`}
+                        className={`adm-stockNumber ${isCritical ? 'critical' : isLow ? 'low' : 'good'
+                          }`}
                         title={
                           isCritical
                             ? 'Stock en cero o negativo (demanda sin reposición)'
                             : isLow
-                            ? 'Stock por debajo del umbral mínimo'
-                            : 'Stock saludable'
+                              ? 'Stock por debajo del umbral mínimo'
+                              : 'Stock saludable'
                         }
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
@@ -566,7 +557,7 @@ export default function AdminInventoryPage() {
       {/* MODAL AJUSTAR STOCK */}
       {adjustModalOpen && adjustItem && (
         <div className="adm-modalOverlay" onClick={() => setAdjustModalOpen(false)}>
-          <div className="adm-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460 }}>
+          <div className="adm-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
             <div className="adm-modalHeader">
               <h2 className="adm-modalTitle">
                 Ajustar Stock: {adjustItem.code} - {adjustItem.name}
@@ -578,91 +569,87 @@ export default function AdminInventoryPage() {
             <form onSubmit={handleSaveAdjust}>
               <div className="adm-modalBody">
                 <div className="adm-adjustCurrentStock">
-                  <span>Stock registrado actual:</span>
+                  <span>Stock actual registrado:</span>
                   <strong>{adjustItem.stock} unidades</strong>
                 </div>
 
-                <div className="adm-adjustModeTabs">
+                <label className="adm-label" style={{ marginBottom: 8, display: 'block' }}>
+                  Nuevo stock físico (escribí el conteo o usá los botones + / -):
+                </label>
+
+                {/* Stepper interactivo directo */}
+                <div className="adm-stepperGroup">
                   <button
                     type="button"
-                    className={`adm-adjustTab ${adjustMode === 'delta' ? 'active' : ''}`}
-                    onClick={() => setAdjustMode('delta')}
+                    className="adm-stepperBtn minus"
+                    onClick={() => handleStepChange(-1)}
+                    title="Restar 1 unidad"
                   >
-                    Sumar o Restar (+ / -)
+                    <span className="material-symbols-outlined">remove</span>
                   </button>
+                  <div className="adm-stepperInputWrap">
+                    <input
+                      type="number"
+                      className="adm-stepperInput"
+                      value={targetStock}
+                      onChange={(e) => setTargetStock(e.target.value)}
+                      autoFocus
+                      required
+                    />
+                    <span className="adm-stepperUnit">u.</span>
+                  </div>
                   <button
                     type="button"
-                    className={`adm-adjustTab ${adjustMode === 'direct' ? 'active' : ''}`}
-                    onClick={() => setAdjustMode('direct')}
+                    className="adm-stepperBtn plus"
+                    onClick={() => handleStepChange(1)}
+                    title="Sumar 1 unidad"
                   >
-                    Nuevo conteo físico
+                    <span className="material-symbols-outlined">add</span>
                   </button>
                 </div>
 
-                <div className="adm-form">
-                  {adjustMode === 'delta' ? (
-                    <div className="adm-field">
-                      <label className="adm-label">Cantidad a modificar (+ para sumar, - para restar)</label>
-                      <input
-                        type="number"
-                        className="adm-input"
-                        placeholder="Ej. +20 por compra, o -2 por rotura"
-                        value={deltaValue}
-                        onChange={(e) => setDeltaValue(e.target.value)}
-                        autoFocus
-                        required
-                      />
-                    </div>
-                  ) : (
-                    <div className="adm-field">
-                      <label className="adm-label">Nuevo total de unidades contadas en taller</label>
-                      <input
-                        type="number"
-                        className="adm-input"
-                        placeholder="Ej. 35"
-                        value={directValue}
-                        onChange={(e) => setDirectValue(e.target.value)}
-                        autoFocus
-                        required
-                      />
-                    </div>
-                  )}
+                {/* Píldoras de ajuste rápido táctil para tablet */}
+                <div className="adm-quickPills">
+                  <button type="button" className="adm-quickPill sub" onClick={() => handleStepChange(-10)}>-10</button>
+                  <button type="button" className="adm-quickPill sub" onClick={() => handleStepChange(-5)}>-5</button>
+                  <button type="button" className="adm-quickPill sub" onClick={() => handleStepChange(-1)}>-1</button>
+                  <button type="button" className="adm-quickPill add" onClick={() => handleStepChange(1)}>+1</button>
+                  <button type="button" className="adm-quickPill add" onClick={() => handleStepChange(5)}>+5</button>
+                  <button type="button" className="adm-quickPill add" onClick={() => handleStepChange(10)}>+10</button>
+                  <button type="button" className="adm-quickPill add" onClick={() => handleStepChange(20)}>+20</button>
+                </div>
 
-                  <div className="adm-field">
-                    <label className="adm-label">Motivo o detalle (opcional)</label>
-                    <input
-                      type="text"
-                      className="adm-input"
-                      placeholder="Ej. Compra proveedor Dije S.A., rotura, conteo de fin de mes..."
-                      value={adjustNote}
-                      onChange={(e) => setAdjustNote(e.target.value)}
-                    />
-                  </div>
-
-                  <div
+                {/* Resumen de diferencia */}
+                <div className="adm-deltaSummary">
+                  <span style={{ fontSize: 13, color: '#475569' }}>Diferencia calculada:</span>
+                  <strong
                     style={{
-                      padding: '10px 14px',
-                      background: '#f8fafc',
-                      borderRadius: 10,
-                      border: '1px solid #e2e8f0',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
+                      fontSize: 15,
+                      color: deltaCalc > 0 ? '#059669' : deltaCalc < 0 ? '#dc2626' : '#6b7280',
                     }}
                   >
-                    <span style={{ fontSize: 13, color: '#475569' }}>Nuevo stock resultante:</span>
-                    <strong
-                      style={{
-                        fontSize: 16,
-                        color: previewStock <= 0 ? '#dc2626' : previewStock <= adjustItem.lowStockThreshold ? '#d97706' : '#059669',
-                      }}
-                    >
-                      {previewStock} unidades
-                    </strong>
-                  </div>
-
-                  {adjustError && <div className="adm-error">{adjustError}</div>}
+                    {deltaCalc > 0 ? `+${deltaCalc} u. (aumenta)` : deltaCalc < 0 ? `${deltaCalc} u. (disminuye)` : 'Sin cambios'}
+                  </strong>
                 </div>
+
+                <div className="adm-field">
+                  <label className="adm-label">Motivo o detalle (opcional)</label>
+                  <input
+                    type="text"
+                    className="adm-input"
+                    placeholder="Ej. Compra a proveedor, recuento físico, rotura..."
+                    value={adjustNote}
+                    onChange={(e) => setAdjustNote(e.target.value)}
+                  />
+                  <div className="adm-notePills">
+                    <button type="button" className="adm-notePill" onClick={() => setAdjustNote('Compra a proveedor')}>Compra a proveedor</button>
+                    <button type="button" className="adm-notePill" onClick={() => setAdjustNote('Recuento físico')}>Recuento físico</button>
+                    <button type="button" className="adm-notePill" onClick={() => setAdjustNote('Rotura / Descarte')}>Rotura / Descarte</button>
+                    <button type="button" className="adm-notePill" onClick={() => setAdjustNote('Devolución')}>Devolución</button>
+                  </div>
+                </div>
+
+                {adjustError && <div className="adm-error">{adjustError}</div>}
               </div>
 
               <div className="adm-modalFooter">
@@ -678,7 +665,7 @@ export default function AdminInventoryPage() {
                   className="adm-btnPrimary"
                   disabled={adjusting}
                 >
-                  {adjusting ? 'Aplicando...' : 'Aplicar Ajuste'}
+                  {adjusting ? 'Guardando...' : 'Guardar Stock'}
                 </button>
               </div>
             </form>
@@ -735,9 +722,8 @@ export default function AdminInventoryPage() {
                           <span className="adm-movementMeta">{formatDate(m.createdAt)}</span>
                         </div>
                         <div
-                          className={`adm-movementDelta ${
-                            isPositive ? 'positive' : isNegative ? 'negative' : 'neutral'
-                          }`}
+                          className={`adm-movementDelta ${isPositive ? 'positive' : isNegative ? 'negative' : 'neutral'
+                            }`}
                         >
                           {isPositive ? `+${m.delta}` : m.delta}
                         </div>

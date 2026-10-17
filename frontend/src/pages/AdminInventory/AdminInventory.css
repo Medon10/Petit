@@ -36,6 +36,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   transition: all 150ms ease;
+  min-height: 40px;
 }
 
 .adm-invFilterCheckbox:hover {
@@ -45,8 +46,8 @@
 
 .adm-invFilterCheckbox input {
   accent-color: #db2777;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
 }
 
@@ -113,6 +114,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
 }
 
 .adm-stockNumber.critical {
@@ -222,33 +224,7 @@
   color: #6b7280;
 }
 
-/* Adjust mode selector */
-.adm-adjustModeTabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 8px;
-}
-
-.adm-adjustTab {
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid transparent;
-  background: transparent;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 120ms ease;
-}
-
-.adm-adjustTab.active {
-  background: #fdf2f8;
-  color: #db2777;
-  border-color: #fbcfe8;
-}
-
+/* ── Stepper interactivo para Tablet & Mobile (Ajuste Rápido) ── */
 .adm-adjustCurrentStock {
   display: flex;
   align-items: center;
@@ -257,7 +233,7 @@
   background: #f9fafb;
   border-radius: 10px;
   border: 1px solid #e5e7eb;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .adm-adjustCurrentStock span {
@@ -266,7 +242,220 @@
 }
 
 .adm-adjustCurrentStock strong {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
   color: #111827;
+}
+
+.adm-stepperGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.adm-stepperBtn {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 120ms ease;
+  user-select: none;
+}
+
+.adm-stepperBtn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.adm-stepperBtn:active {
+  transform: scale(0.94);
+  background: #e5e7eb;
+}
+
+.adm-stepperBtn .material-symbols-outlined {
+  font-size: 24px;
+}
+
+.adm-stepperBtn.minus {
+  color: #dc2626;
+}
+
+.adm-stepperBtn.plus {
+  color: #059669;
+}
+
+.adm-stepperInputWrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.adm-stepperInput {
+  width: 100%;
+  height: 52px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+  box-sizing: border-box;
+  padding: 0 45px 0 12px;
+  transition: border-color 150ms ease;
+}
+
+.adm-stepperInput:focus {
+  border-color: #db2777;
+  outline: none;
+}
+
+.adm-stepperUnit {
+  position: absolute;
+  right: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Píldoras de ajuste rápido táctil (+1, +5, +10, etc.) */
+.adm-quickPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.adm-quickPill {
+  padding: 6px 12px;
+  min-height: 38px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 120ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.adm-quickPill.add {
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.adm-quickPill.sub {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.adm-quickPill:hover {
+  filter: brightness(0.95);
+}
+
+.adm-quickPill:active {
+  transform: scale(0.95);
+}
+
+.adm-deltaSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 14px;
+}
+
+/* Sugerencias de motivo en 1 toque */
+.adm-notePills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.adm-notePill {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #faf5f8;
+  color: #be185d;
+  border: 1px solid #fbcfe8;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.adm-notePill:hover {
+  background: #f3d8e5;
+}
+
+/* ── Responsive Tablet & Mobile First ────────────────────────── */
+@media (max-width: 900px) {
+  .adm-invToolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .adm-invFilters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .adm-invSearch {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .adm-invKpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .adm-modal {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    margin: 10px auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .adm-invKpis {
+    grid-template-columns: 1fr;
+  }
+
+  .adm-stepperGroup {
+    gap: 6px;
+  }
+
+  .adm-stepperBtn {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
+  }
+
+  .adm-stepperInput {
+    height: 46px;
+    font-size: 22px;
+  }
 }

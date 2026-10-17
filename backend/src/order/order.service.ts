@@ -6,6 +6,7 @@ import { OrderItemExtra } from '../order-item-extra/order-item-extra.entity.js';
 import { OrderRepository } from './order.repository.js';
 import { VariantComponent } from '../supply/variant-component.entity.js';
 import { StockMovement, StockMovementType } from '../supply/stock-movement.entity.js';
+import { sendLowStockNotification } from '../shared/mail/low-stock.mail.js';
 
 export type OrderItemExtraInput = {
   extra_id?: number;
@@ -263,6 +264,8 @@ export async function updateOrderStatus(id: number, status: string) {
 
   // Descuento / Reversión de Stock:
   // Se descuenta cuando entra a 'processing' (o 'completed' directo) si no fue aplicado antes.
+  const lowStockAlerts: Array<{ code: string; name: string; currentStock: number; threshold: number }> = [];
+
   if ((status === 'processing' || status === 'completed') && !o.stockAppliedAt) {
     const items = o.items?.getItems?.() || [];
     for (const item of items) {
@@ -274,8 +277,10 @@ export async function updateOrderStatus(id: number, status: string) {
       )) as any;
       if (component && component.supply) {
         const supply = component.supply;
+        const prevStock = Number(supply.stock);
         const qtyToDeduct = (Number(component.quantity) || 1) * (Number(item.quantity) || 1);
-        supply.stock = Number(supply.stock) - qtyToDeduct;
+        const newStock = prevStock - qtyToDeduct;
+        supply.stock = newStock;
         em.create(StockMovement as any, {
           supply,
           delta: -qtyToDeduct,
@@ -283,6 +288,16 @@ export async function updateOrderStatus(id: number, status: string) {
           order: o,
           note: `Pedido #${o.id} (${item.productName} - ${item.variantName || 'Estándar'} x${item.quantity})`,
         });
+
+        // Alerta si llegó o cayó por debajo del punto de pedido (umbral):
+        if (newStock <= Number(supply.lowStockThreshold) && prevStock > Number(supply.lowStockThreshold)) {
+          lowStockAlerts.push({
+            code: supply.code,
+            name: supply.name,
+            currentStock: newStock,
+            threshold: Number(supply.lowStockThreshold),
+          });
+        }
       }
     }
     o.stockAppliedAt = now;
@@ -311,5 +326,14 @@ export async function updateOrderStatus(id: number, status: string) {
   }
 
   await em.flush();
+
+  if (lowStockAlerts.length > 0) {
+    sendLowStockNotification({
+      orderId: o.id,
+      customerName: o.customerName,
+      pieces: lowStockAlerts,
+    }).catch((err) => console.error('[mail] Error enviando alerta stock bajo:', err));
+  }
+
   return await OrderRepository.populateOrder(em, id);
 }
