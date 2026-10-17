@@ -42,7 +42,6 @@ export default function AdminPricingPage() {
   const [fLabor, setFLabor] = useState('0');
   const [fPackaging, setFPackaging] = useState('0');
   const [fOther, setFOther] = useState('0');
-  const [fPriceWeb, setFPriceWeb] = useState('0');
   const [fNotes, setFNotes] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState('');
@@ -125,7 +124,6 @@ export default function AdminPricingPage() {
     setFLabor(String(item.costs.costLabor));
     setFPackaging(String(item.costs.costPackaging));
     setFOther(String(item.costs.costOther));
-    setFPriceWeb(String(item.priceWeb));
     setFNotes(item.notes || '');
     setEditError('');
     setEditModalOpen(true);
@@ -138,18 +136,16 @@ export default function AdminPricingPage() {
   const simCostLabor = Math.max(0, Number(fLabor) || 0);
   const simCostPackaging = Math.max(0, Number(fPackaging) || 0);
   const simCostOther = Math.max(0, Number(fOther) || 0);
-  const simPriceWeb = Math.max(0, Number(fPriceWeb) || 0);
+  const simPriceWeb = editingItem ? Number(editingItem.priceWeb) || 0 : 0;
 
   const simTotalCost = Math.round((simCostPiece + simCostEngraving + simCostChain + simCostLabor + simCostPackaging + simCostOther) * 100) / 100;
   const simProfit = Math.round((simPriceWeb - simTotalCost) * 100) / 100;
   const simMarginPercent = simPriceWeb > 0 ? Math.round((simProfit / simPriceWeb) * 1000) / 10 : 0;
   const simMarkupPercent = simTotalCost > 0 ? Math.round((simProfit / simTotalCost) * 1000) / 10 : 0;
-  const simSugg15 = Math.round(simTotalCost * 1.5);
-  const simSugg20 = Math.round(simTotalCost * 2.0);
 
   const simStatus = simMarginPercent >= 50 ? 'healthy' : simMarginPercent >= 40 ? 'warning' : 'critical';
 
-  // Guardar edición individual
+  // Guardar edición individual de costos
   async function handleSaveEdit(e: React.FormEvent) {
     e.preventDefault();
     if (!editingItem) return;
@@ -164,7 +160,6 @@ export default function AdminPricingPage() {
         cost_labor: simCostLabor,
         cost_packaging: simCostPackaging,
         cost_other: simCostOther,
-        price_web: simPriceWeb,
         notes: fNotes.trim() || undefined,
       });
 
@@ -384,7 +379,6 @@ export default function AdminPricingPage() {
                   <th>Producto y Variante</th>
                   <th>Costo de Fabricación</th>
                   <th>Precio Web</th>
-                  <th>Sugeridos (1.5x / 2.0x)</th>
                   <th>Ganancia y Margen</th>
                   <th style={{ textAlign: 'right' }}>Acciones</th>
                 </tr>
@@ -443,20 +437,6 @@ export default function AdminPricingPage() {
                       <div className="adm-prPrice">{formatMoney(item.priceWeb)}</div>
                     </td>
 
-                    {/* Precios Sugeridos */}
-                    <td>
-                      <div className="adm-prSuggested">
-                        <div className="adm-prSuggRow">
-                          <span>x1.5 (50% markup):</span>
-                          <strong>{formatMoney(item.metrics.suggested15)}</strong>
-                        </div>
-                        <div className="adm-prSuggRow">
-                          <span>x2.0 (100% markup):</span>
-                          <strong>{formatMoney(item.metrics.suggested20)}</strong>
-                        </div>
-                      </div>
-                    </td>
-
                     {/* Ganancia & Margen */}
                     <td>
                       <div className="adm-prProfit">
@@ -502,7 +482,7 @@ export default function AdminPricingPage() {
         <div className="adm-prModalOverlay" onClick={() => !savingEdit && setEditModalOpen(false)}>
           <div className="adm-prModal" onClick={(e) => e.stopPropagation()}>
             <div className="adm-prModalHeader">
-              <h3>Editar Costos y Precio de Venta</h3>
+              <h3>Editar Costos de Fabricación</h3>
               <button
                 type="button"
                 className="adm-btnSecondary"
@@ -516,7 +496,7 @@ export default function AdminPricingPage() {
 
             <form onSubmit={handleSaveEdit}>
               <div className="adm-prModalBody">
-                {/* Banner de producto */}
+                {/* Banner de producto con Precio Web actual */}
                 <div className="adm-prModalBanner">
                   {editingItem.imageUrl ? (
                     <img
@@ -529,12 +509,20 @@ export default function AdminPricingPage() {
                       <span className="material-symbols-outlined">sell</span>
                     </div>
                   )}
-                  <div className="adm-prModalBannerMeta">
+                  <div className="adm-prModalBannerMeta" style={{ flex: 1 }}>
                     <h4>{editingItem.productName}</h4>
                     <span>
                       Variante: <strong>{editingItem.variantName}</strong> · Categoría: {editingItem.categoryName}
                       {editingItem.linkedSupply && ` · Pieza: ${editingItem.linkedSupply.code}`}
                     </span>
+                  </div>
+                  <div style={{ textAlign: 'right', paddingLeft: 14, borderLeft: '1px solid #fbcfe8' }}>
+                    <span style={{ fontSize: 10, textTransform: 'uppercase', fontWeight: 800, color: '#9d174d', letterSpacing: '0.05em', display: 'block' }}>
+                      Precio Web
+                    </span>
+                    <strong style={{ fontSize: 16, color: '#831843' }}>
+                      {formatMoney(editingItem.priceWeb)}
+                    </strong>
                   </div>
                 </div>
 
@@ -614,19 +602,6 @@ export default function AdminPricingPage() {
                   </div>
                 </div>
 
-                {/* Precio Web de Venta */}
-                <div className="adm-prField" style={{ maxWidth: 220 }}>
-                  <label>Precio de Venta en la Web ($)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="100"
-                    value={fPriceWeb}
-                    onChange={(e) => setFPriceWeb(e.target.value)}
-                    required
-                  />
-                </div>
-
                 {/* Simulador en Vivo de Rentabilidad */}
                 <div className="adm-prSimulator">
                   <span className="adm-prSimTitle">Simulación en Vivo de Rentabilidad</span>
@@ -650,14 +625,6 @@ export default function AdminPricingPage() {
                       >
                         {simMarginPercent}%
                       </span>
-                    </div>
-                    <div className="adm-prSimItem">
-                      <span className="adm-prSimItemLabel">Sugerido 1.5x</span>
-                      <span className="adm-prSimItemValue">{formatMoney(simSugg15)}</span>
-                    </div>
-                    <div className="adm-prSimItem">
-                      <span className="adm-prSimItemLabel">Sugerido 2.0x</span>
-                      <span className="adm-prSimItemValue">{formatMoney(simSugg20)}</span>
                     </div>
                   </div>
                 </div>
