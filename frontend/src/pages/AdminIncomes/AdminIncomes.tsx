@@ -45,6 +45,9 @@ export default function AdminIncomesPage() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
+  const [deleteTarget, setDeleteTarget] = useState<IncomeDto | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const onAuthErr = useCallback(
     (e: unknown) => {
       const msg = String((e as Error)?.message ?? '');
@@ -148,14 +151,21 @@ export default function AdminIncomesPage() {
     }
   }
 
-  async function onDelete(i: IncomeDto) {
-    const label = `${formatDateAR(i.date)} · ${i.description} (${formatMoney(i.amount)})`;
-    if (!window.confirm(`¿Eliminar el ingreso del ${label}? Esta acción no se puede deshacer.`)) return;
+  function onDelete(i: IncomeDto) {
+    setDeleteTarget(i);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await adminDeleteIncome(i.id);
+      await adminDeleteIncome(deleteTarget.id);
+      setDeleteTarget(null);
       await load();
     } catch (err) {
       if (!onAuthErr(err)) setError((err as Error).message || 'No se pudo eliminar');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -327,6 +337,51 @@ export default function AdminIncomesPage() {
               <button type="button" className="adm-btnCancel" onClick={() => setModalOpen(false)} disabled={saving}>Cancelar</button>
               <button type="button" className="adm-btnPrimary" onClick={onSave} disabled={saving}>
                 {saving ? 'Guardando…' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div
+          className="adm-deleteModalOverlay"
+          role="presentation"
+          onClick={() => !deleting && setDeleteTarget(null)}
+        >
+          <div
+            className="adm-deleteModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="inc-del-modal-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="adm-deleteModalIcon">
+              <span className="material-symbols-outlined" aria-hidden="true">delete</span>
+            </div>
+
+            <h3 className="adm-deleteModalTitle" id="inc-del-modal-title">¿Eliminar ingreso?</h3>
+
+            <p className="adm-deleteModalText">
+              ¿Estás seguro de que querés eliminar el ingreso <strong>"{deleteTarget.description}"</strong> de <strong>{formatMoney(deleteTarget.amount)}</strong> ({formatDateAR(deleteTarget.date)})? Esta acción no se puede deshacer.
+            </p>
+
+            <div className="adm-deleteModalActions">
+              <button
+                type="button"
+                className="adm-btnModalCancel"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="adm-btnConfirmDelete"
+                onClick={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
           </div>

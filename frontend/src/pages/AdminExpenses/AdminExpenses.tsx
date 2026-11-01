@@ -81,6 +81,9 @@ export default function AdminExpensesPage() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
+  const [deleteTarget, setDeleteTarget] = useState<ExpenseDto | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const onAuthErr = useCallback(
     (e: unknown) => {
       const msg = String((e as Error)?.message ?? '');
@@ -241,14 +244,21 @@ export default function AdminExpensesPage() {
     }
   }
 
-  async function onDelete(e: ExpenseDto) {
-    const label = `${formatDateAR(e.date)}${e.supplier ? ` · ${e.supplier.name}` : ''} (${formatMoney(e.total)})`;
-    if (!window.confirm(`¿Eliminar la compra del ${label}? Esta acción no se puede deshacer.`)) return;
+  function onDelete(e: ExpenseDto) {
+    setDeleteTarget(e);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await adminDeleteExpense(e.id);
+      await adminDeleteExpense(deleteTarget.id);
+      setDeleteTarget(null);
       await load();
     } catch (err) {
       if (!onAuthErr(err)) setError((err as Error).message || 'No se pudo eliminar');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -499,6 +509,51 @@ export default function AdminExpensesPage() {
               <button type="button" className="adm-btnCancel" onClick={() => setModalOpen(false)} disabled={saving}>Cancelar</button>
               <button type="button" className="adm-btnPrimary" onClick={onSave} disabled={saving}>
                 {saving ? 'Guardando…' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div
+          className="adm-deleteModalOverlay"
+          role="presentation"
+          onClick={() => !deleting && setDeleteTarget(null)}
+        >
+          <div
+            className="adm-deleteModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="exp-del-modal-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="adm-deleteModalIcon">
+              <span className="material-symbols-outlined" aria-hidden="true">delete</span>
+            </div>
+
+            <h3 className="adm-deleteModalTitle" id="exp-del-modal-title">¿Eliminar gasto?</h3>
+
+            <p className="adm-deleteModalText">
+              ¿Estás seguro de que querés eliminar el gasto de <strong>{formatMoney(deleteTarget.total)}</strong>{deleteTarget.supplier ? ` (${deleteTarget.supplier.name})` : ''} del {formatDateAR(deleteTarget.date)}? Esta acción no se puede deshacer.
+            </p>
+
+            <div className="adm-deleteModalActions">
+              <button
+                type="button"
+                className="adm-btnModalCancel"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="adm-btnConfirmDelete"
+                onClick={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
           </div>

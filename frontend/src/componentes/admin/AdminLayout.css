@@ -578,6 +578,132 @@
   font-size: 14px;
 }
 
+/* ── Delete Confirmation Modal (Petit style) ──────────────── */
+.adm-deleteModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 350;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: admFadeIn 150ms ease-out;
+}
+
+@keyframes admFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.adm-deleteModal {
+  background: #ffffff;
+  border-radius: 24px;
+  width: min(420px, 100%);
+  border: 1.5px solid #f3d5e7;
+  box-shadow: 0 24px 60px -12px rgba(199, 109, 162, 0.25), 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  padding: 32px 28px 24px;
+  text-align: center;
+  animation: admModalPop 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes admModalPop {
+  from { opacity: 0; transform: scale(0.95) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.adm-deleteModalIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+  border: 2px solid #fbcfe8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  color: #C76DA2;
+  box-shadow: 0 8px 20px -4px rgba(199, 109, 162, 0.3);
+}
+
+.adm-deleteModalIcon .material-symbols-outlined {
+  font-size: 32px;
+}
+
+.adm-deleteModalTitle {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 900;
+  color: #18181b;
+  letter-spacing: -0.02em;
+}
+
+.adm-deleteModalText {
+  margin: 0 0 24px;
+  font-size: 13.5px;
+  color: #64748b;
+  line-height: 1.5;
+  padding: 0 8px;
+}
+
+.adm-deleteModalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.adm-btnModalCancel {
+  flex: 1;
+  height: 42px;
+  border-radius: 999px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adm-btnModalCancel:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.adm-btnConfirmDelete {
+  flex: 1;
+  height: 42px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
+  transition: all 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adm-btnConfirmDelete:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.4);
+}
+
+.adm-btnConfirmDelete:disabled,
+.adm-btnModalCancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 /* ── Upload area ─────────────────────────────────────────── */
 .adm-uploadArea {
   display: flex;
