@@ -24,6 +24,7 @@ import { expenseRouter, supplierRouter } from './expense/expense.routes.js';
 import { statsRouter } from './stats/stats.routes.js';
 import { supplyRouter, variantComponentRouter } from './supply/supply.routes.js';
 import { pricingRouter } from './pricing/pricing.routes.js';
+import { incomeRouter } from './income/income.routes.js';
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -113,6 +114,7 @@ app.use('/admin/stats', statsRouter);
 app.use('/admin/supplies', supplyRouter);
 app.use('/admin/variants-components', variantComponentRouter);
 app.use('/admin/pricing', pricingRouter);
+app.use('/admin/incomes', incomeRouter);
 app.use('/categories', categoryRouter);
 app.use('/products', productRouter);
 app.use('/variants', variantRouter);

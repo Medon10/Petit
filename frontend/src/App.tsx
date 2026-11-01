@@ -17,6 +17,7 @@ const AdminStatsPage = lazy(() => import('./pages/AdminStats/AdminStats'))
 const AdminExpensesPage = lazy(() => import('./pages/AdminExpenses/AdminExpenses'))
 const AdminInventoryPage = lazy(() => import('./pages/AdminInventory/AdminInventory'))
 const AdminPricingPage = lazy(() => import('./pages/AdminPricing/AdminPricing'))
+const AdminIncomesPage = lazy(() => import('./pages/AdminIncomes/AdminIncomes'))
 import ProtectedAdminRoute from './shared/ProtectedAdminRoute'
 import WhatsAppButton from './componentes/WhatsAppButton/WhatsAppButton'
 import QuienesSomosPage from './pages/QuienesSomos/QuienesSomos'
@@ -50,6 +51,7 @@ function App() {
         <Route path="/admin/pedidos" element={<ProtectedAdminRoute><AdminOrdersPage /></ProtectedAdminRoute>} />
         <Route path="/admin/estadisticas" element={<ProtectedAdminRoute><AdminStatsPage /></ProtectedAdminRoute>} />
         <Route path="/admin/gastos" element={<ProtectedAdminRoute><AdminExpensesPage /></ProtectedAdminRoute>} />
+        <Route path="/admin/ingresos" element={<ProtectedAdminRoute><AdminIncomesPage /></ProtectedAdminRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

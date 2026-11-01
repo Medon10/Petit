@@ -65,6 +65,12 @@ async function periodTotals(from: string, to: string) {
         AND ${ORDER_DAY_SQL} BETWEEN ? AND ?`,
     [from, to]
   );
+  const [ext] = await exec(
+    `SELECT COALESCE(SUM(amount), 0) AS ingresos
+       FROM external_incomes
+      WHERE date BETWEEN ? AND ?`,
+    [from, to]
+  );
   const [exp] = await exec(
     `SELECT COALESCE(SUM(CASE WHEN ei.category <> 'inversion' THEN ei.total ELSE 0 END), 0) AS gastos,
             COALESCE(SUM(CASE WHEN ei.category = 'inversion' THEN ei.total ELSE 0 END), 0) AS inversion
@@ -73,18 +79,23 @@ async function periodTotals(from: string, to: string) {
       WHERE e.date BETWEEN ? AND ?`,
     [from, to]
   );
-  const ingresos = num(inc?.ingresos);
+  const ingresosTienda = num(inc?.ingresos);
+  const ingresosExternos = num(ext?.ingresos);
+  const ingresos = num(ingresosTienda + ingresosExternos);
   const gastos = num(exp?.gastos);
   const inversion = num(exp?.inversion);
   const pedidos = Number(inc?.pedidos ?? 0);
   return {
     ingresos,
+    ingresosTienda,
+    ingresosExternos,
     gastos,
     inversion,
     gananciaOperativa: num(ingresos - gastos),
     gananciaNeta: num(ingresos - gastos - inversion),
     pedidos,
-    ticketPromedio: pedidos > 0 ? num(ingresos / pedidos) : 0,
+    // El ticket promedio mide solo ventas de la tienda (los ingresos externos no son pedidos).
+    ticketPromedio: pedidos > 0 ? num(ingresosTienda / pedidos) : 0,
   };
 }
 
@@ -112,6 +123,13 @@ export async function getMonthly(params: { year?: unknown }) {
       GROUP BY 1`,
     [from, to]
   );
+  const externalRows = await exec(
+    `SELECT EXTRACT(MONTH FROM date)::int AS m, COALESCE(SUM(amount), 0) AS ingresos
+       FROM external_incomes
+      WHERE date BETWEEN ? AND ?
+      GROUP BY 1`,
+    [from, to]
+  );
   const expenseRows = await exec(
     `SELECT EXTRACT(MONTH FROM e.date)::int AS m,
             COALESCE(SUM(CASE WHEN ei.category <> 'inversion' THEN ei.total ELSE 0 END), 0) AS gastos,
@@ -125,8 +143,9 @@ export async function getMonthly(params: { year?: unknown }) {
 
   const months = Array.from({ length: 12 }, (_, i) => {
     const inc = incomeRows.find((r) => Number(r.m) === i + 1);
+    const ext = externalRows.find((r) => Number(r.m) === i + 1);
     const exp = expenseRows.find((r) => Number(r.m) === i + 1);
-    const ingresos = num(inc?.ingresos);
+    const ingresos = num(num(inc?.ingresos) + num(ext?.ingresos));
     const gastos = num(exp?.gastos);
     const inversion = num(exp?.inversion);
     return {

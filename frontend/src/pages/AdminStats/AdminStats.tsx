@@ -151,6 +151,9 @@ export default function AdminStatsPage() {
           <span className="adm-statLabel">Ingresos</span>
           <strong className="adm-statValue">{formatMoney(cur?.ingresos ?? 0)}</strong>
           <Delta cur={cur?.ingresos ?? 0} prev={prev?.ingresos ?? 0} />
+          {(cur?.ingresosExternos ?? 0) > 0 && (
+            <small className="adm-statSub">Incluye {formatMoney(cur?.ingresosExternos ?? 0)} de ingresos externos</small>
+          )}
         </div>
         <div className="adm-card adm-statCard">
           <span className="adm-statLabel">Gastos</span>
@@ -183,14 +186,14 @@ export default function AdminStatsPage() {
         <div className="adm-card">
           <span className="adm-statLabel">Ticket promedio</span>
           <strong>{formatMoney(cur?.ticketPromedio ?? 0)}</strong>
-          <small>Ingresos / pedidos</small>
+          <small>Ventas de la tienda / pedidos</small>
         </div>
       </div>
 
       <div className="adm-card">
         <h2 className="adm-cardTitle">Ingresos vs gastos · {year}</h2>
         <p style={{ margin: '-10px 0 16px', fontSize: '13px', color: '#71717a' }}>
-          Verde: cobros por pedidos · Rosa: compras e insumos · Línea negra: resultado neto mensual.
+          Verde: pedidos + ingresos externos · Rosa: compras e insumos · Línea negra: resultado neto mensual.
         </p>
         <div className="adm-statChart">
           <ResponsiveContainer width="100%" height="100%">

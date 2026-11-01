@@ -69,6 +69,11 @@
   font-weight: 600;
 }
 
+.adm-statSub {
+  font-size: 11px;
+  color: #a1a1aa;
+}
+
 .adm-statMini {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));

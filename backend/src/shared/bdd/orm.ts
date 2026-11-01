@@ -22,6 +22,7 @@ import { Supply } from '../../supply/supply.entity.js';
 import { VariantComponent } from '../../supply/variant-component.entity.js';
 import { StockMovement } from '../../supply/stock-movement.entity.js';
 import { VariantCost } from '../../pricing/variant-cost.entity.js';
+import { ExternalIncome } from '../../income/income.entity.js';
 
 function buildClientUrlFromEnv() {
     // 1. Buscamos primero DATABASE_URL (Railway/Neon) o DB_URL
@@ -48,8 +49,8 @@ const dbSslEnabled = String(process.env.DB_SSL || '').toLowerCase() === 'true' |
 const dbSslRejectUnauthorized = String(process.env.DB_SSL_REJECT_UNAUTHORIZED || 'true').toLowerCase() !== 'false';
 
 export const orm = await MikroORM.init({
-    entities: [Category, Product, Variant, Extra, ExtraScope, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review, Supplier, Expense, ExpenseItem, Supply, VariantComponent, StockMovement, VariantCost],
-    entitiesTs: [Category, Product, Variant, Extra, ExtraScope, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review, Supplier, Expense, ExpenseItem, Supply, VariantComponent, StockMovement, VariantCost],
+    entities: [Category, Product, Variant, Extra, ExtraScope, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review, Supplier, Expense, ExpenseItem, Supply, VariantComponent, StockMovement, VariantCost, ExternalIncome],
+    entitiesTs: [Category, Product, Variant, Extra, ExtraScope, SiteSetting, AdminUser, Order, OrderItem, OrderItemExtra, Review, Supplier, Expense, ExpenseItem, Supply, VariantComponent, StockMovement, VariantCost, ExternalIncome],
     driver: PostgreSqlDriver,
     clientUrl: buildClientUrlFromEnv(),
     driverOptions: dbSslEnabled

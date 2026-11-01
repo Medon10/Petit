@@ -55,6 +55,8 @@ export type ExpenseInput = {
 
 export type PeriodTotals = {
   ingresos: number;
+  ingresosTienda: number;
+  ingresosExternos: number;
   gastos: number;
   inversion: number;
   gananciaOperativa: number;
@@ -95,6 +97,21 @@ export type TopDto = {
   extras: { extra: string; unidades: number; ingresos: number }[];
 };
 
+export type IncomeDto = {
+  id: number;
+  date: string;
+  description: string;
+  amount: string;
+  notes: string | null;
+};
+
+export type IncomeInput = {
+  date: string;
+  description: string;
+  amount: number;
+  notes?: string;
+};
+
 export const adminGetExpenses = (p: { from?: string; to?: string; q?: string; page?: number; limit?: number }) =>
   adminRequestJson<{ data: ExpenseDto[]; total: number; page: number; totalPages: number }>(
     `/admin/expenses${buildQuery({ from: p.from, to: p.to, q: p.q || undefined, page: p.page, limit: p.limit })}`,
@@ -112,6 +129,21 @@ export const adminDeleteExpense = (id: number) =>
 
 export const adminGetSuppliers = () =>
   adminRequestJson<{ data: SupplierDto[] }>('/admin/suppliers', { method: 'GET' });
+
+export const adminGetIncomes = (p: { from?: string; to?: string; q?: string }) =>
+  adminRequestJson<{ data: IncomeDto[] }>(
+    `/admin/incomes${buildQuery({ from: p.from, to: p.to, q: p.q || undefined })}`,
+    { method: 'GET' }
+  );
+
+export const adminCreateIncome = (body: IncomeInput) =>
+  adminRequestJson<{ data: IncomeDto }>('/admin/incomes', { method: 'POST', body });
+
+export const adminUpdateIncome = (id: number, body: IncomeInput) =>
+  adminRequestJson<{ data: IncomeDto }>(`/admin/incomes/${id}`, { method: 'PUT', body });
+
+export const adminDeleteIncome = (id: number) =>
+  adminRequestJson<{ message: string }>(`/admin/incomes/${id}`, { method: 'DELETE' });
 
 export const adminGetSummary = (from: string, to: string) =>
   adminRequestJson<SummaryDto>(`/admin/stats/summary${buildQuery({ from, to })}`, { method: 'GET' });

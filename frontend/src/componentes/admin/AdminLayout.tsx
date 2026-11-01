@@ -47,6 +47,10 @@ export default function AdminLayout({ children }: Props) {
             <span className="material-symbols-outlined" aria-hidden="true">receipt_long</span>
             Pedidos
           </NavLink>
+          <NavLink className={({ isActive }) => `adm-navLink${isActive ? ' active' : ''}`} to="/admin/ingresos">
+            <span className="material-symbols-outlined" aria-hidden="true">trending_up</span>
+            Ingresos
+          </NavLink>
           <NavLink className={({ isActive }) => `adm-navLink${isActive ? ' active' : ''}`} to="/admin/gastos">
             <span className="material-symbols-outlined" aria-hidden="true">payments</span>
             Gastos
