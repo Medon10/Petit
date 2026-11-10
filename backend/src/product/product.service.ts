@@ -82,7 +82,7 @@ export async function findAllProducts(filters: ProductFilters) {
 
 export async function findOneProduct(id: number, options?: { includeInactive?: boolean }) {
   const em = orm.em.fork();
-  const item = await ProductRepository.findProduct(em, id);
+  const item = await ProductRepository.findProduct(em, id, options);
   if (!item) return null;
   if (!options?.includeInactive && (item as any).isActive === false) return null;
   return item;
@@ -195,6 +195,7 @@ export async function searchProducts(queryRaw?: unknown, pageRaw?: unknown, limi
     ],
   } as any, {
     populate: ['category', 'variants'] as any,
+    populateWhere: { variants: { isActive: true } } as any,
     orderBy: { name: 'ASC' } as any,
     limit,
     offset,

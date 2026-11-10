@@ -49,10 +49,12 @@ export default function ProductPage() {
           getProductReviewSummary(productId),
         ]);
         if (cancelled) return;
-        setProduct(item);
+        const activeVariants = (item?.variants || []).filter((v) => v.isActive !== false);
+        const filteredItem = item ? { ...item, variants: activeVariants } : null;
+        setProduct(filteredItem);
         setExtras(extrasRes);
         setReviewSummary(summaryRes);
-        const firstVariantId = (item?.variants || [])[0]?.id;
+        const firstVariantId = activeVariants[0]?.id;
         setSelectedVariantId(firstVariantId ?? null);
       } catch {
         if (cancelled) return;
@@ -383,11 +385,12 @@ export default function ProductPage() {
                   <button
                     type="button"
                     className="ph-primaryButton"
+                    disabled={!selectedVariant}
                     onClick={() => {
-                      if (!Number.isFinite(productId)) return;
+                      if (!Number.isFinite(productId) || !selectedVariant) return;
                       cart.addItem({
                         productId,
-                        variantId: selectedVariant?.id ?? null,
+                        variantId: selectedVariant.id,
                         extraIds: Array.from(selectedExtraIds.values()),
                         quantity: 1,
                       });
@@ -396,7 +399,7 @@ export default function ProductPage() {
                       window.setTimeout(() => setAddedToast(false), 1600);
                     }}
                   >
-                    Agregar al carrito
+                    {selectedVariant ? 'Agregar al carrito' : 'Sin stock disponible'}
                   </button>
 
                   {addedToast ? <span className="ph-addedToast">Agregado</span> : null}
@@ -491,17 +494,19 @@ export default function ProductPage() {
           <button
             type="button"
             className="ph-mobileStickyBtn"
+            disabled={!selectedVariant}
             onClick={() => {
+              if (!selectedVariant) return;
               cart.addItem({
                 productId,
-                variantId: selectedVariant?.id ?? null,
+                variantId: selectedVariant.id,
                 extraIds: Array.from(selectedExtraIds.values()),
                 quantity: 1,
               });
               cart.openCart();
             }}
           >
-            Agregar
+            {selectedVariant ? 'Agregar' : 'Sin stock'}
           </button>
         </div>
       ) : null}

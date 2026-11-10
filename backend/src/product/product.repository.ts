@@ -10,8 +10,12 @@ export class ProductRepository {
     return category as any;
   }
 
-  static async findProduct(em: EntityManager, id: number) {
-    return await em.findOne(Product as any, { id }, { populate: ['category', 'variants'] as any } as any);
+  static async findProduct(em: EntityManager, id: number, options?: { includeInactive?: boolean }) {
+    const findOptions: any = { populate: ['category', 'variants'] };
+    if (!options?.includeInactive) {
+      findOptions.populateWhere = { variants: { isActive: true } };
+    }
+    return await em.findOne(Product as any, { id }, findOptions);
   }
 
   static async findProductPlain(em: EntityManager, id: number) {

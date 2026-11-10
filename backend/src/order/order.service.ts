@@ -268,19 +268,34 @@ export async function updateOrderStatus(id: number, status: string) {
 
   if ((status === 'processing' || status === 'completed') && !o.stockAppliedAt) {
     const items = o.items?.getItems?.() || [];
+    const variantIds = Array.from(
+      new Set(items.map((item: any) => item.variant?.id).filter((vid: any): vid is number => Number.isFinite(vid)))
+    );
+    const components =
+      variantIds.length > 0
+        ? ((await em.find(
+            VariantComponent as any,
+            { variant: { $in: variantIds } },
+            { populate: ['supply'] as any } as any
+          )) as any[])
+        : [];
+    const componentByVariantId = new Map<number, any>();
+    for (const comp of components) {
+      const vid = comp.variant?.id ?? comp.variant;
+      if (vid != null) componentByVariantId.set(Number(vid), comp);
+    }
+
+    let appliedAny = false;
     for (const item of items) {
       if (!item.variant?.id) continue;
-      const component = (await em.findOne(
-        VariantComponent as any,
-        { variant: item.variant.id },
-        { populate: ['supply'] as any } as any
-      )) as any;
+      const component = componentByVariantId.get(Number(item.variant.id));
       if (component && component.supply) {
         const supply = component.supply;
         const prevStock = Number(supply.stock);
         const qtyToDeduct = (Number(component.quantity) || 1) * (Number(item.quantity) || 1);
         const newStock = prevStock - qtyToDeduct;
         supply.stock = newStock;
+        appliedAny = true;
         em.create(StockMovement as any, {
           supply,
           delta: -qtyToDeduct,
@@ -291,34 +306,50 @@ export async function updateOrderStatus(id: number, status: string) {
 
         // Alerta si llegó o cayó por debajo del punto de pedido (umbral):
         if (newStock <= Number(supply.lowStockThreshold) && prevStock > Number(supply.lowStockThreshold)) {
-          lowStockAlerts.push({
-            code: supply.code,
-            name: supply.name,
-            currentStock: newStock,
-            threshold: Number(supply.lowStockThreshold),
-          });
+          const existingAlert = lowStockAlerts.find((a) => a.code === supply.code);
+          if (existingAlert) {
+            existingAlert.currentStock = newStock;
+          } else {
+            lowStockAlerts.push({
+              code: supply.code,
+              name: supply.name,
+              currentStock: newStock,
+              threshold: Number(supply.lowStockThreshold),
+            });
+          }
         }
       }
     }
-    o.stockAppliedAt = now;
-  } else if (status === 'cancelled' && o.stockAppliedAt) {
-    // Si se cancela y se había descontado el stock, revertir exactamente los movimientos de venta de esta orden:
-    const prevSales = await em.find(
+    if (appliedAny) {
+      o.stockAppliedAt = now;
+    }
+  } else if ((status === 'cancelled' || status === 'pending') && o.stockAppliedAt) {
+    // Si se cancela o vuelve a pendiente y se había descontado el stock, revertir el saldo neto descontado en esta orden:
+    const orderMovements = (await em.find(
       StockMovement as any,
-      { order: o.id, type: StockMovementType.SALE },
+      { order: o.id, type: { $in: [StockMovementType.SALE, StockMovementType.SALE_REVERSAL] } },
       { populate: ['supply'] as any } as any
-    );
-    for (const mov of prevSales) {
-      if ((mov as any).supply) {
-        const supply = (mov as any).supply;
-        const qtyToRestore = Math.abs(Number((mov as any).delta));
+    )) as any[];
+
+    const netBySupply = new Map<number, { supply: any; netDelta: number }>();
+    for (const mov of orderMovements) {
+      if (!mov.supply?.id) continue;
+      const sid = Number(mov.supply.id);
+      const current = netBySupply.get(sid) || { supply: mov.supply, netDelta: 0 };
+      current.netDelta += Number(mov.delta) || 0;
+      netBySupply.set(sid, current);
+    }
+
+    for (const { supply, netDelta } of netBySupply.values()) {
+      if (netDelta < 0) {
+        const qtyToRestore = Math.abs(netDelta);
         supply.stock = Number(supply.stock) + qtyToRestore;
         em.create(StockMovement as any, {
           supply,
           delta: qtyToRestore,
           type: StockMovementType.SALE_REVERSAL,
           order: o,
-          note: `Cancelación de Pedido #${o.id}`,
+          note: status === 'cancelled' ? `Cancelación de Pedido #${o.id}` : `Reversión a pendiente de Pedido #${o.id}`,
         });
       }
     }
