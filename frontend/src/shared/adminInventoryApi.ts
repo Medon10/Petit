@@ -95,6 +95,14 @@ export async function updateSupply(
   });
 }
 
+export async function deleteSupply(
+  id: number
+): Promise<{ message: string; data: { id: number; code: string; name: string } }> {
+  return adminRequestJson(`/admin/supplies/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 export async function adjustSupplyStock(
   id: number,
   payload: StockAdjustInput

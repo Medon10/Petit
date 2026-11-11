@@ -185,6 +185,17 @@ export async function updateSupply(id: number, input: SupplyInput) {
   return await getSupply(id);
 }
 
+export async function deleteSupply(id: number) {
+  const em = orm.em.fork();
+  const s = (await em.findOne(Supply as any, { id })) as any;
+  if (!s) return null;
+
+  await em.nativeDelete(VariantComponent as any, { supply: id });
+  await em.nativeDelete(StockMovement as any, { supply: id });
+  await em.removeAndFlush(s);
+  return { id: s.id, code: s.code, name: s.name };
+}
+
 export async function adjustSupplyStock(id: number, input: StockAdjustInput) {
   const em = orm.em.fork();
   const s = (await em.findOne(Supply as any, { id })) as any;

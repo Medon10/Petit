@@ -6,6 +6,7 @@ import {
   getSupply,
   createSupply,
   updateSupply,
+  deleteSupply,
   adjustSupplyStock,
   getSupplyMovements,
   getVariantComponent,
@@ -74,6 +75,17 @@ supplyRouter.put('/:id', async (req: Request, res: Response) => {
     return res.json({ message: 'Pieza actualizada', data: item });
   } catch (error) {
     return handleError(res, error, 'Error al actualizar pieza');
+  }
+});
+
+supplyRouter.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const item = await deleteSupply(id);
+    if (!item) return res.status(404).json({ message: 'Pieza no encontrada' });
+    return res.json({ message: 'Pieza eliminada', data: item });
+  } catch (error) {
+    return handleError(res, error, 'Error al eliminar pieza');
   }
 });
 

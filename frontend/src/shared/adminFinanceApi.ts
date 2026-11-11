@@ -177,3 +177,42 @@ export function monthRange(year: number, month: number) {
   const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
   return { from: `${year}-${pad2(month)}-01`, to: `${year}-${pad2(month)}-${pad2(last)}` };
 }
+
+export type MonthWeekOption = {
+  week: number;
+  label: string;
+  from: string;
+  to: string;
+};
+
+/** Semanas dentro de un mes (month 1-12) como rangos 'YYYY-MM-DD'. */
+export function getMonthWeeks(year: number, month: number): MonthWeekOption[] {
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const mm = pad2(month);
+  const ranges: Array<[number, number]> = [
+    [1, 7],
+    [8, 14],
+    [15, 21],
+    [22, 28],
+  ];
+  if (lastDay > 28) {
+    ranges.push([29, lastDay]);
+  }
+  return ranges.map(([start, end], idx) => ({
+    week: idx + 1,
+    label: `Semana ${idx + 1} (${pad2(start)}/${mm} – ${pad2(end)}/${mm})`,
+    from: `${year}-${mm}-${pad2(start)}`,
+    to: `${year}-${mm}-${pad2(end)}`,
+  }));
+}
+
+/** Rango de la semana actual (lunes a domingo) como 'YYYY-MM-DD'. */
+export function currentWeekRange(): { from: string; to: string } {
+  const now = new Date();
+  const day = now.getDay(); // 0 = domingo, 1 = lunes, ...
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+  const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+  const fmt = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  return { from: fmt(monday), to: fmt(sunday) };
+}

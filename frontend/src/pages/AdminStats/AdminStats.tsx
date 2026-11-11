@@ -11,8 +11,10 @@ import {
   adminGetSummary,
   adminGetTop,
   categoryLabel,
+  currentWeekRange,
   formatDateAR,
   formatMoney,
+  getMonthWeeks,
   monthRange,
   type BreakdownDto,
   type MonthlyDto,
@@ -47,7 +49,8 @@ export default function AdminStatsPage() {
   const nav = useNavigate();
   const thisYear = new Date().getFullYear();
   const [year, setYear] = useState(thisYear);
-  const [month, setMonth] = useState(0); // 0 = todo el año
+  const [month, setMonth] = useState(0); // 0 = todo el año, -1 = esta semana, 1..12 = mes
+  const [week, setWeek] = useState(0); // 0 = todo el mes, 1..5 = semana del mes
 
   const [summary, setSummary] = useState<SummaryDto | null>(null);
   const [monthly, setMonthly] = useState<MonthlyDto | null>(null);
@@ -69,9 +72,19 @@ export default function AdminStatsPage() {
     [nav]
   );
 
+  const monthWeeks = month > 0 ? getMonthWeeks(year, month) : [];
+
   useEffect(() => {
     let cancelled = false;
-    const range = month === 0 ? { from: `${year}-01-01`, to: `${year}-12-31` } : monthRange(year, month);
+    let range: { from: string; to: string };
+    if (month === -1) {
+      range = currentWeekRange();
+    } else if (month === 0) {
+      range = { from: `${year}-01-01`, to: `${year}-12-31` };
+    } else {
+      const selectedWeek = week > 0 ? getMonthWeeks(year, month).find((w) => w.week === week) : undefined;
+      range = selectedWeek ? { from: selectedWeek.from, to: selectedWeek.to } : monthRange(year, month);
+    }
 
     async function run() {
       setLoading(true);
@@ -99,7 +112,7 @@ export default function AdminStatsPage() {
     return () => {
       cancelled = true;
     };
-  }, [year, month, onAuthErr]);
+  }, [year, month, week, onAuthErr]);
 
   const cur = summary?.current;
   const prev = summary?.previous;
@@ -123,17 +136,47 @@ export default function AdminStatsPage() {
       <div className="adm-header">
         <h1 className="adm-h1">Estadísticas</h1>
         <div className="adm-statFilters">
-          <select className="adm-select" aria-label="Año" value={year} onChange={(e) => setYear(Number(e.target.value))}>
+          <select
+            className="adm-select"
+            aria-label="Año"
+            value={year}
+            onChange={(e) => {
+              setYear(Number(e.target.value));
+              setWeek(0);
+            }}
+          >
             {years.map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
-          <select className="adm-select" aria-label="Mes" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+          <select
+            className="adm-select"
+            aria-label="Mes"
+            value={month}
+            onChange={(e) => {
+              setMonth(Number(e.target.value));
+              setWeek(0);
+            }}
+          >
             <option value={0}>Todo el año</option>
+            <option value={-1}>Esta semana</option>
             {MONTH_NAMES.map((m, i) => (
               <option key={m} value={i + 1}>{m}</option>
             ))}
           </select>
+          {month > 0 && (
+            <select
+              className="adm-select"
+              aria-label="Semana"
+              value={week}
+              onChange={(e) => setWeek(Number(e.target.value))}
+            >
+              <option value={0}>Todo el mes</option>
+              {monthWeeks.map((w) => (
+                <option key={w.week} value={w.week}>{w.label}</option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 

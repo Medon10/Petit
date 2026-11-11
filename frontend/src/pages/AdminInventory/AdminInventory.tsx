@@ -8,6 +8,7 @@ import {
   fetchSupplies,
   createSupply,
   updateSupply,
+  deleteSupply,
   adjustSupplyStock,
   fetchSupplyMovements,
   type SupplyDto,
@@ -253,6 +254,24 @@ export default function AdminInventoryPage() {
     }
   }
 
+  // Eliminar pieza definitivamente
+  async function handleDeleteSupply(item: SupplyDto) {
+    const linkedWarning =
+      item.linkedVariantsCount > 0
+        ? ` Se desvinculará de ${item.linkedVariantsCount} variante(s).`
+        : '';
+    if (!confirm(`¿Eliminar pieza "${item.code} - ${item.name}"?${linkedWarning}`)) return;
+    setError('');
+    try {
+      await deleteSupply(item.id);
+      await loadData();
+    } catch (err: any) {
+      if (!onAuthErr(err)) {
+        setError(err?.message || 'Error al eliminar pieza');
+      }
+    }
+  }
+
   // Diferencia calculada en tiempo real
   const targetStockNum = Number(targetStock);
   const isValidStockNum = targetStock.trim() !== '' && Number.isInteger(targetStockNum);
@@ -358,7 +377,7 @@ export default function AdminInventoryPage() {
                 <th style={{ width: 140 }}>Stock Actual</th>
                 <th>Variantes vinculadas</th>
                 <th style={{ width: 90 }}>Estado</th>
-                <th style={{ width: 140, textAlign: 'right' }}>Acciones</th>
+                <th style={{ width: 170, textAlign: 'right' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -437,6 +456,13 @@ export default function AdminInventoryPage() {
                           onClick={() => openEditModal(item)}
                         >
                           <span className="material-symbols-outlined">edit</span>
+                        </button>
+                        <button
+                          className="adm-btnSmall"
+                          title="Eliminar pieza"
+                          onClick={() => handleDeleteSupply(item)}
+                        >
+                          <span className="material-symbols-outlined">delete</span>
                         </button>
                       </div>
                     </td>
