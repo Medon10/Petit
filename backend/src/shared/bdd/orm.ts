@@ -69,6 +69,27 @@ export const orm = await MikroORM.init({
 });
 
 export const syncSchema = async () => {
+    try {
+        const conn = orm.em.getConnection();
+        const colCheck = await conn.execute(
+            `SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'payment_status'`
+        );
+        const isFirstRun = !Array.isArray(colCheck) || colCheck.length === 0;
+        await conn.execute(
+            `ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status varchar(20) NOT NULL DEFAULT 'unpaid'`
+        );
+        await conn.execute(
+            `ALTER TABLE orders ADD COLUMN IF NOT EXISTS paid_amount numeric(10,2) NOT NULL DEFAULT 0.00`
+        );
+        if (isFirstRun) {
+            await conn.execute(
+                `UPDATE orders SET payment_status = 'paid', paid_amount = total WHERE status IN ('processing', 'completed')`
+            );
+        }
+    } catch (e: any) {
+        console.error('[syncSchema] Error asegurando columnas de pago en orders:', e?.message || e);
+    }
+
     const generator = orm.getSchemaGenerator();
     if (process.env.NODE_ENV !== 'production') {
         try {

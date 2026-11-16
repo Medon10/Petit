@@ -8,6 +8,7 @@ import {
   adminGetOrders,
   adminGetOrder,
   adminUpdateOrderStatus,
+  adminUpdateOrderPayment,
   clearAdminToken,
   type OrderDto,
 } from '../../shared/api';
@@ -37,6 +38,33 @@ const statusColor: Record<string, string> = {
   cancelled: 'red',
 };
 
+const PAYMENT_OPTIONS = ['unpaid', 'deposit', 'paid'] as const;
+
+const paymentLabelShort: Record<string, string> = {
+  unpaid: 'No pagado',
+  deposit: 'Seña',
+  paid: 'Pagado',
+};
+
+const paymentColor: Record<string, string> = {
+  unpaid: 'red',
+  deposit: 'yellow',
+  paid: 'green',
+};
+
+function formatMoney(n: number) {
+  return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2);
+}
+
+function getOrderPaymentAmounts(order: Pick<OrderDto, 'total' | 'paymentStatus' | 'paidAmount'>) {
+  const total = Number(order.total) || 0;
+  const pStatus = order.paymentStatus || 'unpaid';
+  const rawPaid = Number(order.paidAmount) || 0;
+  const paid = pStatus === 'paid' ? total : pStatus === 'deposit' ? Math.min(Math.max(0, rawPaid), total || rawPaid) : 0;
+  const remaining = Math.max(0, total - paid);
+  return { total, pStatus, paid, remaining };
+}
+
 const shippingLabel: Record<string, string> = {
   pickup: 'Retiro',
   delivery: 'Envio coordinado',
@@ -64,6 +92,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'processing' | 'completed' | 'cancelled'>('all');
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'unpaid' | 'deposit' | 'paid'>('all');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -72,6 +101,10 @@ export default function AdminOrdersPage() {
   const [detail, setDetail] = useState<OrderDto | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [paymentUpdating, setPaymentUpdating] = useState(false);
+  const [depositEditing, setDepositEditing] = useState(false);
+  const [depositInput, setDepositInput] = useState('');
+  const [paymentError, setPaymentError] = useState('');
 
   const onAuthErr = useCallback((e: any) => {
     const msg = String(e?.message ?? '');
@@ -88,13 +121,14 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [statusFilter, debouncedSearch]);
+  }, [statusFilter, paymentFilter, debouncedSearch]);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const result = await adminGetOrders({
         status: statusFilter === 'all' ? undefined : statusFilter,
+        paymentStatus: paymentFilter === 'all' ? undefined : paymentFilter,
         q: debouncedSearch || undefined,
         page,
         limit: 20,
@@ -107,21 +141,35 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, debouncedSearch, page]);
+  }, [statusFilter, paymentFilter, debouncedSearch, page, onAuthErr]);
 
   useEffect(() => { load(); }, [load]);
 
   async function openDetail(id: number) {
     setDetailLoading(true);
     setDetail(null);
+    setPaymentError('');
+    setDepositEditing(false);
+    setDepositInput('');
     try {
       const o = await adminGetOrder(id);
       setDetail(o);
+      if (o?.paymentStatus === 'deposit') {
+        setDepositEditing(true);
+        setDepositInput(String(Number(o.paidAmount ?? 0) || ''));
+      }
     } catch (e: any) {
       onAuthErr(e);
     } finally {
       setDetailLoading(false);
     }
+  }
+
+  function closeDetail() {
+    setDetail(null);
+    setDetailLoading(false);
+    setDepositEditing(false);
+    setPaymentError('');
   }
 
   async function changeStatus(id: number, status: string) {
@@ -136,6 +184,30 @@ export default function AdminOrdersPage() {
       onAuthErr(e);
     } finally {
       setStatusUpdating(false);
+    }
+  }
+
+  async function savePayment(id: number, paymentStatus: 'unpaid' | 'deposit' | 'paid', paidAmount?: number) {
+    setPaymentUpdating(true);
+    setPaymentError('');
+    try {
+      const res = await adminUpdateOrderPayment(id, { payment_status: paymentStatus, paid_amount: paidAmount });
+      const updated = res?.data;
+      if (detail && detail.id === id && updated) {
+        setDetail(updated);
+        setDepositEditing(updated.paymentStatus === 'deposit');
+        if (updated.paymentStatus === 'deposit') {
+          setDepositInput(String(Number(updated.paidAmount ?? 0) || ''));
+        } else {
+          setDepositInput('');
+        }
+      }
+      await load();
+    } catch (e: any) {
+      onAuthErr(e);
+      setPaymentError(e?.message || 'No se pudo actualizar el pago');
+    } finally {
+      setPaymentUpdating(false);
     }
   }
 
@@ -164,6 +236,21 @@ export default function AdminOrdersPage() {
               <option value="processing">En proceso</option>
               <option value="completed">Completado</option>
               <option value="cancelled">Cancelado</option>
+          </select>
+        </div>
+
+        <div className="adm-field" style={{ minWidth: 180 }}>
+          <label className="adm-label" htmlFor="orders-payment">Pago</label>
+          <select
+            id="orders-payment"
+            className="adm-select"
+            value={paymentFilter}
+            onChange={(e) => setPaymentFilter(e.target.value as typeof paymentFilter)}
+          >
+              <option value="all">Todos</option>
+              <option value="unpaid">No pagado</option>
+              <option value="deposit">Seña</option>
+              <option value="paid">Pagado</option>
           </select>
         </div>
 
@@ -199,6 +286,7 @@ export default function AdminOrdersPage() {
                 <th>#</th>
                 <th>Cliente</th>
                 <th>Estado</th>
+                <th>Pago</th>
                 <th>Entrega</th>
                 <th>Total</th>
                 <th>Fecha</th>
@@ -206,7 +294,9 @@ export default function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((o) => (
+              {orders.map((o) => {
+                const { pStatus, paid, remaining } = getOrderPaymentAmounts(o);
+                return (
                 <tr key={o.id}>
                   <td style={{ fontWeight: 700 }}>#{o.id}</td>
                   <td>{o.customerName}</td>
@@ -214,6 +304,16 @@ export default function AdminOrdersPage() {
                     <span className={`adm-badge ${statusColor[o.status] ?? 'gray'}`}>
                       {statusLabelShort[o.status] ?? o.status}
                     </span>
+                  </td>
+                  <td>
+                    <span className={`adm-badge ${paymentColor[pStatus] ?? 'gray'}`}>
+                      {paymentLabelShort[pStatus] ?? pStatus}
+                    </span>
+                    {pStatus === 'deposit' && (
+                      <div style={{ fontSize: 11, color: '#6b7280', marginTop: 4, whiteSpace: 'nowrap' }}>
+                        Pagó ${formatMoney(paid)} · Falta ${formatMoney(remaining)}
+                      </div>
+                    )}
                   </td>
                   <td>{shippingLabel[o.shippingMethod || 'pickup'] || 'Retiro'}</td>
                   <td>${o.total}</td>
@@ -229,7 +329,8 @@ export default function AdminOrdersPage() {
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -239,8 +340,8 @@ export default function AdminOrdersPage() {
       {(detail || detailLoading) && (
         <div
           className="adm-modalOverlay"
-          onClick={() => { setDetail(null); setDetailLoading(false); }}
-          onKeyDown={(e) => { if (e.key === 'Escape') { setDetail(null); setDetailLoading(false); } }}
+          onClick={closeDetail}
+          onKeyDown={(e) => { if (e.key === 'Escape') closeDetail(); }}
           role="presentation"
         >
           <div className="adm-modal" style={{ maxWidth: 600 }} onClick={(e) => e.stopPropagation()}>
@@ -248,7 +349,7 @@ export default function AdminOrdersPage() {
               <h2 className="adm-modalTitle">
                 {detailLoading ? 'Detalle de pedido' : `Pedido #${detail?.id}`}
               </h2>
-              <button className="adm-modalClose" aria-label="Cerrar detalle del pedido" onClick={() => { setDetail(null); setDetailLoading(false); }}>
+              <button className="adm-modalClose" aria-label="Cerrar detalle del pedido" onClick={closeDetail}>
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
@@ -355,6 +456,111 @@ export default function AdminOrdersPage() {
                     </div>
                   </div>
 
+                  {(() => {
+                    const { total: totalNum, pStatus, paid } = getOrderPaymentAmounts(detail);
+                    const activeBtn = depositEditing ? 'deposit' : pStatus;
+                    const draftNum = Number(depositInput.replace(',', '.'));
+                    const hasDraft = depositEditing && depositInput.trim() !== '' && Number.isFinite(draftNum) && draftNum >= 0;
+                    const displayPaid = hasDraft ? draftNum : paid;
+                    const displayRemaining = Math.max(0, totalNum - displayPaid);
+
+                    return (
+                      <div>
+                        <div className="adm-label">Pago</div>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 4 }}>
+                          {PAYMENT_OPTIONS.map((p) => {
+                            const isSelected = activeBtn === p;
+                            const isDisabled = paymentUpdating || (p !== 'deposit' && isSelected);
+                            return (
+                              <button
+                                key={p}
+                                type="button"
+                                className={`adm-badge ${paymentColor[p]}${isSelected ? '' : ' adm-badgeOutline'}`}
+                                style={{
+                                  cursor: isDisabled ? 'default' : 'pointer',
+                                  opacity: paymentUpdating ? 0.5 : 1,
+                                  border: isSelected ? '2px solid currentColor' : '2px solid transparent',
+                                  padding: '6px 14px',
+                                  fontSize: 12,
+                                  whiteSpace: 'nowrap',
+                                }}
+                                disabled={isDisabled}
+                                onClick={() => {
+                                  if (p === 'deposit') {
+                                    setPaymentError('');
+                                    setDepositEditing(true);
+                                    if (!depositInput && pStatus === 'deposit' && Number(detail.paidAmount) > 0) {
+                                      setDepositInput(String(Number(detail.paidAmount)));
+                                    }
+                                  } else {
+                                    setDepositEditing(false);
+                                    savePayment(detail.id, p);
+                                  }
+                                }}
+                              >
+                                {paymentLabelShort[p]}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {(depositEditing || pStatus === 'deposit') && (
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 10 }}>
+                            <label htmlFor="order-deposit-amount" style={{ fontSize: 13, fontWeight: 600 }}>
+                              Monto abonado ($):
+                            </label>
+                            <input
+                              id="order-deposit-amount"
+                              type="number"
+                              min="1"
+                              step="0.01"
+                              max={totalNum > 0 ? totalNum : undefined}
+                              className="adm-input"
+                              style={{ width: 150, padding: '6px 10px' }}
+                              placeholder="Ej: 15000"
+                              value={depositInput}
+                              onChange={(e) => setDepositInput(e.target.value)}
+                              disabled={paymentUpdating}
+                            />
+                            <button
+                              type="button"
+                              className="adm-btnPrimary"
+                              style={{ padding: '6px 14px', fontSize: 12 }}
+                              disabled={paymentUpdating}
+                              onClick={() => {
+                                const parsed = Number(depositInput.replace(',', '.'));
+                                savePayment(detail.id, 'deposit', parsed);
+                              }}
+                            >
+                              Guardar seña
+                            </button>
+                          </div>
+                        )}
+
+                        <div style={{ marginTop: 8, fontSize: 13, color: '#374151', background: '#f9fafb', padding: '8px 10px', borderRadius: 6 }}>
+                          {activeBtn === 'deposit' ? (
+                            <>
+                              <strong>Pagó:</strong> ${formatMoney(displayPaid)} · <strong>Falta pagar:</strong> ${formatMoney(displayRemaining)}{' '}
+                              <span style={{ color: '#6b7280' }}>(de ${formatMoney(totalNum)})</span>
+                            </>
+                          ) : pStatus === 'paid' ? (
+                            <>
+                              <strong>Pagado completo:</strong> ${formatMoney(totalNum)} · <strong>Falta pagar:</strong> $0.00
+                            </>
+                          ) : (
+                            <>
+                              <strong>Pagó:</strong> $0.00 · <strong>Falta pagar:</strong> ${formatMoney(totalNum)}
+                            </>
+                          )}
+                        </div>
+
+                        {paymentError && (
+                          <div style={{ color: '#dc2626', fontSize: 12, marginTop: 6 }}>{paymentError}</div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   {detail.items && detail.items.length > 0 && (
                     <div>
                       <div className="adm-label" style={{ marginBottom: 8 }}>Ítems</div>
@@ -410,8 +616,15 @@ export default function AdminOrdersPage() {
                       title="Copiar resumen del pedido"
                       style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px' }}
                       onClick={() => {
+                        const { total: totalNum, pStatus, paid, remaining } = getOrderPaymentAmounts(detail);
+                        const paymentText =
+                          pStatus === 'deposit'
+                            ? `${paymentLabelShort[pStatus]} (Pagó: $${formatMoney(paid)} · Falta: $${formatMoney(remaining)})`
+                            : pStatus === 'paid'
+                              ? `${paymentLabelShort[pStatus]} ($${formatMoney(totalNum)})`
+                              : `${paymentLabelShort[pStatus]} (Falta: $${formatMoney(totalNum)})`;
                         const itemsText = (detail.items || []).map(it => `  - ${it.productName}${it.variantName ? ` (${it.variantName})` : ''} x${it.quantity}`).join('\n');
-                        copyToClipboard(`Pedido #${detail.id}\nCliente: ${detail.customerName}\nEstado: ${statusLabel[detail.status] ?? detail.status}\nTotal: $${detail.total}\nItems:\n${itemsText}`);
+                        copyToClipboard(`Pedido #${detail.id}\nCliente: ${detail.customerName}\nEstado: ${statusLabel[detail.status] ?? detail.status}\nPago: ${paymentText}\nTotal: $${detail.total}\nItems:\n${itemsText}`);
                       }}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>summarize</span>
@@ -423,7 +636,7 @@ export default function AdminOrdersPage() {
             )}
 
             <div className="adm-modalFooter">
-              <button className="adm-btnCancel" onClick={() => { setDetail(null); setDetailLoading(false); }}>Cerrar</button>
+              <button className="adm-btnCancel" onClick={closeDetail}>Cerrar</button>
             </div>
           </div>
         </div>

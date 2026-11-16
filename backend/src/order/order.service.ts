@@ -120,6 +120,8 @@ export async function createOrder(input: CreateOrderInput) {
       shippingProvince: shippingMethod === ShippingMethod.DELIVERY ? shippingProvince : undefined,
       shippingCost: toDecimalString(shippingCost),
       status: 'pending',
+      paymentStatus: 'unpaid',
+      paidAmount: '0.00',
       subtotal: '0.00',
       total: '0.00',
     });
@@ -191,7 +193,7 @@ export async function createOrder(input: CreateOrderInput) {
   return populated;
 }
 
-export async function listOrders(params: { limit?: unknown; page?: unknown; status?: unknown; q?: unknown }) {
+export async function listOrders(params: { limit?: unknown; page?: unknown; status?: unknown; paymentStatus?: unknown; q?: unknown }) {
   const em = orm.em.fork();
 
   const limitRaw = params.limit as any;
@@ -206,6 +208,9 @@ export async function listOrders(params: { limit?: unknown; page?: unknown; stat
 
   const status = String(params.status ?? '').trim();
   if (status) where.status = status;
+
+  const paymentStatus = String(params.paymentStatus ?? '').trim();
+  if (paymentStatus) where.paymentStatus = paymentStatus;
 
   const q = String(params.q ?? '').trim();
   if (q) {
@@ -366,5 +371,50 @@ export async function updateOrderStatus(id: number, status: string) {
     }).catch((err) => console.error('[mail] Error enviando alerta stock bajo:', err));
   }
 
+  return await OrderRepository.populateOrder(em, id);
+}
+
+const VALID_PAYMENT_STATUSES = ['unpaid', 'deposit', 'paid'] as const;
+
+export async function updateOrderPayment(
+  id: number,
+  input: { paymentStatus?: unknown; paidAmount?: unknown }
+) {
+  const paymentStatus = String(input.paymentStatus ?? '').trim();
+  if (!VALID_PAYMENT_STATUSES.includes(paymentStatus as any)) {
+    throw new Error(`Estado de pago inválido: ${paymentStatus}`);
+  }
+  const em = orm.em.fork();
+  const order = await em.findOne(Order as any, { id });
+  if (!order) return null;
+  const o = order as any;
+  const totalNum = Number(o.total) || 0;
+
+  if (paymentStatus === 'unpaid') {
+    o.paymentStatus = 'unpaid';
+    o.paidAmount = '0.00';
+  } else if (paymentStatus === 'paid') {
+    o.paymentStatus = 'paid';
+    o.paidAmount = toDecimalString(totalNum);
+    if (!o.paidAt) o.paidAt = new Date();
+  } else if (paymentStatus === 'deposit') {
+    const rawAmount = Number(input.paidAmount);
+    if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
+      throw new Error('Ingresá un monto de seña válido mayor a $0');
+    }
+    if (totalNum > 0 && rawAmount > totalNum) {
+      throw new Error('El monto de la seña no puede superar el total del pedido');
+    }
+    if (totalNum > 0 && rawAmount === totalNum) {
+      o.paymentStatus = 'paid';
+      o.paidAmount = toDecimalString(totalNum);
+    } else {
+      o.paymentStatus = 'deposit';
+      o.paidAmount = toDecimalString(rawAmount);
+    }
+    if (!o.paidAt) o.paidAt = new Date();
+  }
+
+  await em.flush();
   return await OrderRepository.populateOrder(em, id);
 }

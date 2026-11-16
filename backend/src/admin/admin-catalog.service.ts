@@ -12,7 +12,7 @@ import {
   getExtraScopes, setExtraScopes,
 } from '../extra/extra.service.js';
 import {
-  listOrders as listOrdersSvc, getOrderById, updateOrderStatus,
+  listOrders as listOrdersSvc, getOrderById, updateOrderStatus, updateOrderPayment,
 } from '../order/order.service.js';
 
 // ── Products ────────────────────────────────────────────────
@@ -166,7 +166,7 @@ export async function setAdminExtraScopes(id: number, input: { product_ids?: num
 
 // ── Orders (admin) ──────────────────────────────────────────
 
-export async function listAdminOrders(params: { limit?: unknown; page?: unknown; status?: unknown; q?: unknown }) {
+export async function listAdminOrders(params: { limit?: unknown; page?: unknown; status?: unknown; paymentStatus?: unknown; q?: unknown }) {
   return await listOrdersSvc(params);
 }
 
@@ -176,6 +176,10 @@ export async function getAdminOrder(id: number) {
 
 export async function setAdminOrderStatus(id: number, status: string) {
   return await updateOrderStatus(id, status);
+}
+
+export async function setAdminOrderPayment(id: number, input: { paymentStatus?: unknown; paidAmount?: unknown }) {
+  return await updateOrderPayment(id, input);
 }
 
 // ── Reviews (admin) ─────────────────────────────────────────

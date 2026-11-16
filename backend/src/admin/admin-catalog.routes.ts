@@ -36,6 +36,7 @@ import {
   listOrders,
   getOrder,
   updateOrderStatus,
+  updateOrderPayment,
   listReviews,
   updateReviewStatus,
   deleteReview,
@@ -98,6 +99,7 @@ adminCatalogRouter.put('/extras/:id/scopes', setExtraScopes);
 adminCatalogRouter.get('/orders', listOrders);
 adminCatalogRouter.get('/orders/:id', getOrder);
 adminCatalogRouter.patch('/orders/:id/status', updateOrderStatus);
+adminCatalogRouter.patch('/orders/:id/payment', updateOrderPayment);
 
 // ── Reviews ─────────────────────────────────────────────────
 adminCatalogRouter.get('/reviews', listReviews);

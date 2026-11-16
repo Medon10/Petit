@@ -5,6 +5,14 @@ const TZ = 'America/Argentina/Buenos_Aires';
 /** Pedidos que cuentan como ingreso: comprobante recibido o completados. */
 const INCOME_STATUSES_SQL = `('processing','completed')`;
 
+const ORDER_COLLECTED_SQL = `CASE
+  WHEN o.payment_status = 'paid' THEN o.total
+  WHEN o.payment_status = 'deposit' THEN o.paid_amount
+  WHEN o.payment_status IS NULL AND o.status IN ('processing', 'completed') THEN o.total
+  ELSE 0
+END`;
+const ORDER_COUNTED_WHERE_SQL = `(o.status <> 'cancelled' AND (o.payment_status IN ('paid', 'deposit') OR (o.payment_status IS NULL AND o.status IN ('processing', 'completed'))))`;
+
 /**
  * Fecha (día local argentino) en que el pedido ingresó.
  * `paid_at` es la fuente; los pedidos anteriores a la feature usan `created_at`.
@@ -59,9 +67,9 @@ const num = (v: unknown) => Math.round(Number(v ?? 0) * 100) / 100;
 
 async function periodTotals(from: string, to: string) {
   const [inc] = await exec(
-    `SELECT COALESCE(SUM(o.total), 0) AS ingresos, COUNT(*)::int AS pedidos
+    `SELECT COALESCE(SUM(${ORDER_COLLECTED_SQL}), 0) AS ingresos, COUNT(*)::int AS pedidos
        FROM orders o
-      WHERE o.status IN ${INCOME_STATUSES_SQL}
+      WHERE ${ORDER_COUNTED_WHERE_SQL}
         AND ${ORDER_DAY_SQL} BETWEEN ? AND ?`,
     [from, to]
   );
@@ -116,9 +124,9 @@ export async function getMonthly(params: { year?: unknown }) {
 
   const incomeRows = await exec(
     `SELECT EXTRACT(MONTH FROM ${ORDER_DAY_SQL})::int AS m,
-            COALESCE(SUM(o.total), 0) AS ingresos, COUNT(*)::int AS pedidos
+            COALESCE(SUM(${ORDER_COLLECTED_SQL}), 0) AS ingresos, COUNT(*)::int AS pedidos
        FROM orders o
-      WHERE o.status IN ${INCOME_STATUSES_SQL}
+      WHERE ${ORDER_COUNTED_WHERE_SQL}
         AND ${ORDER_DAY_SQL} BETWEEN ? AND ?
       GROUP BY 1`,
     [from, to]

@@ -9,6 +9,12 @@ export enum OrderStatus {
   COMPLETED = 'completed',
 }
 
+export enum OrderPaymentStatus {
+  UNPAID = 'unpaid',
+  DEPOSIT = 'deposit',
+  PAID = 'paid',
+}
+
 export enum ShippingMethod {
   PICKUP = 'pickup',
   DELIVERY = 'delivery',
@@ -51,6 +57,12 @@ export class Order extends BaseEntity {
 
   @Enum({ items: () => OrderStatus })
   status: OrderStatus = OrderStatus.PENDING;
+
+  @Property({ fieldName: 'payment_status', default: OrderPaymentStatus.UNPAID })
+  paymentStatus: OrderPaymentStatus = OrderPaymentStatus.UNPAID;
+
+  @Property({ fieldName: 'paid_amount', type: 'decimal', precision: 10, scale: 2, default: 0 })
+  paidAmount: string = '0.00';
 
   @Property({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   subtotal: string = '0.00';

@@ -30,6 +30,7 @@ import {
   listAdminOrders,
   getAdminOrder,
   setAdminOrderStatus,
+  setAdminOrderPayment,
   listAdminReviews,
   setAdminReviewStatus,
   removeAdminReview,
@@ -361,6 +362,7 @@ export async function listOrders(req: Request, res: Response) {
       limit: req.query.limit ?? req.query.take,
       page: req.query.page,
       status: req.query.status,
+      paymentStatus: req.query.payment_status ?? req.query.paymentStatus,
       q: req.query.q,
     });
     return res.json(result);
@@ -390,6 +392,21 @@ export async function updateOrderStatus(req: Request, res: Response) {
     return res.status(200).json({ message: 'Pedido actualizado', data: item });
   } catch (error: any) {
     return res.status(400).json({ message: error?.message || 'Error al actualizar pedido' });
+  }
+}
+
+export async function updateOrderPayment(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const body = (req.body as any) ?? {};
+    const paymentStatus = body.payment_status ?? body.paymentStatus;
+    const paidAmount = body.paid_amount ?? body.paidAmount;
+    if (!paymentStatus) return res.status(400).json({ message: 'payment_status es requerido' });
+    const item = await setAdminOrderPayment(id, { paymentStatus, paidAmount });
+    if (!item) return res.status(404).json({ message: 'No encontrado' });
+    return res.status(200).json({ message: 'Pago actualizado', data: item });
+  } catch (error: any) {
+    return res.status(400).json({ message: error?.message || 'Error al actualizar pago del pedido' });
   }
 }
 

@@ -455,6 +455,8 @@ export type OrderDto = {
   shippingCost?: string;
   subtotal?: string;
   status: string;
+  paymentStatus?: 'unpaid' | 'deposit' | 'paid';
+  paidAmount?: string;
   total: string;
   createdAt?: string;
   items?: Array<{
@@ -480,9 +482,10 @@ export type OrdersPageDto = {
   totalPages: number;
 };
 
-export async function adminGetOrders(options?: { status?: string; q?: string; page?: number; limit?: number }) {
+export async function adminGetOrders(options?: { status?: string; paymentStatus?: string; q?: string; page?: number; limit?: number }) {
   const qs = buildQuery({
     status: options?.status,
+    payment_status: options?.paymentStatus,
     q: options?.q,
     page: options?.page,
     limit: options?.limit,
@@ -502,6 +505,16 @@ export async function adminGetOrder(id: number) {
 
 export async function adminUpdateOrderStatus(id: number, status: string) {
   return await adminRequestJson<{ data?: unknown }>(`/admin/catalog/orders/${id}/status`, { method: 'PATCH', body: { status } });
+}
+
+export async function adminUpdateOrderPayment(
+  id: number,
+  input: { payment_status: 'unpaid' | 'deposit' | 'paid'; paid_amount?: number }
+) {
+  return await adminRequestJson<{ data?: OrderDto }>(`/admin/catalog/orders/${id}/payment`, {
+    method: 'PATCH',
+    body: input,
+  });
 }
 
 // ── Reviews ─────────────────────────────────────────────────
