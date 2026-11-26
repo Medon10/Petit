@@ -459,14 +459,18 @@ export type OrderDto = {
   paidAmount?: string;
   total: string;
   createdAt?: string;
+  updatedAt?: string;
   items?: Array<{
     id: number;
+    product?: number | { id: number };
+    variant?: number | { id: number } | null;
     productName: string;
     variantName?: string;
     quantity: number;
     unitPrice: string;
     extras?: Array<{
       id: number;
+      extra?: number | { id: number } | null;
       extraName: string;
       quantity: number;
       unitPrice: string;
@@ -513,6 +517,39 @@ export async function adminUpdateOrderPayment(
 ) {
   return await adminRequestJson<{ data?: OrderDto }>(`/admin/catalog/orders/${id}/payment`, {
     method: 'PATCH',
+    body: input,
+  });
+}
+
+export type UpdateOrderInput = {
+  customer_name: string;
+  customer_email?: string;
+  customer_phone?: string;
+  notes?: string;
+  shipping: {
+    method: ShippingMethod;
+    postal_code?: string;
+    address_line1?: string;
+    address_line2?: string;
+    city?: string;
+    province?: string;
+  };
+  items: Array<{
+    id?: number;
+    product_id: number;
+    variant_id: number | null;
+    quantity: number;
+    extras?: Array<{
+      id?: number;
+      extra_id: number | null;
+      quantity: number;
+    }>;
+  }>;
+};
+
+export async function adminUpdateOrder(id: number, input: UpdateOrderInput) {
+  return await adminRequestJson<{ data?: OrderDto; warnings?: string[] }>(`/admin/catalog/orders/${id}`, {
+    method: 'PUT',
     body: input,
   });
 }

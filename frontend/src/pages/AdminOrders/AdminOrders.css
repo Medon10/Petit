@@ -30,3 +30,128 @@
     padding-bottom: 0;
   }
 }
+
+/* ── Order Edit Modal ────────────────────────────────────── */
+.adm-orderEditModal {
+  width: min(760px, 100%);
+  max-height: 90vh;
+}
+
+.adm-orderEditGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.adm-orderEditItem {
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fafafa;
+}
+
+.adm-orderEditItemHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.adm-orderEditItemControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) 128px;
+  gap: 10px;
+  align-items: end;
+}
+
+.adm-orderEditQty {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.adm-orderEditQty .adm-input {
+  height: 32px;
+  text-align: center;
+  padding: 0 6px;
+}
+
+.adm-orderEditExtras {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #e4e4e7;
+}
+
+.adm-orderEditExtraRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #ececee;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.adm-orderEditAddExtra {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.adm-orderEditAddExtra .adm-select {
+  flex: 1;
+}
+
+.adm-orderEditSummary {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.adm-orderNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.adm-orderNotice .material-symbols-outlined {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.adm-orderNotice.info {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.adm-orderNotice.warning {
+  background: #fefce8;
+  color: #854d0e;
+  border: 1px solid #fde68a;
+}
+
+.adm-orderNotice.success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+@media (max-width: 680px) {
+  .adm-orderEditGrid,
+  .adm-orderEditItemControls {
+    grid-template-columns: 1fr;
+  }
+
+  .adm-orderEditAddExtra {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

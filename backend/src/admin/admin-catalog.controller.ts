@@ -31,6 +31,7 @@ import {
   getAdminOrder,
   setAdminOrderStatus,
   setAdminOrderPayment,
+  updateAdminOrder,
   listAdminReviews,
   setAdminReviewStatus,
   removeAdminReview,
@@ -407,6 +408,26 @@ export async function updateOrderPayment(req: Request, res: Response) {
     return res.status(200).json({ message: 'Pago actualizado', data: item });
   } catch (error: any) {
     return res.status(400).json({ message: error?.message || 'Error al actualizar pago del pedido' });
+  }
+}
+
+export async function updateOrder(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
+    const input = (req.body as any).sanitizedInput || req.body;
+    const result = await updateAdminOrder(id, input);
+    if (!result) return res.status(404).json({ message: 'No encontrado' });
+    return res.status(200).json({
+      message: 'Pedido actualizado',
+      data: result.order,
+      warnings: result.warnings,
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      message: error?.message || 'Error al actualizar pedido',
+      code: error?.code,
+    });
   }
 }
 

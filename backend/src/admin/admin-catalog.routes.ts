@@ -6,6 +6,7 @@ import { sanitizeProductInput } from '../shared/middleware/sanitizeProduct.js';
 import { sanitizeCategoryInput } from '../shared/middleware/sanitizeCategory.js';
 import { sanitizeVariantInput } from '../shared/middleware/sanitizeVariant.js';
 import { sanitizeExtraInput } from '../shared/middleware/sanitizeExtra.js';
+import { sanitizeAdminOrderUpdateInput } from '../shared/middleware/sanitizeOrder.js';
 import {
   listProducts,
   getProduct,
@@ -37,6 +38,7 @@ import {
   getOrder,
   updateOrderStatus,
   updateOrderPayment,
+  updateOrder,
   listReviews,
   updateReviewStatus,
   deleteReview,
@@ -98,6 +100,8 @@ adminCatalogRouter.put('/extras/:id/scopes', setExtraScopes);
 // ── Orders ──────────────────────────────────────────────────
 adminCatalogRouter.get('/orders', listOrders);
 adminCatalogRouter.get('/orders/:id', getOrder);
+adminCatalogRouter.put('/orders/:id', sanitizeAdminOrderUpdateInput, updateOrder);
+adminCatalogRouter.patch('/orders/:id', sanitizeAdminOrderUpdateInput, updateOrder);
 adminCatalogRouter.patch('/orders/:id/status', updateOrderStatus);
 adminCatalogRouter.patch('/orders/:id/payment', updateOrderPayment);
 

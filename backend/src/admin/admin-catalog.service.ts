@@ -12,7 +12,7 @@ import {
   getExtraScopes, setExtraScopes,
 } from '../extra/extra.service.js';
 import {
-  listOrders as listOrdersSvc, getOrderById, updateOrderStatus, updateOrderPayment,
+  listOrders as listOrdersSvc, getOrderById, updateOrderStatus, updateOrderPayment, updateOrder,
 } from '../order/order.service.js';
 
 // ── Products ────────────────────────────────────────────────
@@ -180,6 +180,10 @@ export async function setAdminOrderStatus(id: number, status: string) {
 
 export async function setAdminOrderPayment(id: number, input: { paymentStatus?: unknown; paidAmount?: unknown }) {
   return await updateOrderPayment(id, input);
+}
+
+export async function updateAdminOrder(id: number, input: any) {
+  return await updateOrder(id, input);
 }
 
 // ── Reviews (admin) ─────────────────────────────────────────

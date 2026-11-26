@@ -24,6 +24,24 @@ export class OrderRepository {
     return extra as any;
   }
 
+  static async findProductByIdOrThrow(em: EntityManager, productId: number) {
+    const product = await em.findOne(Product as any, { id: productId });
+    if (!product) throw new Error(`product_id inválido: ${productId}`);
+    return product as any;
+  }
+
+  static async findVariantByIdOrThrow(em: EntityManager, variantId: number, productId: number) {
+    const variant = await em.findOne(Variant as any, { id: variantId, product: productId } as any);
+    if (!variant) throw new Error(`variant_id inválido para product_id=${productId}`);
+    return variant as any;
+  }
+
+  static async findActiveExtraOrThrow(em: EntityManager, extraId: number) {
+    const extra = await em.findOne(Extra as any, { id: extraId });
+    if (!extra || (extra as any).isActive === false) throw new Error(`extra_id inválido o inactivo: ${extraId}`);
+    return extra as any;
+  }
+
   static async populateOrder(em: EntityManager, id: number) {
     return await em.findOne(
       Order as any,

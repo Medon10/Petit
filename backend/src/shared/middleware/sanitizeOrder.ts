@@ -65,3 +65,81 @@ export function sanitizeOrderInput(req: Request, res: Response, next: NextFuncti
   (req as any).body.sanitizedInput = input;
   next();
 }
+
+type AdminOrderExtraInput = {
+  id?: number;
+  extra_id?: number | null;
+  extraId?: number | null;
+  quantity?: number;
+};
+
+type AdminOrderItemInput = {
+  id?: number;
+  product_id?: number;
+  productId?: number;
+  variant_id?: number | null;
+  variantId?: number | null;
+  quantity?: number;
+  extras?: AdminOrderExtraInput[];
+};
+
+function readOptionalId(value: unknown): number | undefined {
+  if (value == null || value === '') return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function readNullableId(primary: unknown, fallback: unknown): number | null | undefined {
+  if (primary === null || (primary === undefined && fallback === null)) return null;
+  const raw = primary !== undefined ? primary : fallback;
+  if (raw == null || raw === '') return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+export function sanitizeAdminOrderUpdateInput(req: Request, _res: Response, next: NextFunction) {
+  const b = req.body || {};
+
+  const itemsRaw: any[] = Array.isArray(b.items) ? b.items : [];
+  const items = itemsRaw.map((it: AdminOrderItemInput) => {
+    const extrasRaw: any[] = Array.isArray((it as any).extras) ? (it as any).extras : [];
+    return {
+      id: readOptionalId(it.id),
+      product_id: readOptionalId(it.product_id ?? it.productId),
+      variant_id: readNullableId(it.variant_id, it.variantId),
+      quantity: it.quantity != null ? Number(it.quantity) : 1,
+      extras: extrasRaw.map((x: AdminOrderExtraInput) => ({
+        id: readOptionalId(x.id),
+        extra_id: readNullableId(x.extra_id, x.extraId),
+        quantity: x.quantity != null ? Number(x.quantity) : 1,
+      })),
+    };
+  });
+
+  const shippingRaw = b.shipping && typeof b.shipping === 'object' ? (b.shipping as ShippingInput) : {};
+  const shippingMethodRaw = String(shippingRaw.method ?? '').toLowerCase();
+  const shippingMethod = shippingMethodRaw === 'delivery' ? 'delivery' : 'pickup';
+
+  const customerNameRaw = b.customer_name !== undefined ? b.customer_name : b.customerName;
+  const customerEmailRaw = b.customer_email !== undefined ? b.customer_email : b.customerEmail;
+  const customerPhoneRaw = b.customer_phone !== undefined ? b.customer_phone : b.customerPhone;
+
+  const input = {
+    customer_name: typeof customerNameRaw === 'string' ? customerNameRaw.trim() : undefined,
+    customer_email: typeof customerEmailRaw === 'string' ? customerEmailRaw.trim() : undefined,
+    customer_phone: typeof customerPhoneRaw === 'string' ? customerPhoneRaw.trim() : undefined,
+    notes: typeof b.notes === 'string' ? b.notes.trim() : undefined,
+    shipping: {
+      method: shippingMethod,
+      postal_code: readString(shippingRaw.postal_code ?? shippingRaw.postalCode),
+      address_line1: readString(shippingRaw.address_line1 ?? shippingRaw.addressLine1),
+      address_line2: readString(shippingRaw.address_line2 ?? shippingRaw.addressLine2),
+      city: readString(shippingRaw.city),
+      province: readString(shippingRaw.province),
+    },
+    items,
+  } as any;
+
+  (req as any).body.sanitizedInput = input;
+  next();
+}

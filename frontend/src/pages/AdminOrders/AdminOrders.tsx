@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import AdminLayout from '../../componentes/admin/AdminLayout';
 import Pagination from '../../componentes/shared/Pagination';
 import Skeleton from '../../componentes/shared/Skeleton';
+import OrderEditModal from './OrderEditModal';
 import {
   adminGetOrders,
   adminGetOrder,
@@ -87,6 +88,10 @@ function copyToClipboard(text: string) {
   });
 }
 
+function isOrderEditable(status?: string) {
+  return status === 'pending' || status === 'processing';
+}
+
 export default function AdminOrdersPage() {
   const nav = useNavigate();
   const [orders, setOrders] = useState<OrderDto[]>([]);
@@ -100,14 +105,16 @@ export default function AdminOrdersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [detail, setDetail] = useState<OrderDto | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<OrderDto | null>(null);
+  const [editFeedback, setEditFeedback] = useState<{ message: string; warnings: string[] } | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [paymentUpdating, setPaymentUpdating] = useState(false);
   const [depositEditing, setDepositEditing] = useState(false);
   const [depositInput, setDepositInput] = useState('');
   const [paymentError, setPaymentError] = useState('');
 
-  const onAuthErr = useCallback((e: any) => {
-    const msg = String(e?.message ?? '');
+  const onAuthErr = useCallback((e: unknown) => {
+    const msg = e instanceof Error ? e.message : String(e ?? '');
     if (msg.includes('401') || msg.includes('token')) {
       clearAdminToken();
       nav('/admin/login');
@@ -136,7 +143,7 @@ export default function AdminOrdersPage() {
       setOrders(result.data);
       setTotal(result.total);
       setTotalPages(result.totalPages || 1);
-    } catch (e: any) {
+    } catch (e: unknown) {
       onAuthErr(e);
     } finally {
       setLoading(false);
@@ -145,9 +152,10 @@ export default function AdminOrdersPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function openDetail(id: number) {
+  async function openDetail(id: number, alsoEdit = false) {
     setDetailLoading(true);
     setDetail(null);
+    setEditFeedback(null);
     setPaymentError('');
     setDepositEditing(false);
     setDepositInput('');
@@ -158,7 +166,10 @@ export default function AdminOrdersPage() {
         setDepositEditing(true);
         setDepositInput(String(Number(o.paidAmount ?? 0) || ''));
       }
-    } catch (e: any) {
+      if (alsoEdit && o && isOrderEditable(o.status)) {
+        setEditingOrder(o);
+      }
+    } catch (e: unknown) {
       onAuthErr(e);
     } finally {
       setDetailLoading(false);
@@ -168,8 +179,24 @@ export default function AdminOrdersPage() {
   function closeDetail() {
     setDetail(null);
     setDetailLoading(false);
+    setEditingOrder(null);
+    setEditFeedback(null);
     setDepositEditing(false);
     setPaymentError('');
+  }
+
+  async function handleOrderEdited(updated: OrderDto, warnings: string[]) {
+    setDetail(updated);
+    setEditingOrder(null);
+    setEditFeedback({ message: 'Pedido actualizado correctamente.', warnings });
+    setPaymentError('');
+    setDepositEditing(updated.paymentStatus === 'deposit');
+    if (updated.paymentStatus === 'deposit') {
+      setDepositInput(String(Number(updated.paidAmount ?? 0) || ''));
+    } else {
+      setDepositInput('');
+    }
+    await load();
   }
 
   async function changeStatus(id: number, status: string) {
@@ -180,7 +207,7 @@ export default function AdminOrdersPage() {
         setDetail({ ...detail, status });
       }
       await load();
-    } catch (e: any) {
+    } catch (e: unknown) {
       onAuthErr(e);
     } finally {
       setStatusUpdating(false);
@@ -203,9 +230,9 @@ export default function AdminOrdersPage() {
         }
       }
       await load();
-    } catch (e: any) {
+    } catch (e: unknown) {
       onAuthErr(e);
-      setPaymentError(e?.message || 'No se pudo actualizar el pago');
+      setPaymentError(e instanceof Error ? e.message : 'No se pudo actualizar el pago');
     } finally {
       setPaymentUpdating(false);
     }
@@ -319,14 +346,26 @@ export default function AdminOrdersPage() {
                   <td>${o.total}</td>
                   <td>{formatDate(o.createdAt)}</td>
                   <td>
-                    <button
-                      className="adm-btnSmall"
-                      aria-label={`Ver detalle del pedido #${o.id}`}
-                      title="Ver detalle"
-                      onClick={() => openDetail(o.id)}
-                    >
-                      <span className="material-symbols-outlined" aria-hidden="true">visibility</span>
-                    </button>
+                    <div className="adm-actions">
+                      <button
+                        className="adm-btnSmall"
+                        aria-label={`Ver detalle del pedido #${o.id}`}
+                        title="Ver detalle"
+                        onClick={() => openDetail(o.id)}
+                      >
+                        <span className="material-symbols-outlined" aria-hidden="true">visibility</span>
+                      </button>
+                      {isOrderEditable(o.status) && (
+                        <button
+                          className="adm-btnSmall"
+                          aria-label={`Editar pedido #${o.id}`}
+                          title="Editar pedido"
+                          onClick={() => openDetail(o.id, true)}
+                        >
+                          <span className="material-symbols-outlined" aria-hidden="true">edit</span>
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
                 );
@@ -365,6 +404,20 @@ export default function AdminOrdersPage() {
 
             {detail && (
               <div className="adm-modalBody">
+                {editFeedback && (
+                  <div style={{ display: 'grid', gap: 8, marginBottom: 14 }}>
+                    <div className="adm-orderNotice success">
+                      <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                      <span>{editFeedback.message}</span>
+                    </div>
+                    {editFeedback.warnings.map((w, idx) => (
+                      <div key={idx} className="adm-orderNotice warning">
+                        <span className="material-symbols-outlined" aria-hidden="true">warning</span>
+                        <span>{w}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="adm-form" style={{ gap: 12 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div>
@@ -623,13 +676,28 @@ export default function AdminOrdersPage() {
                             : pStatus === 'paid'
                               ? `${paymentLabelShort[pStatus]} ($${formatMoney(totalNum)})`
                               : `${paymentLabelShort[pStatus]} (Falta: $${formatMoney(totalNum)})`;
-                        const itemsText = (detail.items || []).map(it => `  - ${it.productName}${it.variantName ? ` (${it.variantName})` : ''} x${it.quantity}`).join('\n');
+                        const itemsText = (detail.items || []).map((it) => {
+                          const base = `  - ${it.productName}${it.variantName ? ` (${it.variantName})` : ''} x${it.quantity}`;
+                          const extrasLines = (it.extras || []).map((ex) => `    + ${ex.extraName} x${ex.quantity}`);
+                          return [base, ...extrasLines].join('\n');
+                        }).join('\n');
                         copyToClipboard(`Pedido #${detail.id}\nCliente: ${detail.customerName}\nEstado: ${statusLabel[detail.status] ?? detail.status}\nPago: ${paymentText}\nTotal: $${detail.total}\nItems:\n${itemsText}`);
                       }}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>summarize</span>
                       Copiar resumen
                     </button>
+                    {isOrderEditable(detail.status) && (
+                      <button
+                        type="button"
+                        className="adm-btnPrimary"
+                        style={{ marginLeft: 'auto', height: 34, padding: '0 14px', fontSize: 12 }}
+                        onClick={() => setEditingOrder(detail)}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
+                        Editar pedido
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -640,6 +708,15 @@ export default function AdminOrdersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {editingOrder && (
+        <OrderEditModal
+          order={editingOrder}
+          onClose={() => setEditingOrder(null)}
+          onSaved={handleOrderEdited}
+          onAuthErr={onAuthErr}
+        />
       )}
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
