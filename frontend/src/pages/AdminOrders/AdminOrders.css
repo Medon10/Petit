@@ -13,6 +13,16 @@
   flex-wrap: wrap;
 }
 
+.adm-ordersField {
+  flex: 1 1 155px;
+  min-width: 0;
+}
+
+.adm-ordersSearch {
+  flex: 2 1 220px;
+  min-width: 0;
+}
+
 .adm-ordersCount {
   margin-left: auto;
   font-size: 12px;
@@ -21,9 +31,20 @@
   text-transform: uppercase;
   color: #71717a;
   padding-bottom: 10px;
+  white-space: nowrap;
 }
 
-@media (max-width: 768px) {
+.adm-orderDetailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.adm-orderDetailValue {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1024px) {
   .adm-ordersCount {
     margin-left: 0;
     width: 100%;
@@ -31,10 +52,168 @@
   }
 }
 
-/* ── Order Edit Modal ────────────────────────────────────── */
+@media (max-width: 560px) {
+  .adm-orderDetailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Petit Action Buttons ────────────────────────────────── */
+.adm-btnPetit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #C76DA2 0%, #db2777 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(199, 109, 162, 0.32);
+  transition: filter 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+  white-space: nowrap;
+}
+
+.adm-btnPetit:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(219, 39, 119, 0.38);
+}
+
+.adm-btnPetit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.adm-btnPetitSoft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #f3c4df;
+  border-radius: 9px;
+  background: #fdf2f8;
+  color: #9d174d;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 150ms ease;
+  white-space: nowrap;
+}
+
+.adm-btnPetitSoft:hover:not(:disabled) {
+  background: #fce7f3;
+  border-color: #db2777;
+  color: #831843;
+}
+
+.adm-btnPetitSoft:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.adm-btnPetitSoft .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* ── Order Edit Modal (Petit Style) ──────────────────────── */
 .adm-orderEditModal {
   width: min(760px, 100%);
   max-height: 90vh;
+  border: 1.5px solid #f3d5e7;
+  box-shadow: 0 24px 60px -12px rgba(199, 109, 162, 0.24), 0 12px 24px -8px rgba(0, 0, 0, 0.12);
+}
+
+.adm-orderEditHeader {
+  background: linear-gradient(135deg, #fff5fa 0%, #fce7f3 100%);
+  border-bottom: 1px solid #f3d5e7;
+}
+
+.adm-orderEditHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.adm-orderEditHeaderIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #f3c4df;
+  color: #db2777;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(199, 109, 162, 0.16);
+}
+
+.adm-orderEditHeaderIcon .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.adm-orderEditSubtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #831843;
+  opacity: 0.85;
+}
+
+.adm-orderEditModal .adm-input,
+.adm-orderEditModal .adm-textarea,
+.adm-orderEditModal .adm-select {
+  border-color: #ead9e4;
+}
+
+.adm-orderEditModal .adm-input:focus,
+.adm-orderEditModal .adm-textarea:focus,
+.adm-orderEditModal .adm-select:focus {
+  border-color: #C76DA2;
+  box-shadow: 0 0 0 3px rgba(199, 109, 162, 0.18);
+}
+
+.adm-orderEditSection {
+  background: #fffcff;
+  border: 1px solid #f3e4ed;
+  border-radius: 14px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.adm-orderEditSectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.adm-orderEditSectionTitle {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #831843;
+}
+
+.adm-orderEditSectionTitle .material-symbols-outlined {
+  font-size: 17px;
+  color: #C76DA2;
 }
 
 .adm-orderEditGrid {
@@ -43,19 +222,50 @@
   gap: 10px 12px;
 }
 
+.adm-orderEditFull {
+  grid-column: 1 / -1;
+}
+
 .adm-orderEditItem {
-  border: 1px solid #e4e4e7;
-  border-radius: 12px;
-  padding: 12px;
-  background: #fafafa;
+  border: 1px solid #f3d5e7;
+  border-radius: 14px;
+  padding: 14px;
+  background: linear-gradient(180deg, #fffafd 0%, #fdf4f9 100%);
+  min-width: 0;
 }
 
 .adm-orderEditItemHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 10px;
+}
+
+.adm-orderEditItemBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fce7f3;
+  color: #9d174d;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.adm-orderEditItemSubtotal {
+  font-size: 13px;
+  font-weight: 800;
+  color: #831843;
+}
+
+.adm-orderEditRemoveBtn:hover:not(:disabled) {
+  border-color: #fda4af;
+  background: #fff1f2;
+  color: #be123c;
 }
 
 .adm-orderEditItemControls {
@@ -80,16 +290,17 @@
 .adm-orderEditExtras {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px dashed #e4e4e7;
+  border-top: 1px dashed #ecc3dc;
 }
 
 .adm-orderEditExtraRow {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   background: #fff;
-  border: 1px solid #ececee;
-  border-radius: 8px;
+  border: 1px solid #f3d5e7;
+  border-radius: 9px;
   padding: 6px 8px;
 }
 
@@ -101,13 +312,25 @@
 
 .adm-orderEditAddExtra .adm-select {
   flex: 1;
+  min-width: 0;
 }
 
 .adm-orderEditSummary {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 12px 14px;
+  background: linear-gradient(135deg, #fff5fa 0%, #fdf2f8 100%);
+  border: 1.5px solid #f3c4df;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.adm-orderEditNewTotal {
+  font-size: 16px;
+  font-weight: 900;
+  color: #831843;
+}
+
+.adm-orderEditFooter {
+  background: #fffafd;
+  border-top: 1px solid #f3e4ed;
 }
 
 .adm-orderNotice {
@@ -144,7 +367,7 @@
   border: 1px solid #bbf7d0;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 720px) {
   .adm-orderEditGrid,
   .adm-orderEditItemControls {
     grid-template-columns: 1fr;
@@ -153,5 +376,9 @@
   .adm-orderEditAddExtra {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .adm-orderEditSection {
+    padding: 12px;
   }
 }

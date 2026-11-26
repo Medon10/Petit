@@ -340,7 +340,7 @@ export default function AdminExpensesPage() {
             {g.rows.map((e) => (
               <article key={e.id} className="adm-card adm-expCard">
                 <header className="adm-expCardHead">
-                  <div>
+                  <div className="adm-expCardMeta">
                     <strong>{formatDateAR(e.date)}</strong>
                     {e.supplier && <span className="adm-expSupplier">{e.supplier.name}</span>}
                     {e.notes && <span className="adm-expNotes">{e.notes}</span>}

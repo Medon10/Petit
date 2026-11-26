@@ -289,20 +289,22 @@ export default function AdminStatsPage() {
           {top && top.items.length === 0 ? (
             <p className="adm-empty">Sin ventas en el período.</p>
           ) : (
-            <table className="adm-table">
-              <thead>
-                <tr><th>Producto</th><th className="adm-num">Unid.</th><th className="adm-num">Ingresos</th></tr>
-              </thead>
-              <tbody>
-                {top?.items.map((i) => (
-                  <tr key={`${i.product}-${i.variant}`}>
-                    <td>{i.product}{i.variant ? <span className="adm-statVariant"> · {i.variant}</span> : null}</td>
-                    <td className="adm-num">{i.unidades}</td>
-                    <td className="adm-num">{formatMoney(i.ingresos)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="adm-tableWrap">
+              <table className="adm-table">
+                <thead>
+                  <tr><th>Producto</th><th className="adm-num">Unid.</th><th className="adm-num">Ingresos</th></tr>
+                </thead>
+                <tbody>
+                  {top?.items.map((i) => (
+                    <tr key={`${i.product}-${i.variant}`}>
+                      <td>{i.product}{i.variant ? <span className="adm-statVariant"> · {i.variant}</span> : null}</td>
+                      <td className="adm-num">{i.unidades}</td>
+                      <td className="adm-num">{formatMoney(i.ingresos)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
         <div className="adm-card">
@@ -310,20 +312,22 @@ export default function AdminStatsPage() {
           {top && top.extras.length === 0 ? (
             <p className="adm-empty">Sin extras en el período.</p>
           ) : (
-            <table className="adm-table">
-              <thead>
-                <tr><th>Extra</th><th className="adm-num">Unid.</th><th className="adm-num">Ingresos</th></tr>
-              </thead>
-              <tbody>
-                {top?.extras.map((e) => (
-                  <tr key={e.extra}>
-                    <td>{e.extra}</td>
-                    <td className="adm-num">{e.unidades}</td>
-                    <td className="adm-num">{formatMoney(e.ingresos)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="adm-tableWrap">
+              <table className="adm-table">
+                <thead>
+                  <tr><th>Extra</th><th className="adm-num">Unid.</th><th className="adm-num">Ingresos</th></tr>
+                </thead>
+                <tbody>
+                  {top?.extras.map((e) => (
+                    <tr key={e.extra}>
+                      <td>{e.extra}</td>
+                      <td className="adm-num">{e.unidades}</td>
+                      <td className="adm-num">{formatMoney(e.ingresos)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

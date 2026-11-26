@@ -18,7 +18,8 @@
 }
 
 .adm-invSearch {
-  min-width: 260px;
+  flex: 1 1 220px;
+  min-width: 0;
   max-width: 380px;
 }
 
@@ -66,6 +67,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -174,6 +176,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   padding: 10px 14px;
   border-radius: 10px;
@@ -410,7 +413,7 @@
 }
 
 /* ── Responsive Tablet & Mobile First ────────────────────────── */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .adm-invToolbar {
     flex-direction: column;
     align-items: stretch;
@@ -423,18 +426,12 @@
   }
 
   .adm-invSearch {
-    min-width: 100%;
+    min-width: 0;
     max-width: 100%;
   }
 
   .adm-invKpis {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .adm-modal {
-    width: 94vw !important;
-    max-width: 94vw !important;
-    margin: 10px auto;
   }
 }
 

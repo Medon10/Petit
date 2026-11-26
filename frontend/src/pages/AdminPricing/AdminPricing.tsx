@@ -516,7 +516,7 @@ export default function AdminPricingPage() {
                       {editingItem.linkedSupply && ` · Pieza: ${editingItem.linkedSupply.code}`}
                     </span>
                   </div>
-                  <div style={{ textAlign: 'right', paddingLeft: 14, borderLeft: '1px solid #fbcfe8' }}>
+                  <div className="adm-prModalBannerPrice">
                     <span style={{ fontSize: 10, textTransform: 'uppercase', fontWeight: 800, color: '#9d174d', letterSpacing: '0.05em', display: 'block' }}>
                       Precio Web
                     </span>

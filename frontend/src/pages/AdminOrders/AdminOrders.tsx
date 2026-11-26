@@ -152,7 +152,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function openDetail(id: number, alsoEdit = false) {
+  async function openDetail(id: number) {
     setDetailLoading(true);
     setDetail(null);
     setEditFeedback(null);
@@ -165,9 +165,6 @@ export default function AdminOrdersPage() {
       if (o?.paymentStatus === 'deposit') {
         setDepositEditing(true);
         setDepositInput(String(Number(o.paidAmount ?? 0) || ''));
-      }
-      if (alsoEdit && o && isOrderEditable(o.status)) {
-        setEditingOrder(o);
       }
     } catch (e: unknown) {
       onAuthErr(e);
@@ -250,7 +247,7 @@ export default function AdminOrdersPage() {
       </div>
 
       <div className="adm-card adm-ordersToolbar">
-        <div className="adm-field" style={{ minWidth: 220 }}>
+        <div className="adm-field adm-ordersField">
           <label className="adm-label" htmlFor="orders-status">Estado</label>
           <select
             id="orders-status"
@@ -266,7 +263,7 @@ export default function AdminOrdersPage() {
           </select>
         </div>
 
-        <div className="adm-field" style={{ minWidth: 180 }}>
+        <div className="adm-field adm-ordersField">
           <label className="adm-label" htmlFor="orders-payment">Pago</label>
           <select
             id="orders-payment"
@@ -281,7 +278,7 @@ export default function AdminOrdersPage() {
           </select>
         </div>
 
-        <div className="adm-field" style={{ minWidth: 300, flex: 1 }}>
+        <div className="adm-field adm-ordersSearch">
           <label className="adm-label" htmlFor="orders-search">Buscar</label>
           <input
             id="orders-search"
@@ -355,16 +352,6 @@ export default function AdminOrdersPage() {
                       >
                         <span className="material-symbols-outlined" aria-hidden="true">visibility</span>
                       </button>
-                      {isOrderEditable(o.status) && (
-                        <button
-                          className="adm-btnSmall"
-                          aria-label={`Editar pedido #${o.id}`}
-                          title="Editar pedido"
-                          onClick={() => openDetail(o.id, true)}
-                        >
-                          <span className="material-symbols-outlined" aria-hidden="true">edit</span>
-                        </button>
-                      )}
                     </div>
                   </td>
                 </tr>
@@ -376,7 +363,7 @@ export default function AdminOrdersPage() {
       )}
 
       {/* Detail modal */}
-      {(detail || detailLoading) && (
+      {(detail || detailLoading) && !editingOrder && (
         <div
           className="adm-modalOverlay"
           onClick={closeDetail}
@@ -419,30 +406,30 @@ export default function AdminOrdersPage() {
                   </div>
                 )}
                 <div className="adm-form" style={{ gap: 12 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="adm-orderDetailGrid">
                     <div>
                       <div className="adm-label">Cliente</div>
-                      <div>{detail.customerName}</div>
+                      <div className="adm-orderDetailValue">{detail.customerName}</div>
                     </div>
                     <div>
                       <div className="adm-label">Email</div>
-                      <div>{detail.customerEmail || '—'}</div>
+                      <div className="adm-orderDetailValue">{detail.customerEmail || '—'}</div>
                     </div>
                     <div>
                       <div className="adm-label">Teléfono</div>
-                      <div>{detail.customerPhone || '—'}</div>
+                      <div className="adm-orderDetailValue">{detail.customerPhone || '—'}</div>
                     </div>
                     <div>
                       <div className="adm-label">Fecha</div>
-                      <div>{formatDate(detail.createdAt)}</div>
+                      <div className="adm-orderDetailValue">{formatDate(detail.createdAt)}</div>
                     </div>
                     <div>
                       <div className="adm-label">Entrega</div>
-                      <div>{shippingLabel[detail.shippingMethod || 'pickup'] || 'Retiro'}</div>
+                      <div className="adm-orderDetailValue">{shippingLabel[detail.shippingMethod || 'pickup'] || 'Retiro'}</div>
                     </div>
                     <div>
                       <div className="adm-label">Codigo postal</div>
-                      <div>{detail.shippingPostalCode || '—'}</div>
+                      <div className="adm-orderDetailValue">{detail.shippingPostalCode || '—'}</div>
                     </div>
                   </div>
 
@@ -617,31 +604,33 @@ export default function AdminOrdersPage() {
                   {detail.items && detail.items.length > 0 && (
                     <div>
                       <div className="adm-label" style={{ marginBottom: 8 }}>Ítems</div>
-                      <table className="adm-table" style={{ fontSize: 13 }}>
-                        <thead>
-                          <tr><th>Producto</th><th>Variante</th><th>Cant.</th><th>Precio</th></tr>
-                        </thead>
-                        <tbody>
-                          {detail.items.map((item) => (
-                            <Fragment key={`row-${item.id}`}>
-                              <tr key={`item-${item.id}`}>
-                                <td>{item.productName}</td>
-                                <td>{item.variantName ?? '—'}</td>
-                                <td>{item.quantity}</td>
-                                <td>${item.unitPrice}</td>
-                              </tr>
-                              {item.extras?.map((ex) => (
-                                <tr key={`extra-${item.id}-${ex.id}`} style={{ background: '#fafafa' }}>
-                                  <td style={{ paddingLeft: 24, fontSize: 12, color: '#888' }}>+ {ex.extraName}</td>
-                                  <td style={{ fontSize: 12, color: '#888' }}>{ex.categoryType ?? ''}</td>
-                                  <td style={{ fontSize: 12, color: '#888' }}>{ex.quantity}</td>
-                                  <td style={{ fontSize: 12, color: '#888' }}>${ex.unitPrice}</td>
+                      <div className="adm-tableWrap">
+                        <table className="adm-table" style={{ fontSize: 13 }}>
+                          <thead>
+                            <tr><th>Producto</th><th>Variante</th><th>Cant.</th><th>Precio</th></tr>
+                          </thead>
+                          <tbody>
+                            {detail.items.map((item) => (
+                              <Fragment key={`row-${item.id}`}>
+                                <tr key={`item-${item.id}`}>
+                                  <td>{item.productName}</td>
+                                  <td>{item.variantName ?? '—'}</td>
+                                  <td>{item.quantity}</td>
+                                  <td>${item.unitPrice}</td>
                                 </tr>
-                              ))}
-                            </Fragment>
-                          ))}
-                        </tbody>
-                      </table>
+                                {item.extras?.map((ex) => (
+                                  <tr key={`extra-${item.id}-${ex.id}`} style={{ background: '#fafafa' }}>
+                                    <td style={{ paddingLeft: 24, fontSize: 12, color: '#888' }}>+ {ex.extraName}</td>
+                                    <td style={{ fontSize: 12, color: '#888' }}>{ex.categoryType ?? ''}</td>
+                                    <td style={{ fontSize: 12, color: '#888' }}>{ex.quantity}</td>
+                                    <td style={{ fontSize: 12, color: '#888' }}>${ex.unitPrice}</td>
+                                  </tr>
+                                ))}
+                              </Fragment>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   )}
 
@@ -690,7 +679,7 @@ export default function AdminOrdersPage() {
                     {isOrderEditable(detail.status) && (
                       <button
                         type="button"
-                        className="adm-btnPrimary"
+                        className="adm-btnPetit"
                         style={{ marginLeft: 'auto', height: 34, padding: '0 14px', fontSize: 12 }}
                         onClick={() => setEditingOrder(detail)}
                       >

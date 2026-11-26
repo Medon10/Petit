@@ -439,6 +439,9 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
     }
   }
 
+  const statusPillLabel = order.status === 'processing' ? 'En proceso' : 'Pendiente';
+  const statusPillColor = order.status === 'processing' ? 'blue' : 'yellow';
+
   return (
     <div
       className="adm-modalOverlay"
@@ -455,10 +458,23 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
         aria-modal="true"
         aria-labelledby="order-edit-title"
       >
-        <div className="adm-modalHeader">
-          <h2 id="order-edit-title" className="adm-modalTitle">
-            Editar pedido #{order.id}
-          </h2>
+        <div className="adm-modalHeader adm-orderEditHeader">
+          <div className="adm-orderEditHeaderLeft">
+            <div className="adm-orderEditHeaderIcon" aria-hidden="true">
+              <span className="material-symbols-outlined">edit_note</span>
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                <h2 id="order-edit-title" className="adm-modalTitle">
+                  Editar pedido #{order.id}
+                </h2>
+                <span className={`adm-badge ${statusPillColor}`}>{statusPillLabel}</span>
+              </div>
+              <p className="adm-orderEditSubtitle">
+                Ajustá los datos del cliente, entrega, productos o extras del pedido
+              </p>
+            </div>
+          </div>
           <button
             type="button"
             className="adm-modalClose"
@@ -493,8 +509,13 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
             ) : (
               <div className="adm-form" style={{ gap: 16 }}>
                 {/* Cliente y notas */}
-                <div>
-                  <div className="adm-label" style={{ marginBottom: 8 }}>Datos del cliente y notas</div>
+                <section className="adm-orderEditSection">
+                  <div className="adm-orderEditSectionHead">
+                    <h3 className="adm-orderEditSectionTitle">
+                      <span className="material-symbols-outlined" aria-hidden="true">person</span>
+                      Datos del cliente y notas
+                    </h3>
+                  </div>
                   <div className="adm-orderEditGrid">
                     <div className="adm-field">
                       <label className="adm-label" htmlFor="edit-customer-name">Nombre *</label>
@@ -517,7 +538,7 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                         disabled={saving}
                       />
                     </div>
-                    <div className="adm-field" style={{ gridColumn: '1 / -1' }}>
+                    <div className="adm-field adm-orderEditFull">
                       <label className="adm-label" htmlFor="edit-customer-email">Email</label>
                       <input
                         id="edit-customer-email"
@@ -528,7 +549,7 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                         disabled={saving}
                       />
                     </div>
-                    <div className="adm-field" style={{ gridColumn: '1 / -1' }}>
+                    <div className="adm-field adm-orderEditFull">
                       <label className="adm-label" htmlFor="edit-order-notes">Notas (grabado, aclaraciones)</label>
                       <textarea
                         id="edit-order-notes"
@@ -540,11 +561,16 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                       />
                     </div>
                   </div>
-                </div>
+                </section>
 
                 {/* Entrega */}
-                <div>
-                  <div className="adm-label" style={{ marginBottom: 8 }}>Entrega</div>
+                <section className="adm-orderEditSection">
+                  <div className="adm-orderEditSectionHead">
+                    <h3 className="adm-orderEditSectionTitle">
+                      <span className="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+                      Entrega
+                    </h3>
+                  </div>
                   <div className="adm-orderEditGrid">
                     <div className="adm-field">
                       <label className="adm-label" htmlFor="edit-shipping-method">Método</label>
@@ -614,20 +640,22 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                       </>
                     )}
                   </div>
-                </div>
+                </section>
 
                 {/* Ítems */}
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <div className="adm-label">Ítems del pedido ({items.length})</div>
+                <section className="adm-orderEditSection">
+                  <div className="adm-orderEditSectionHead">
+                    <h3 className="adm-orderEditSectionTitle">
+                      <span className="material-symbols-outlined" aria-hidden="true">shopping_bag</span>
+                      Ítems del pedido ({items.length})
+                    </h3>
                     <button
                       type="button"
-                      className="adm-btnSmall"
-                      style={{ width: 'auto', padding: '0 10px', gap: 4, fontSize: 12, fontWeight: 700 }}
+                      className="adm-btnPetitSoft"
                       onClick={handleAddProduct}
                       disabled={saving || activeProducts.length === 0}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">add</span>
                       Agregar producto
                     </button>
                   </div>
@@ -657,16 +685,16 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                       return (
                         <div key={item.localKey} className="adm-orderEditItem">
                           <div className="adm-orderEditItemHeader">
-                            <span style={{ fontSize: 12, fontWeight: 800, color: '#52525b' }}>
+                            <span className="adm-orderEditItemBadge">
                               Ítem #{idx + 1}
                             </span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>
+                              <span className="adm-orderEditItemSubtotal">
                                 Subtotal: ${formatMoney(lineTotal)}
                               </span>
                               <button
                                 type="button"
-                                className="adm-btnSmall"
+                                className="adm-btnSmall adm-orderEditRemoveBtn"
                                 title={items.length <= 1 ? 'El pedido debe tener al menos 1 ítem' : 'Quitar ítem'}
                                 aria-label={`Quitar ítem ${idx + 1}`}
                                 onClick={() => handleRemoveItem(item.localKey)}
@@ -778,7 +806,7 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                             </div>
                           </div>
 
-                          <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+                          <div style={{ fontSize: 12, color: '#7a596d', marginTop: 6 }}>
                             Precio unitario aplicado: <strong>${formatMoney(unitPrice)}</strong>
                             {item.id != null &&
                               item.productId === item.originalProductId &&
@@ -796,7 +824,7 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                                   const displayName = extraObj?.name || ex.originalExtraName;
                                   return (
                                     <div key={ex.localKey} className="adm-orderEditExtraRow">
-                                      <span style={{ flex: 1, fontSize: 12 }}>
+                                      <span style={{ flex: 1, minWidth: 140, fontSize: 12 }}>
                                         + {displayName} <span style={{ color: '#6b7280' }}>(${formatMoney(exPrice)} c/u)</span>
                                       </span>
                                       <div className="adm-orderEditQty" style={{ width: 'auto' }}>
@@ -842,7 +870,7 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                                       </div>
                                       <button
                                         type="button"
-                                        className="adm-btnSmall"
+                                        className="adm-btnSmall adm-orderEditRemoveBtn"
                                         style={{ width: 26, height: 26 }}
                                         title="Quitar extra"
                                         onClick={() =>
@@ -881,12 +909,12 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                               </select>
                               <button
                                 type="button"
-                                className="adm-btnSmall"
-                                style={{ width: 'auto', height: 34, padding: '0 10px', gap: 4, fontSize: 12, fontWeight: 700 }}
+                                className="adm-btnPetitSoft"
+                                style={{ height: 34 }}
                                 onClick={() => handleAddExtra(item.localKey)}
                                 disabled={saving || !item.pendingExtraId}
                               >
-                                <span className="material-symbols-outlined" style={{ fontSize: 15 }}>add</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">add</span>
                                 Agregar extra
                               </button>
                             </div>
@@ -895,16 +923,16 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
                       );
                     })}
                   </div>
-                </div>
+                </section>
 
                 {/* Resumen de totales */}
                 <div className="adm-orderEditSummary">
                   <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-                    <div style={{ fontSize: 13, color: '#52525b' }}>
+                    <div style={{ fontSize: 13, color: '#6b4f60' }}>
                       Total anterior: <strong>${formatMoney(totals.oldTotal)}</strong>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 16, fontWeight: 800 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span className="adm-orderEditNewTotal">
                         Nuevo total: ${formatMoney(totals.newTotal)}
                       </span>
                       {Math.abs(totals.delta) > 0.001 && (
@@ -930,15 +958,16 @@ export default function OrderEditModal({ order, onClose, onSaved, onAuthErr }: O
             )}
           </div>
 
-          <div className="adm-modalFooter">
+          <div className="adm-modalFooter adm-orderEditFooter">
             <button type="button" className="adm-btnCancel" onClick={onClose} disabled={saving}>
-              Cancelar
+              Volver al detalle
             </button>
             <button
               type="submit"
-              className="adm-btnPrimary"
+              className="adm-btnPetit"
               disabled={saving || catalogLoading || Boolean(catalogError)}
             >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }} aria-hidden="true">check</span>
               {saving ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </div>

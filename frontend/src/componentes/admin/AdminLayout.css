@@ -162,6 +162,7 @@
 }
 
 .adm-tab {
+  flex-shrink: 0;
   padding: 8px 18px;
   border: 0;
   background: transparent;
@@ -191,6 +192,13 @@
   border-radius: 14px;
   padding: 20px;
   margin-bottom: 20px;
+  min-width: 0;
+}
+
+.adm-tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .adm-cardTitle {
@@ -311,6 +319,40 @@
 .adm-btnPrimary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.adm-btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fff;
+  color: #3f3f46;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 150ms;
+  white-space: nowrap;
+}
+
+.adm-btnSecondary:hover:not(:disabled) {
+  border-color: #db2777;
+  color: #db2777;
+  background: #fdf2f8;
+}
+
+.adm-btnSecondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.adm-textMuted {
+  font-size: 13px;
+  color: #71717a;
 }
 
 .adm-btnSmall {
@@ -482,11 +524,13 @@
 .adm-form {
   display: grid;
   gap: 14px;
+  min-width: 0;
 }
 
 .adm-field {
   display: grid;
   gap: 5px;
+  min-width: 0;
 }
 
 .adm-label {
@@ -780,12 +824,28 @@
   line-height: 1.5;
 }
 
+@media (max-width: 640px) {
+  .adm-modalOverlay {
+    padding: 12px;
+  }
+  .adm-modalHeader {
+    padding: 14px 16px;
+  }
+  .adm-modalBody {
+    padding: 16px;
+  }
+  .adm-modalFooter {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+}
+
 @media (min-width: 768px) {
   .adm-layout {
     flex-direction: row;
   }
   .adm-sidebar {
-    width: 258px;
+    width: 212px;
     height: 100vh;
     min-height: 100vh;
     position: sticky;
@@ -828,13 +888,23 @@
     text-transform: uppercase;
   }
   .adm-main {
-    padding: 34px 38px;
+    padding: 24px 20px;
   }
   .adm-header {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .adm-sidebar {
+    width: 258px;
+  }
+  .adm-main {
+    padding: 34px 38px;
   }
 }

@@ -283,7 +283,7 @@ export default function AdminInventoryPage() {
         <title>Inventario de Piezas | Petit Admin</title>
       </Helmet>
 
-      <div className="adm-header" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="adm-header">
         <div>
           <h1 className="adm-h1">Inventario de Piezas</h1>
           <p className="adm-textMuted" style={{ margin: '4px 0 0' }}>
